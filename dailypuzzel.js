@@ -1,15 +1,19 @@
-const option1=document.getElementById("option1");
-const option2=document.getElementById("option2");
+const option1 = document.getElementById("option1");
+const option2 = document.getElementById("option2");
 
-option1.onclick=function(){
+const resultBox = document.getElementById("resultBox");
+const resultTitle = document.getElementById("resultTitle");
+const resultText = document.getElementById("resultText");
+
+option1.onclick = function(){
 
 option1.classList.add("correct");
 
-setTimeout(function(){
+resultBox.style.display="block";
 
-window.location.href="correct.html";
+resultTitle.innerHTML="✅ Correct!";
 
-},800);
+resultText.innerHTML="You selected the real logo.";
 
 }
 
@@ -17,10 +21,12 @@ option2.onclick=function(){
 
 option2.classList.add("wrong");
 
-setTimeout(function(){
+resultBox.style.display="block";
 
-window.location.href="wrong.html";
+resultTitle.innerHTML="❌ Wrong!";
 
-},800);
+resultTitle.style.color="#ef4444";
+
+resultText.innerHTML="You selected the wrong logo.";
 
 }
