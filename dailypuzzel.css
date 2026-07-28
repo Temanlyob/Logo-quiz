@@ -81,7 +81,7 @@ justify-content:center;
 
 gap:45px;
 
-flex-wrap:wrap;
+flex-wrap:nowrap;
 
 margin-bottom:45px;
 
@@ -430,6 +430,22 @@ align-items:flex-start;
 #showResultsBtn{
 
 font-size:16px;
+
+}
+
+  .cards{
+
+gap:15px;
+
+flex-wrap:nowrap;
+
+}
+
+.card{
+
+width:150px;
+
+padding:12px;
 
 }
 
