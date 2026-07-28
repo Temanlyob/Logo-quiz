@@ -181,3 +181,293 @@ text-align:center;
 color:#64748b;
 
 }
+
+/* ==========================
+   CALENDAR GRID
+========================== */
+
+.calendar-grid{
+
+display:grid;
+
+grid-template-columns:repeat(7,1fr);
+
+gap:12px;
+
+}
+
+.day{
+
+height:72px;
+
+background:#f8faff;
+
+border-radius:18px;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-size:18px;
+
+font-weight:600;
+
+cursor:pointer;
+
+transition:.25s;
+
+position:relative;
+
+border:2px solid transparent;
+
+}
+
+.day:hover{
+
+transform:translateY(-3px);
+
+background:#edf4ff;
+
+}
+
+/* ==========================
+   TODAY
+========================== */
+
+.day.today{
+
+background:#3b82f6;
+
+color:#fff;
+
+font-weight:700;
+
+}
+
+/* ==========================
+   SOLVED
+========================== */
+
+.day.solved{
+
+background:#e8fff0;
+
+border-color:#22c55e;
+
+color:#16964b;
+
+}
+
+.day.solved::after{
+
+content:"✓";
+
+position:absolute;
+
+top:6px;
+
+right:8px;
+
+font-size:12px;
+
+font-weight:700;
+
+color:#22c55e;
+
+}
+
+/* ==========================
+   LOCKED / FUTURE
+========================== */
+
+.day.locked{
+
+background:#f1f5f9;
+
+color:#b0b8c5;
+
+cursor:not-allowed;
+
+}
+
+.day.locked:hover{
+
+transform:none;
+
+}
+
+/* ==========================
+   EMPTY BOX
+========================== */
+
+.day.empty{
+
+background:transparent;
+
+pointer-events:none;
+
+}
+
+/* ==========================
+   LEGEND
+========================== */
+
+.legend{
+
+display:flex;
+
+justify-content:center;
+
+gap:30px;
+
+flex-wrap:wrap;
+
+margin-top:25px;
+
+}
+
+.legend-item{
+
+display:flex;
+
+align-items:center;
+
+gap:8px;
+
+font-size:15px;
+
+color:#475569;
+
+}
+
+.dot{
+
+width:16px;
+
+height:16px;
+
+border-radius:50%;
+
+}
+
+.dot.solved{
+
+background:#22c55e;
+
+}
+
+.dot.today{
+
+background:#3b82f6;
+
+}
+
+.dot.pending{
+
+background:#d1d5db;
+
+}
+
+/* ==========================
+   MOBILE
+========================== */
+
+@media(max-width:700px){
+
+body{
+
+padding:18px;
+
+}
+
+.top h1{
+
+font-size:32px;
+
+}
+
+.top p{
+
+font-size:14px;
+
+}
+
+.back-btn{
+
+width:40px;
+
+height:40px;
+
+font-size:20px;
+
+}
+
+.calendar-card{
+
+padding:16px;
+
+}
+
+.month-bar h2{
+
+font-size:22px;
+
+}
+
+.month-bar button{
+
+width:40px;
+
+height:40px;
+
+font-size:18px;
+
+}
+
+.day{
+
+height:52px;
+
+font-size:15px;
+
+border-radius:12px;
+
+}
+
+.legend{
+
+gap:18px;
+
+}
+
+.legend-item{
+
+font-size:13px;
+
+}
+
+}
+
+/* ==========================
+   SMALL MOBILE
+========================== */
+
+@media(max-width:380px){
+
+.day{
+
+height:44px;
+
+font-size:13px;
+
+}
+
+.month-bar h2{
+
+font-size:18px;
+
+}
+
+   }
