@@ -1,3 +1,56 @@
+// ==========================
+// TODAY'S DATE
+// ==========================
+
+const today = new Date();
+
+const dd = String(today.getDate()).padStart(2, "0");
+const mm = String(today.getMonth() + 1).padStart(2, "0");
+const yy = String(today.getFullYear()).slice(-2);
+
+const todayKey = `${dd}-${mm}-${yy}`;
+
+// Image filenames
+const rightImage = `images/${todayKey}right.png`;
+const wrongImage = `images/${todayKey}wrong.png`;
+
+// Image elements
+const img1 = document.getElementById("img1");
+const img2 = document.getElementById("img2");
+
+// ==========================
+// RANDOM POSITION
+// (same for whole day)
+// ==========================
+
+let randomSide = localStorage.getItem("random_" + todayKey);
+
+if (!randomSide) {
+
+    randomSide = Math.random() < 0.5 ? "left" : "right";
+
+    localStorage.setItem("random_" + todayKey, randomSide);
+
+}
+
+let correctOption;
+
+if (randomSide === "left") {
+
+    img1.src = rightImage;
+    img2.src = wrongImage;
+
+    correctOption = option1;
+
+} else {
+
+    img1.src = wrongImage;
+    img2.src = rightImage;
+
+    correctOption = option2;
+
+}
+
 const option1 = document.getElementById("option1");
 const option2 = document.getElementById("option2");
 
@@ -18,37 +71,89 @@ const showResultsBtn = document.getElementById("showResultsBtn");
 
 let answered = false;
 
-// ----------------------------
-// CORRECT ANSWER
-// ----------------------------
+// ==========================
+// CHECK ANSWER
+// ==========================
 
-option1.addEventListener("click", function(){
+function checkAnswer(selectedOption){
 
     if(answered) return;
+
     answered = true;
 
-    option1.classList.add("correct");
+    const isCorrect = selectedOption === correctOption;
 
-    badge1.style.display="flex";
-    badge1.innerHTML="✓";
+    const wrongOption =
+        correctOption === option1 ? option2 : option1;
 
-    resultCircle.innerHTML="✅";
+    // Correct option
+    correctOption.classList.add("correct");
 
-    resultCircle.style.background="#e8fff0";
-    resultCircle.style.color="#22c55e";
+    if(correctOption === option1){
 
-    resultTitle.innerHTML="Correct!";
-    resultTitle.style.color="#22c55e";
+        badge1.style.display="flex";
+        badge1.innerHTML="✓";
 
-    resultText.innerHTML="You selected the real logo.";
+    }else{
 
-    pointsCard.innerHTML="+10 Points ⭐";
+        badge2.style.display="flex";
+        badge2.innerHTML="✓";
 
-    infoTitle.innerHTML="Great Job!";
-    infoText.innerHTML="You spotted the authentic logo.";
+    }
 
-    localStorage.setItem("lastResult","correct");
-localStorage.setItem("lastScore","10");
+    if(isCorrect){
+
+        resultCircle.innerHTML="✅";
+        resultCircle.style.background="#e8fff0";
+        resultCircle.style.color="#22c55e";
+
+        resultTitle.innerHTML="Correct!";
+        resultTitle.style.color="#22c55e";
+
+        resultText.innerHTML="You selected the real logo.";
+
+        pointsCard.innerHTML="+10 Points ⭐";
+
+        infoTitle.innerHTML="Great Job!";
+        infoText.innerHTML="You spotted the authentic logo.";
+
+        localStorage.setItem("lastResult","correct");
+        localStorage.setItem("lastScore","10");
+
+    }else{
+
+        wrongOption.classList.add("wrong");
+
+        if(wrongOption===option1){
+
+            badge1.style.display="flex";
+            badge1.innerHTML="✕";
+
+        }else{
+
+            badge2.style.display="flex";
+            badge2.innerHTML="✕";
+
+        }
+
+        resultCircle.innerHTML="❌";
+        resultCircle.style.background="#ffecec";
+        resultCircle.style.color="#ef4444";
+
+        resultTitle.innerHTML="Incorrect!";
+        resultTitle.style.color="#ef4444";
+
+        resultText.innerHTML="That wasn't the authentic logo.";
+
+        pointsCard.innerHTML="0 Points";
+
+        infoTitle.innerHTML="Correct Answer";
+        infoText.innerHTML="The highlighted logo was the original one.";
+
+        localStorage.setItem("lastResult","wrong");
+        localStorage.setItem("lastScore","0");
+
+    }
 
     resultSection.style.display="block";
 
@@ -56,51 +161,7 @@ localStorage.setItem("lastScore","10");
         behavior:"smooth"
     });
 
-});
-
-// ----------------------------
-// WRONG ANSWER
-// ----------------------------
-
-option2.addEventListener("click", function(){
-
-    if(answered) return;
-    answered = true;
-
-    option2.classList.add("wrong");
-    option1.classList.add("correct");
-
-    badge2.style.display="flex";
-    badge2.innerHTML="✕";
-
-    badge1.style.display="flex";
-    badge1.innerHTML="✓";
-
-    resultCircle.innerHTML="❌";
-
-    resultCircle.style.background="#ffecec";
-    resultCircle.style.color="#ef4444";
-
-    resultTitle.innerHTML="Incorrect!";
-    resultTitle.style.color="#ef4444";
-
-    resultText.innerHTML="That wasn't the authentic logo.";
-
-    pointsCard.innerHTML="0 Points";
-
-    infoTitle.innerHTML="Correct Answer";
-    infoText.innerHTML="The left logo was the original one.";
-
-    localStorage.setItem("lastResult","wrong");
-localStorage.setItem("lastScore","0");
-
-    resultSection.style.display="block";
-
-    resultSection.scrollIntoView({
-        behavior:"smooth"
-    });
-
-});
+}
 
 // ----------------------------
 // SHOW RESULTS
