@@ -1,0 +1,573 @@
+/* ==========================
+   RESET
+========================== */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+
+font-family:'Poppins',sans-serif;
+
+background:#f5f8ff;
+
+color:#102a54;
+
+padding:25px;
+
+}
+
+.container{
+
+max-width:900px;
+
+margin:auto;
+
+padding-bottom:110px;
+
+}
+
+/* ==========================
+   HEADER
+========================== */
+
+.top{
+
+display:flex;
+
+align-items:center;
+
+margin-bottom:30px;
+
+}
+
+.back-btn{
+
+width:46px;
+
+height:46px;
+
+border-radius:14px;
+
+background:#fff;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+text-decoration:none;
+
+font-size:24px;
+
+color:#102a54;
+
+box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+margin-right:15px;
+
+}
+
+.top h1{
+
+font-size:34px;
+
+font-weight:800;
+
+}
+
+/* ==========================
+   PROFILE CARD
+========================== */
+
+.profile-card{
+
+background:#fff;
+
+border-radius:26px;
+
+padding:35px 25px;
+
+text-align:center;
+
+box-shadow:0 15px 35px rgba(0,0,0,.08);
+
+margin-bottom:30px;
+
+}
+
+.avatar{
+
+width:120px;
+
+height:120px;
+
+border-radius:50%;
+
+object-fit:cover;
+
+border:5px solid #22c55e;
+
+margin-bottom:18px;
+
+}
+
+.profile-card h2{
+
+font-size:30px;
+
+font-weight:700;
+
+margin-bottom:6px;
+
+}
+
+.profile-card p{
+
+color:#64748b;
+
+font-size:16px;
+
+margin-bottom:18px;
+
+}
+
+.level{
+
+display:inline-block;
+
+padding:10px 22px;
+
+border-radius:999px;
+
+background:#e8fff0;
+
+color:#22c55e;
+
+font-weight:700;
+
+}
+
+/* ==========================
+   STATS
+========================== */
+
+.stats-grid{
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:18px;
+
+margin-bottom:30px;
+
+}
+
+.stat-card{
+
+background:#fff;
+
+padding:24px;
+
+border-radius:20px;
+
+text-align:center;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.icon{
+
+font-size:36px;
+
+margin-bottom:12px;
+
+}
+
+.stat-card h3{
+
+font-size:30px;
+
+color:#22c55e;
+
+margin-bottom:6px;
+
+}
+
+.stat-card p{
+
+color:#64748b;
+
+font-size:15px;
+
+}
+
+/* ==========================
+   ACHIEVEMENTS
+========================== */
+
+.achievement-section{
+
+margin-bottom:30px;
+
+}
+
+.achievement-section h2{
+
+font-size:28px;
+
+font-weight:700;
+
+margin-bottom:18px;
+
+color:#102a54;
+
+}
+
+.achievement-item{
+
+display:flex;
+
+align-items:center;
+
+gap:18px;
+
+background:#fff;
+
+padding:18px;
+
+border-radius:18px;
+
+margin-bottom:14px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.achievement-item span:first-child{
+
+font-size:34px;
+
+}
+
+.achievement-item h3{
+
+font-size:18px;
+
+margin-bottom:4px;
+
+}
+
+.achievement-item p{
+
+font-size:14px;
+
+color:#64748b;
+
+}
+
+/* ==========================
+   SETTINGS
+========================== */
+
+.settings-section{
+
+margin-bottom:30px;
+
+}
+
+.settings-section h2{
+
+font-size:28px;
+
+font-weight:700;
+
+margin-bottom:18px;
+
+color:#102a54;
+
+}
+
+.setting-item{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+background:#fff;
+
+padding:18px 20px;
+
+border-radius:18px;
+
+margin-bottom:12px;
+
+text-decoration:none;
+
+color:#102a54;
+
+font-weight:600;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+transition:.25s;
+
+}
+
+.setting-item:hover{
+
+transform:translateY(-2px);
+
+}
+
+/* ==========================
+   LOGOUT
+========================== */
+
+.logout-section{
+
+margin-bottom:35px;
+
+}
+
+.logout-btn{
+
+width:100%;
+
+padding:16px;
+
+border:none;
+
+border-radius:14px;
+
+background:#ef4444;
+
+color:#fff;
+
+font-size:18px;
+
+font-weight:600;
+
+cursor:pointer;
+
+transition:.25s;
+
+}
+
+.logout-btn:hover{
+
+background:#dc2626;
+
+}
+
+/* ==========================
+   BOTTOM NAVIGATION
+========================== */
+
+.bottom-nav{
+
+position:fixed;
+
+left:0;
+
+right:0;
+
+bottom:0;
+
+display:flex;
+
+justify-content:space-around;
+
+align-items:center;
+
+background:#fff;
+
+padding:12px 0;
+
+box-shadow:0 -6px 20px rgba(0,0,0,.08);
+
+}
+
+.bottom-nav a{
+
+display:flex;
+
+flex-direction:column;
+
+align-items:center;
+
+text-decoration:none;
+
+color:#64748b;
+
+font-size:13px;
+
+font-weight:600;
+
+}
+
+.bottom-nav a span{
+
+margin-top:4px;
+
+}
+
+.bottom-nav .active{
+
+color:#22c55e;
+
+}
+
+/* ==========================
+   TABLET
+========================== */
+
+@media(max-width:900px){
+
+.stats-grid{
+
+grid-template-columns:repeat(2,1fr);
+
+}
+
+}
+
+/* ==========================
+   MOBILE
+========================== */
+
+@media(max-width:700px){
+
+body{
+
+padding:18px;
+
+}
+
+.container{
+
+padding-bottom:100px;
+
+}
+
+.top h1{
+
+font-size:28px;
+
+}
+
+.profile-card{
+
+padding:24px 18px;
+
+}
+
+.avatar{
+
+width:90px;
+
+height:90px;
+
+}
+
+.profile-card h2{
+
+font-size:24px;
+
+}
+
+.stats-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.stat-card{
+
+padding:18px;
+
+}
+
+.achievement-item{
+
+padding:14px;
+
+gap:12px;
+
+}
+
+.achievement-item span:first-child{
+
+font-size:28px;
+
+}
+
+.setting-item{
+
+padding:16px;
+
+font-size:15px;
+
+}
+
+.logout-btn{
+
+font-size:16px;
+
+}
+
+.bottom-nav{
+
+padding:10px 0;
+
+}
+
+.bottom-nav a{
+
+font-size:12px;
+
+}
+
+.bottom-nav a span{
+
+font-size:12px;
+
+}
+
+}
+
+/* ==========================
+   SMALL MOBILE
+========================== */
+
+@media(max-width:380px){
+
+.top h1{
+
+font-size:24px;
+
+}
+
+.profile-card h2{
+
+font-size:22px;
+
+}
+
+.achievement-section h2,
+
+.settings-section h2{
+
+font-size:24px;
+
+}
+
+  }
