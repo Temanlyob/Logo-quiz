@@ -62,22 +62,6 @@ body{
 
 }
 
-.underline{
-
-    width:95px;
-    height:6px;
-
-    border-radius:30px;
-
-    margin:18px auto 0;
-
-    background:linear-gradient(
-    90deg,
-    #2d8cff,
-    #ff9800);
-
-}
-
 .cards{
 
     display:flex;
