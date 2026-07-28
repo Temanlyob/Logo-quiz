@@ -1,174 +1,270 @@
-// ==========================
-// TODAY'S DATE
-// ==========================
+// ======================================
+// DAILY LOGO QUIZ
+// PART 1
+// ======================================
 
-const today = new Date();
+// Cards
+const option1 = document.getElementById("option1");
+const option2 = document.getElementById("option2");
 
-const dd = String(today.getDate()).padStart(2, "0");
-const mm = String(today.getMonth() + 1).padStart(2, "0");
-const yy = String(today.getFullYear()).slice(-2);
-
-const todayKey = `${dd}-${mm}-${yy}`;
-
-// Image filenames
-const rightImage = `images/${todayKey}right.png`;
-const wrongImage = `images/${todayKey}wrong.png`;
-
-// Image elements
+// Images
 const img1 = document.getElementById("img1");
 const img2 = document.getElementById("img2");
 
-// ==========================
+// Badges
+const badge1 = document.getElementById("badge1");
+const badge2 = document.getElementById("badge2");
+
+// Result
+const resultSection = document.getElementById("resultSection");
+const resultCircle = document.getElementById("resultCircle");
+const resultTitle = document.getElementById("resultTitle");
+const resultText = document.getElementById("resultText");
+const pointsCard = document.getElementById("pointsCard");
+const infoTitle = document.getElementById("infoTitle");
+const infoText = document.getElementById("infoText");
+const showResultsBtn = document.getElementById("showResultsBtn");
+
+// --------------------------------------
+// TODAY
+// --------------------------------------
+
+const now = new Date();
+
+const day = String(now.getDate()).padStart(2,"0");
+const month = String(now.getMonth()+1).padStart(2,"0");
+const year = String(now.getFullYear()).slice(-2);
+
+const todayKey = `${day}-${month}-${year}`;
+
+// Image paths
+
+const rightImage =
+`images/${todayKey}right.png`;
+
+const wrongImage =
+`images/${todayKey}wrong.png`;
+
+// --------------------------------------
 // RANDOM POSITION
-// (same for whole day)
-// ==========================
+// --------------------------------------
 
-let randomSide = localStorage.getItem("random_" + todayKey);
+let randomPosition =
+localStorage.getItem("random_"+todayKey);
 
-if (!randomSide) {
+if(randomPosition===null){
 
-    randomSide = Math.random() < 0.5 ? "left" : "right";
+randomPosition=
+Math.random()<0.5 ? "left":"right";
 
-    localStorage.setItem("random_" + todayKey, randomSide);
+localStorage.setItem(
+"random_"+todayKey,
+randomPosition
+);
 
 }
 
 let correctOption;
 
-if (randomSide === "left") {
+if(randomPosition==="left"){
 
-    img1.src = rightImage;
-    img2.src = wrongImage;
+img1.src=rightImage;
+img2.src=wrongImage;
 
-    correctOption = option1;
+correctOption=option1;
 
-} else {
+}else{
 
-    img1.src = wrongImage;
-    img2.src = rightImage;
+img1.src=wrongImage;
+img2.src=rightImage;
 
-    correctOption = option2;
+correctOption=option2;
 
 }
 
-const option1 = document.getElementById("option1");
-const option2 = document.getElementById("option2");
+// --------------------------------------
+// ATTEMPT DATA
+// --------------------------------------
 
-const badge1 = document.getElementById("badge1");
-const badge2 = document.getElementById("badge2");
+const saveKey=
+"quiz_"+todayKey;
 
-const resultSection = document.getElementById("resultSection");
-const resultCircle = document.getElementById("resultCircle");
-const resultTitle = document.getElementById("resultTitle");
-const resultText = document.getElementById("resultText");
+let savedQuiz=
+localStorage.getItem(saveKey);
 
-const pointsCard = document.getElementById("pointsCard");
+let answered=false;
 
-const infoTitle = document.getElementById("infoTitle");
-const infoText = document.getElementById("infoText");
+// ======================================
+// PART 2
+// ONE ATTEMPT SYSTEM
+// ======================================
 
-const showResultsBtn = document.getElementById("showResultsBtn");
+// Already attempted?
 
-let answered = false;
+if(savedQuiz){
 
-// ==========================
+answered=true;
+
+const data=JSON.parse(savedQuiz);
+
+restoreResult(data);
+
+option1.style.pointerEvents="none";
+option2.style.pointerEvents="none";
+
+}
+
+// -------------------------------
+// CLICK EVENTS
+// -------------------------------
+
+option1.onclick=function(){
+
+checkAnswer(option1);
+
+};
+
+option2.onclick=function(){
+
+checkAnswer(option2);
+
+};
+
+// -------------------------------
 // CHECK ANSWER
-// ==========================
+// -------------------------------
 
-function checkAnswer(selectedOption){
+function checkAnswer(selected){
 
-    if(answered) return;
+if(answered) return;
 
-    answered = true;
+answered=true;
 
-    const isCorrect = selectedOption === correctOption;
+const correct=
+selected===correctOption;
 
-    const wrongOption =
-        correctOption === option1 ? option2 : option1;
+const data={
 
-    // Correct option
-    correctOption.classList.add("correct");
+date:todayKey,
 
-    if(correctOption === option1){
+correct:correct,
 
-        badge1.style.display="flex";
-        badge1.innerHTML="✓";
+score:correct?10:0,
 
-    }else{
+attempted:true
 
-        badge2.style.display="flex";
-        badge2.innerHTML="✓";
+};
 
-    }
+localStorage.setItem(
+saveKey,
+JSON.stringify(data)
+);
 
-    if(isCorrect){
+localStorage.setItem(
+"lastResult",
+correct?"correct":"wrong"
+);
 
-        resultCircle.innerHTML="✅";
-        resultCircle.style.background="#e8fff0";
-        resultCircle.style.color="#22c55e";
+localStorage.setItem(
+"lastScore",
+correct?"10":"0"
+);
 
-        resultTitle.innerHTML="Correct!";
-        resultTitle.style.color="#22c55e";
+restoreResult(data);
 
-        resultText.innerHTML="You selected the real logo.";
-
-        pointsCard.innerHTML="+10 Points ⭐";
-
-        infoTitle.innerHTML="Great Job!";
-        infoText.innerHTML="You spotted the authentic logo.";
-
-        localStorage.setItem("lastResult","correct");
-        localStorage.setItem("lastScore","10");
-
-    }else{
-
-        wrongOption.classList.add("wrong");
-
-        if(wrongOption===option1){
-
-            badge1.style.display="flex";
-            badge1.innerHTML="✕";
-
-        }else{
-
-            badge2.style.display="flex";
-            badge2.innerHTML="✕";
-
-        }
-
-        resultCircle.innerHTML="❌";
-        resultCircle.style.background="#ffecec";
-        resultCircle.style.color="#ef4444";
-
-        resultTitle.innerHTML="Incorrect!";
-        resultTitle.style.color="#ef4444";
-
-        resultText.innerHTML="That wasn't the authentic logo.";
-
-        pointsCard.innerHTML="0 Points";
-
-        infoTitle.innerHTML="Correct Answer";
-        infoText.innerHTML="The highlighted logo was the original one.";
-
-        localStorage.setItem("lastResult","wrong");
-        localStorage.setItem("lastScore","0");
-
-    }
-
-    resultSection.style.display="block";
-
-    resultSection.scrollIntoView({
-        behavior:"smooth"
-    });
+option1.style.pointerEvents="none";
+option2.style.pointerEvents="none";
 
 }
 
-// ----------------------------
-// SHOW RESULTS
-// ----------------------------
+// -------------------------------
+// SHOW RESULT
+// -------------------------------
 
-showResultsBtn.addEventListener("click",function(){
+function restoreResult(data){
 
-    window.location.href="results.html";
+resultSection.style.display="block";
+
+if(data.correct){
+
+correctOption.classList.add("correct");
+
+if(correctOption===option1){
+
+badge1.style.display="flex";
+badge1.innerHTML="✓";
+
+}else{
+
+badge2.style.display="flex";
+badge2.innerHTML="✓";
+
+}
+
+resultCircle.innerHTML="✅";
+
+resultTitle.innerHTML="Correct!";
+
+resultText.innerHTML=
+"You selected the real logo.";
+
+pointsCard.innerHTML="+10 Points ⭐";
+
+infoTitle.innerHTML="Great Job!";
+
+infoText.innerHTML=
+"You spotted the authentic logo.";
+
+}else{
+
+const wrong=
+correctOption===option1?
+option2:
+option1;
+
+wrong.classList.add("wrong");
+
+correctOption.classList.add("correct");
+
+if(correctOption===option1){
+
+badge1.style.display="flex";
+badge1.innerHTML="✓";
+
+badge2.style.display="flex";
+badge2.innerHTML="✕";
+
+}else{
+
+badge2.style.display="flex";
+badge2.innerHTML="✓";
+
+badge1.style.display="flex";
+badge1.innerHTML="✕";
+
+}
+
+resultCircle.innerHTML="❌";
+
+resultTitle.innerHTML="Incorrect!";
+
+resultText.innerHTML=
+"That wasn't the authentic logo.";
+
+pointsCard.innerHTML="0 Points";
+
+infoTitle.innerHTML="Correct Answer";
+
+infoText.innerHTML=
+"The highlighted logo was the original one.";
+
+}
+
+resultSection.scrollIntoView({
+
+behavior:"smooth"
 
 });
+
+}
+
