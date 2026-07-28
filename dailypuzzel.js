@@ -1,37 +1,65 @@
 const option1 = document.getElementById("option1");
 const option2 = document.getElementById("option2");
 
+const badge1 = document.getElementById("badge1");
+const badge2 = document.getElementById("badge2");
+
 const resultSection = document.getElementById("resultSection");
-const resultHeading = document.getElementById("resultHeading");
-const resultMessage = document.getElementById("resultMessage");
+const resultCircle = document.getElementById("resultCircle");
+const resultTitle = document.getElementById("resultTitle");
+const resultText = document.getElementById("resultText");
+
+const pointsCard = document.getElementById("pointsCard");
+
+const infoTitle = document.getElementById("infoTitle");
+const infoText = document.getElementById("infoText");
 
 const showResultsBtn = document.getElementById("showResultsBtn");
 
 let answered = false;
 
-// Correct Answer
-option1.addEventListener("click", function () {
+// ----------------------------
+// CORRECT ANSWER
+// ----------------------------
+
+option1.addEventListener("click", function(){
 
     if(answered) return;
     answered = true;
 
     option1.classList.add("correct");
 
-    resultHeading.innerHTML = "✅ Correct!";
-    resultHeading.style.color = "#20b44b";
+    badge1.style.display="flex";
+    badge1.innerHTML="✓";
 
-    resultMessage.innerHTML = "You selected the real logo.";
+    resultCircle.innerHTML="✅";
 
-    resultSection.style.display = "block";
+    resultCircle.style.background="#e8fff0";
+    resultCircle.style.color="#22c55e";
+
+    resultTitle.innerHTML="Correct!";
+    resultTitle.style.color="#22c55e";
+
+    resultText.innerHTML="You selected the real logo.";
+
+    pointsCard.innerHTML="+10 Points ⭐";
+
+    infoTitle.innerHTML="Great Job!";
+    infoText.innerHTML="You spotted the authentic logo.";
+
+    resultSection.style.display="block";
 
     resultSection.scrollIntoView({
-        behavior: "smooth"
+        behavior:"smooth"
     });
 
 });
 
-// Wrong Answer
-option2.addEventListener("click", function () {
+// ----------------------------
+// WRONG ANSWER
+// ----------------------------
+
+option2.addEventListener("click", function(){
 
     if(answered) return;
     answered = true;
@@ -39,22 +67,41 @@ option2.addEventListener("click", function () {
     option2.classList.add("wrong");
     option1.classList.add("correct");
 
-    resultHeading.innerHTML = "❌ Wrong!";
-    resultHeading.style.color = "#ef4444";
+    badge2.style.display="flex";
+    badge2.innerHTML="✕";
 
-    resultMessage.innerHTML = "The correct answer was Option 1.";
+    badge1.style.display="flex";
+    badge1.innerHTML="✓";
 
-    resultSection.style.display = "block";
+    resultCircle.innerHTML="❌";
+
+    resultCircle.style.background="#ffecec";
+    resultCircle.style.color="#ef4444";
+
+    resultTitle.innerHTML="Incorrect!";
+    resultTitle.style.color="#ef4444";
+
+    resultText.innerHTML="That wasn't the authentic logo.";
+
+    pointsCard.innerHTML="0 Points";
+
+    infoTitle.innerHTML="Correct Answer";
+    infoText.innerHTML="The left logo was the original one.";
+
+    resultSection.style.display="block";
 
     resultSection.scrollIntoView({
-        behavior: "smooth"
+        behavior:"smooth"
     });
 
 });
 
-// Show Results button
-showResultsBtn.addEventListener("click", function(){
+// ----------------------------
+// SHOW RESULTS
+// ----------------------------
 
-    alert("Results page will be added next.");
+showResultsBtn.addEventListener("click",function(){
+
+    window.location.href="results.html";
 
 });
