@@ -7,60 +7,74 @@
 
 body{
 
-    background:#f4f8ff;
+    background:#f5f8ff;
+
+    min-height:100vh;
 
     display:flex;
     justify-content:center;
     align-items:center;
 
-    min-height:100vh;
+    padding:30px;
 
 }
 
 .container{
 
     width:100%;
-    max-width:1000px;
+    max-width:1200px;
 
     text-align:center;
 
-    padding:30px;
+}
+
+.top{
+
+    margin-bottom:45px;
 
 }
 
 .logo{
 
     width:95px;
-    margin-bottom:15px;
-
+    margin-bottom:18px;
 }
 
-.title{
+.top h1{
 
-    font-size:58px;
+    font-size:72px;
     font-weight:800;
-    color:#0b1832;
+    color:#081b3d;
+    line-height:1.15;
 
 }
 
-.title span{
+.top h1 span{
 
-    background:linear-gradient(90deg,#0066ff,#ff3c3c,#ff9800);
+    background:linear-gradient(
+    90deg,
+    #2d8cff,
+    #ff4040,
+    #ff9800);
+
     -webkit-background-clip:text;
     color:transparent;
 
 }
 
-.line{
+.underline{
 
-    width:80px;
+    width:95px;
     height:6px;
 
-    background:linear-gradient(90deg,#2a73ff,#ff9800);
+    border-radius:30px;
 
-    border-radius:20px;
+    margin:18px auto 0;
 
-    margin:22px auto 55px;
+    background:linear-gradient(
+    90deg,
+    #2d8cff,
+    #ff9800);
 
 }
 
@@ -70,7 +84,7 @@ body{
 
     justify-content:center;
 
-    gap:45px;
+    gap:50px;
 
     flex-wrap:wrap;
 
@@ -78,19 +92,21 @@ body{
 
 .card{
 
-    background:white;
+    width:360px;
 
-    width:320px;
+    background:#fff;
 
-    border-radius:22px;
+    border-radius:24px;
 
-    padding:22px;
+    padding:28px;
 
     cursor:pointer;
 
-    transition:.25s;
+    transition:.30s;
 
-    box-shadow:0 8px 25px rgba(0,0,0,.08);
+    box-shadow:
+    0 12px 35px
+    rgba(0,0,0,.08);
 
 }
 
@@ -98,25 +114,34 @@ body{
 
     transform:translateY(-8px);
 
-    box-shadow:0 18px 35px rgba(0,0,0,.12);
+    box-shadow:
+    0 22px 45px
+    rgba(0,0,0,.12);
 
 }
 
-.card img{
+.quiz-image{
 
     width:100%;
+    display:block;
 
 }
 
-.card p{
+/* Tablet */
 
-    margin-top:18px;
+@media(max-width:991px){
 
-    font-size:30px;
+.top h1{
 
-    font-weight:700;
+    font-size:54px;
 
-    color:#0b1832;
+}
+
+.card{
+
+    width:300px;
+
+}
 
 }
 
@@ -124,15 +149,38 @@ body{
 
 @media(max-width:700px){
 
-.title{
+body{
 
-    font-size:42px;
+    padding:20px;
 
 }
 
 .logo{
 
-    width:78px;
+    width:70px;
+
+    margin-bottom:15px;
+
+}
+
+.top{
+
+    margin-bottom:30px;
+
+}
+
+.top h1{
+
+    font-size:38px;
+
+}
+
+.underline{
+
+    width:70px;
+    height:5px;
+
+    margin-top:12px;
 
 }
 
@@ -140,25 +188,35 @@ body{
 
     gap:18px;
 
+    justify-content:center;
+
 }
 
 .card{
 
-    width:160px;
+    width:155px;
 
-    padding:14px;
+    padding:12px;
 
-}
-
-.card p{
-
-    font-size:20px;
+    border-radius:18px;
 
 }
 
-.line{
+}
 
-    margin-bottom:35px;
+/* Small Mobile */
+
+@media(max-width:380px){
+
+.top h1{
+
+    font-size:32px;
+
+}
+
+.card{
+
+    width:140px;
 
 }
 
