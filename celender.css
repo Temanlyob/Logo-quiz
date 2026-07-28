@@ -1,0 +1,183 @@
+/* ==========================
+   RESET
+========================== */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+
+font-family:'Poppins',sans-serif;
+
+background:#f5f8ff;
+
+color:#102a54;
+
+padding:25px;
+
+}
+
+.container{
+
+max-width:900px;
+
+margin:auto;
+
+}
+
+/* ==========================
+   HEADER
+========================== */
+
+.top{
+
+text-align:center;
+
+margin-bottom:30px;
+
+position:relative;
+
+}
+
+.back-btn{
+
+position:absolute;
+
+left:0;
+
+top:0;
+
+width:46px;
+
+height:46px;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+background:white;
+
+border-radius:14px;
+
+text-decoration:none;
+
+font-size:24px;
+
+color:#102a54;
+
+box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+}
+
+.top h1{
+
+font-size:40px;
+
+font-weight:800;
+
+margin-bottom:8px;
+
+}
+
+.top p{
+
+font-size:16px;
+
+color:#6b7280;
+
+}
+
+/* ==========================
+   CALENDAR CARD
+========================== */
+
+.calendar-card{
+
+background:white;
+
+border-radius:24px;
+
+padding:24px;
+
+box-shadow:0 15px 35px rgba(0,0,0,.08);
+
+margin-bottom:25px;
+
+}
+
+/* ==========================
+   MONTH BAR
+========================== */
+
+.month-bar{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:25px;
+
+}
+
+.month-bar h2{
+
+font-size:28px;
+
+font-weight:700;
+
+}
+
+.month-bar button{
+
+width:46px;
+
+height:46px;
+
+border:none;
+
+border-radius:14px;
+
+background:#3b82f6;
+
+color:white;
+
+font-size:20px;
+
+cursor:pointer;
+
+transition:.25s;
+
+}
+
+.month-bar button:hover{
+
+transform:scale(1.08);
+
+}
+
+/* ==========================
+   WEEKDAYS
+========================== */
+
+.weekdays{
+
+display:grid;
+
+grid-template-columns:repeat(7,1fr);
+
+margin-bottom:15px;
+
+font-weight:700;
+
+text-align:center;
+
+color:#64748b;
+
+}
