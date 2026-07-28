@@ -1,0 +1,549 @@
+/* ==========================
+   RESET
+========================== */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+
+font-family:'Poppins',sans-serif;
+
+background:#f5f8ff;
+
+color:#102a54;
+
+padding:25px;
+
+}
+
+.container{
+
+max-width:1100px;
+
+margin:auto;
+
+padding-bottom:110px;
+
+}
+
+/* ==========================
+   HEADER
+========================== */
+
+.top{
+
+text-align:center;
+
+margin-bottom:35px;
+
+}
+
+.logo{
+
+width:85px;
+
+margin-bottom:15px;
+
+}
+
+.top h1{
+
+font-size:42px;
+
+font-weight:800;
+
+color:#102a54;
+
+}
+
+.top p{
+
+margin-top:8px;
+
+font-size:17px;
+
+color:#6b7280;
+
+}
+
+/* ==========================
+   TODAY CARD
+========================== */
+
+.today-card{
+
+background:#ffffff;
+
+border-radius:26px;
+
+padding:30px;
+
+text-align:center;
+
+box-shadow:0 15px 35px rgba(0,0,0,.08);
+
+margin-bottom:25px;
+
+}
+
+.emoji{
+
+font-size:55px;
+
+margin-bottom:15px;
+
+}
+
+.today-card h2{
+
+font-size:30px;
+
+font-weight:700;
+
+margin-bottom:10px;
+
+color:#102a54;
+
+}
+
+.today-card p{
+
+font-size:17px;
+
+color:#666;
+
+margin-bottom:20px;
+
+}
+
+.reward{
+
+display:inline-block;
+
+padding:10px 20px;
+
+background:#e8fff0;
+
+color:#22c55e;
+
+border-radius:999px;
+
+font-weight:700;
+
+margin-bottom:25px;
+
+}
+
+.play-btn{
+
+display:block;
+
+width:100%;
+
+padding:16px;
+
+background:#22c55e;
+
+color:white;
+
+text-decoration:none;
+
+font-size:18px;
+
+font-weight:600;
+
+border-radius:14px;
+
+transition:.25s;
+
+}
+
+.play-btn:hover{
+
+background:#16964b;
+
+transform:translateY(-2px);
+
+}
+
+/* ==========================
+   CALENDAR CARD
+========================== */
+
+.calendar-card{
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+gap:15px;
+
+background:#ffffff;
+
+padding:22px;
+
+border-radius:22px;
+
+box-shadow:0 10px 30px rgba(0,0,0,.08);
+
+margin-bottom:30px;
+
+}
+
+.icon{
+
+font-size:42px;
+
+}
+
+.calendar-card h3{
+
+font-size:22px;
+
+margin-bottom:5px;
+
+}
+
+.calendar-card p{
+
+font-size:15px;
+
+color:#666;
+
+}
+
+.calendar-btn{
+
+background:#3b82f6;
+
+color:white;
+
+text-decoration:none;
+
+padding:12px 22px;
+
+border-radius:12px;
+
+font-weight:600;
+
+white-space:nowrap;
+
+}
+
+/* ==========================
+   PROGRESS
+========================== */
+
+.progress-section{
+
+margin-bottom:30px;
+
+}
+
+.progress-section h2{
+
+font-size:28px;
+
+font-weight:700;
+
+margin-bottom:18px;
+
+color:#102a54;
+
+}
+
+.progress-grid{
+
+display:grid;
+
+grid-template-columns:repeat(3,1fr);
+
+gap:18px;
+
+}
+
+.progress-card{
+
+background:#fff;
+
+padding:22px;
+
+border-radius:20px;
+
+text-align:center;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.progress-icon{
+
+font-size:34px;
+
+margin-bottom:12px;
+
+}
+
+.progress-card h3{
+
+font-size:30px;
+
+font-weight:700;
+
+color:#22c55e;
+
+margin-bottom:6px;
+
+}
+
+.progress-card p{
+
+font-size:15px;
+
+color:#666;
+
+}
+
+/* ==========================
+   ACHIEVEMENTS
+========================== */
+
+.achievement-section{
+
+margin-bottom:35px;
+
+}
+
+.achievement-section h2{
+
+font-size:28px;
+
+font-weight:700;
+
+margin-bottom:18px;
+
+color:#102a54;
+
+}
+
+.achievement-card{
+
+background:#fff;
+
+padding:18px 20px;
+
+border-radius:18px;
+
+margin-bottom:14px;
+
+font-size:18px;
+
+font-weight:600;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+/* ==========================
+   BOTTOM NAVIGATION
+========================== */
+
+.bottom-nav{
+
+position:fixed;
+
+left:0;
+
+right:0;
+
+bottom:0;
+
+background:#fff;
+
+display:flex;
+
+justify-content:space-around;
+
+align-items:center;
+
+padding:12px 0;
+
+box-shadow:0 -5px 20px rgba(0,0,0,.08);
+
+}
+
+.bottom-nav a{
+
+text-decoration:none;
+
+color:#64748b;
+
+display:flex;
+
+flex-direction:column;
+
+align-items:center;
+
+font-size:14px;
+
+font-weight:600;
+
+}
+
+.bottom-nav a span{
+
+margin-top:4px;
+
+}
+
+.bottom-nav a.active{
+
+color:#22c55e;
+
+}
+
+/* ==========================
+   TABLET
+========================== */
+
+@media(max-width:900px){
+
+.progress-grid{
+
+grid-template-columns:repeat(2,1fr);
+
+}
+
+}
+
+/* ==========================
+   MOBILE
+========================== */
+
+@media(max-width:700px){
+
+body{
+
+padding:18px;
+
+}
+
+.logo{
+
+width:70px;
+
+}
+
+.top h1{
+
+font-size:34px;
+
+}
+
+.top p{
+
+font-size:15px;
+
+}
+
+.today-card{
+
+padding:22px;
+
+}
+
+.today-card h2{
+
+font-size:24px;
+
+}
+
+.calendar-card{
+
+flex-direction:column;
+
+align-items:flex-start;
+
+}
+
+.calendar-btn{
+
+width:100%;
+
+text-align:center;
+
+margin-top:12px;
+
+}
+
+.progress-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.progress-card{
+
+padding:18px;
+
+}
+
+.achievement-card{
+
+font-size:16px;
+
+}
+
+.bottom-nav{
+
+padding:10px 0;
+
+}
+
+.bottom-nav a{
+
+font-size:12px;
+
+}
+
+.bottom-nav a span{
+
+font-size:12px;
+
+}
+
+}
+
+/* ==========================
+   SMALL MOBILE
+========================== */
+
+@media(max-width:380px){
+
+.top h1{
+
+font-size:30px;
+
+}
+
+.today-card h2{
+
+font-size:22px;
+
+}
+
+.progress-section h2,
+
+.achievement-section h2{
+
+font-size:24px;
+
+}
+
+}
