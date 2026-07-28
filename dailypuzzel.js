@@ -1,46 +1,26 @@
-// Cards
+const option1=document.getElementById("option1");
+const option2=document.getElementById("option2");
 
-const option1 = document.getElementById("option1");
-const option2 = document.getElementById("option2");
+option1.onclick=function(){
 
-// Correct option
+option1.classList.add("correct");
 
-option1.addEventListener("click", function () {
+setTimeout(function(){
 
-    option1.classList.add("correct");
+window.location.href="correct.html";
 
-    option2.style.pointerEvents = "none";
+},800);
 
-    setTimeout(function () {
+}
 
-        alert("✅ Correct!");
+option2.onclick=function(){
 
-        // Baad me yahan Show Results page kholenge
-        // window.location.href="results.html";
+option2.classList.add("wrong");
 
-    },600);
+setTimeout(function(){
 
-});
+window.location.href="wrong.html";
 
+},800);
 
-// Wrong option
-
-option2.addEventListener("click", function () {
-
-    option2.classList.add("wrong");
-
-    option1.classList.add("correct");
-
-    option1.style.pointerEvents = "none";
-
-    option2.style.pointerEvents = "none";
-
-    setTimeout(function () {
-
-        alert("❌ Wrong!");
-
-        // Baad me yahan Show Results page kholenge
-
-    },600);
-
-});
+}
