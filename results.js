@@ -9,7 +9,10 @@ const scoreValue = document.getElementById("scoreValue");
 
 // Demo Data
 // Baad me ye values localStorage se aayengi.
-let isCorrect = true;
+const result = localStorage.getItem("lastResult");
+const score = localStorage.getItem("lastScore");
+
+let isCorrect = result === "correct";
 
 let currentStreak = 3;
 let bestStreak = 8;
@@ -32,7 +35,7 @@ if(isCorrect){
 
     resultTitle.innerHTML = "Today's Result";
 
-    scoreValue.innerHTML = "+10";
+    scoreValue.innerHTML = "+" + score;
 
 }else{
 
@@ -40,7 +43,7 @@ if(isCorrect){
 
     resultTitle.innerHTML = "Better Luck Tomorrow";
 
-    scoreValue.innerHTML = "0";
+    scoreValue.innerHTML = score;
 
     scoreValue.style.color = "#ef4444";
 
