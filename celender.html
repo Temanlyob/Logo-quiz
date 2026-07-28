@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Puzzle Calendar</title>
+
+<link rel="stylesheet" href="calendar.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<header class="top">
+
+<a href="home.html" class="back-btn">←</a>
+
+<h1>📅 Puzzle Calendar</h1>
+
+<p>Play previous daily logo puzzles</p>
+
+</header>
+
+<div class="calendar-card">
+
+<div class="month-bar">
+
+<button id="prevMonth">◀</button>
+
+<h2 id="monthTitle">July 2026</h2>
+
+<button id="nextMonth">▶</button>
+
+</div>
+
+<div class="weekdays">
+
+<span>Sun</span>
+
+<span>Mon</span>
+
+<span>Tue</span>
+
+<span>Wed</span>
+
+<span>Thu</span>
+
+<span>Fri</span>
+
+<span>Sat</span>
+
+</div>
+
+<div id="calendarGrid" class="calendar-grid">
+
+<!-- JS will generate dates here -->
+
+</div>
+
+</div>
+
+<div class="legend">
+
+<div class="legend-item">
+
+<div class="dot solved"></div>
+
+<span>Solved</span>
+
+</div>
+
+<div class="legend-item">
+
+<div class="dot today"></div>
+
+<span>Today</span>
+
+</div>
+
+<div class="legend-item">
+
+<div class="dot pending"></div>
+
+<span>Not Played</span>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="calendar.js"></script>
+
+</body>
+
+</html>
