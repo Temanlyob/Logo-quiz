@@ -47,6 +47,9 @@ option1.addEventListener("click", function(){
     infoTitle.innerHTML="Great Job!";
     infoText.innerHTML="You spotted the authentic logo.";
 
+    localStorage.setItem("lastResult","correct");
+localStorage.setItem("lastScore","10");
+
     resultSection.style.display="block";
 
     resultSection.scrollIntoView({
@@ -87,6 +90,9 @@ option2.addEventListener("click", function(){
 
     infoTitle.innerHTML="Correct Answer";
     infoText.innerHTML="The left logo was the original one.";
+
+    localStorage.setItem("lastResult","wrong");
+localStorage.setItem("lastScore","0");
 
     resultSection.style.display="block";
 
