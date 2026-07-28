@@ -7,7 +7,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Daily Puzzle</title>
+<title>Daily Logo Puzzle</title>
 
 <link rel="stylesheet" href="dailypuzzel.css">
 
@@ -15,7 +15,7 @@
 
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 </head>
 
@@ -23,7 +23,9 @@
 
 <div class="container">
 
-    <div class="top">
+    <!-- Top -->
+
+    <header class="top">
 
         <img src="logo_quiz.png" class="logo">
 
@@ -35,11 +37,16 @@
 
         </h1>
 
-    </div>
+    </header>
 
-    <div class="cards">
+
+    <!-- Quiz -->
+
+    <section class="cards">
 
         <div class="card" id="option1">
+
+            <span class="badge" id="badge1"></span>
 
             <img src="image1.png" class="quiz-image">
 
@@ -47,74 +54,90 @@
 
         <div class="card" id="option2">
 
+            <span class="badge" id="badge2"></span>
+
             <img src="image2.png" class="quiz-image">
 
         </div>
 
-        <div id="resultBox" class="result-box">
+    </section>
 
-<h2 id="resultTitle"></h2>
 
-<p id="resultText"></p>
+    <!-- Result -->
 
-<button id="resultBtn">
-Show Results
-</button>
+    <section class="result-section" id="resultSection">
 
-        </div>
+        <div class="result-circle" id="resultCircle">
 
-    </div>
-
-    <!-- Result Section (Hidden by default) -->
-
-<div id="resultSection" class="result-section">
-
-    <div class="result-icon">
-        ✅
-    </div>
-
-    <h2 id="resultHeading">
-        Correct!
-    </h2>
-
-    <p id="resultMessage">
-        You selected the real logo.
-    </p>
-
-    <div class="points">
-        +10 Points ⭐
-    </div>
-
-    <div class="great-job">
-
-        <div class="trophy">
-            🏆
-        </div>
-
-        <div>
-
-            <h3>Great Job!</h3>
-
-            <p>You have a sharp eye for details.</p>
+            ✅
 
         </div>
 
-    </div>
+        <h2 id="resultTitle">
 
-    <button id="showResultsBtn">
-        Show Results →
-    </button>
+            Correct!
 
-    <a href="index.html" class="back-home">
-        Back to Home
-    </a>
+        </h2>
 
-</div>
+        <p id="resultText">
+
+            You selected the correct logo.
+
+        </p>
+
+        <div class="points-card" id="pointsCard">
+
+            +10 Points ⭐
+
+        </div>
+
+
+        <div class="info-card">
+
+            <div class="info-icon">
+
+                💡
+
+            </div>
+
+            <div>
+
+                <h3 id="infoTitle">
+
+                    Great Job!
+
+                </h3>
+
+                <p id="infoText">
+
+                    You spotted the authentic logo.
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <button id="showResultsBtn">
+
+            Show Results →
+
+        </button>
+
+
+        <a href="index.html" class="back-home">
+
+            ← Back to Home
+
+        </a>
+
+    </section>
 
 </div>
 
 <script src="dailypuzzel.js"></script>
-    
+
 </body>
 
 </html>
