@@ -1,40 +1,37 @@
 import { auth, db } from "./firebase.js";
 
 import {
-  onAuthStateChanged,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 import {
   doc,
-  getDoc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 // Elements
 const score = document.getElementById("totalScore");
 const streak = document.getElementById("currentStreak");
 const acc = document.getElementById("accuracy");
-
 const playBtn = document.querySelector(".play-btn");
 
 // Login Check
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
-
-    
     window.location.replace("login.html");
     return;
   }
-const snap = await getDoc(doc(db, "users", user.uid));
 
-alert("Document Exists: " + snap.exists());
-
-if (snap.exists()) {
-  alert(JSON.stringify(snap.data()));
-}
   try {
 
     const snap = await getDoc(doc(db, "users", user.uid));
+
+    alert("Document Exists: " + snap.exists());
+
+    if (snap.exists()) {
+      alert(JSON.stringify(snap.data()));
+    }
 
     if (!snap.exists()) return;
 
@@ -57,6 +54,7 @@ if (snap.exists()) {
     acc.textContent = accuracy + "%";
 
   } catch (e) {
+    alert(e.message);
     console.error(e);
   }
 
@@ -64,11 +62,7 @@ if (snap.exists()) {
 
 // Play Button
 if (playBtn) {
-
   playBtn.addEventListener("click", () => {
-
     window.location.href = "dailypuzzel.html";
-
   });
-
 }
