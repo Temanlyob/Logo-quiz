@@ -10,14 +10,13 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-const username = document.getElementById("username");
-const score = document.getElementById("score");
-const streak = document.getElementById("streak");
-const accuracy = document.getElementById("accuracy");
-const played = document.getElementById("played");
-const avatar = document.querySelector(".avatar");
-const logoutBtn = document.querySelector(".logout-btn");
+// Elements
+const profileName = document.getElementById("profileName");
+const profileEmail = document.getElementById("profileEmail");
+const profilePhoto = document.getElementById("profilePhoto");
+const logoutBtn = document.getElementById("logoutBtn");
 
+// Auth Check
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
@@ -25,55 +24,54 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  if (user.photoURL) {
-    avatar.src = user.photoURL;
-  }
-
   try {
 
     const snap = await getDoc(doc(db, "users", user.uid));
 
-    console.log("UID:", user.uid);
-console.log("Document Exists:", snap.exists());
-
-if (snap.exists()) {
-  console.log("Data:", snap.data());
-}
-
-    if (!snap.exists()) return;
+    if (!snap.exists()) {
+      alert("User data not found.");
+      return;
+    }
 
     const data = snap.data();
 
-    username.textContent = data.username || user.displayName || "Player";
+    if (profileName) {
+      profileName.textContent = data.username || "User";
+    }
 
-    score.textContent = data.totalScore || 0;
+    if (profileEmail) {
+      profileEmail.textContent = data.email || "";
+    }
 
-    streak.textContent = data.currentStreak || 0;
-
-    const won = data.gamesWon || 0;
-    const lost = data.gamesLost || 0;
-
-    const total = won + lost;
-
-    played.textContent = total;
-
-    const acc =
-      total > 0
-        ? Math.round((won / total) * 100)
-        : 0;
-
-    accuracy.textContent = acc + "%";
+    if (profilePhoto && data.photoURL) {
+      profilePhoto.src = data.photoURL;
+    }
 
   } catch (err) {
     console.error(err);
+    alert(err.message);
   }
 
 });
 
-logoutBtn.addEventListener("click", async () => {
+// Logout
+if (logoutBtn) {
 
-  await signOut(auth);
+  logoutBtn.addEventListener("click", async () => {
 
-  window.location.replace("login.html");
+    try {
 
-});
+      await signOut(auth);
+
+      window.location.replace("login.html");
+
+    } catch (err) {
+
+      console.error(err);
+      alert(err.message);
+
+    }
+
+  });
+
+}
