@@ -23,12 +23,14 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
+  // Pehle UID dikhao
+  alert("Logged in UID:\n" + user.uid);
+
   try {
 
     const snap = await getDoc(doc(db, "users", user.uid));
 
     alert("Document Exists: " + snap.exists());
-    alert(user.uid);
 
     if (snap.exists()) {
       alert(JSON.stringify(snap.data()));
@@ -45,10 +47,9 @@ onAuthStateChanged(auth, async (user) => {
 
     const gamesPlayed = gamesWon + gamesLost;
 
-    const accuracy =
-      gamesPlayed > 0
-        ? Math.round((gamesWon / gamesPlayed) * 100)
-        : 0;
+    const accuracy = gamesPlayed > 0
+      ? Math.round((gamesWon / gamesPlayed) * 100)
+      : 0;
 
     score.textContent = totalScore;
     streak.textContent = currentStreak;
