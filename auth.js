@@ -11,21 +11,25 @@ import {
 
 import {
   doc,
+  getDoc,
   setDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-// Save user to Firestore
-async function createUserDocument(user) {
+// Create Firestore document if missing
+async function createUserDocument(user, username = null) {
 
-  try {
+  if (!user) return;
 
-    alert("Before setDoc");
+  const userRef = doc(db, "users", user.uid);
+  const snap = await getDoc(userRef);
 
-    await setDoc(doc(db, "users", user.uid), {
+  if (!snap.exists()) {
+
+    await setDoc(userRef, {
       uid: user.uid,
-      username: user.displayName || "User",
-      email: user.email,
+      username: username || user.displayName || "User",
+      email: user.email || "",
       photoURL: user.photoURL || "",
       totalScore: 0,
       puzzlesPlayed: 0,
@@ -36,15 +40,6 @@ async function createUserDocument(user) {
       createdAt: serverTimestamp()
     });
 
-    alert("After setDoc");
-
-  } catch (err) {
-
-    console.error(err);
-
-    alert("ERROR CODE:\n" + err.code);
-    alert("ERROR MESSAGE:\n" + err.message);
-
   }
 
 }
@@ -53,11 +48,13 @@ export {
   auth,
   db,
   googleProvider,
+
+  createUserDocument,
+
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
   onAuthStateChanged,
   signOut,
-  sendPasswordResetEmail,
-  createUserDocument
+  sendPasswordResetEmail
 };
