@@ -39,15 +39,19 @@ form.addEventListener("submit", async (e) => {
 
   try {
 
-    const result =
-      await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+    // Create Authentication account
+    const result = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
 
     const user = result.user;
 
+    alert("Auth Account Created");
+    alert("UID:\n" + user.uid);
+
+    // Save Firestore document
     await setDoc(doc(db, "users", user.uid), {
 
       uid: user.uid,
@@ -64,13 +68,16 @@ form.addEventListener("submit", async (e) => {
 
     });
 
-    alert("Firestore document created successfully");
+    alert("Firestore Saved Successfully");
 
     window.location.href = "home.html";
 
   } catch (err) {
 
-    alert(err.message);
+    console.error(err);
+
+    alert("ERROR CODE:\n" + err.code);
+    alert("ERROR MESSAGE:\n" + err.message);
 
   }
 
@@ -80,25 +87,32 @@ form.addEventListener("submit", async (e) => {
 // Google Sign Up
 // ------------------------------
 
-const googleSignup =
-document.getElementById("googleSignup");
+const googleSignup = document.getElementById("googleSignup");
 
 googleSignup.addEventListener("click", async () => {
 
   try {
 
-    const result =
-      await signInWithPopup(auth, googleProvider);
+    const result = await signInWithPopup(auth, googleProvider);
 
     const user = result.user;
 
+    alert("Google Login Success");
+    alert("UID:\n" + user.uid);
+
     await createUserDocument(user);
+
+    alert("Firestore Saved Successfully");
 
     window.location.href = "home.html";
 
   } catch (err) {
-  console.error(err);
-  alert(err.code + "\n" + err.message);
-}
+
+    console.error(err);
+
+    alert("ERROR CODE:\n" + err.code);
+    alert("ERROR MESSAGE:\n" + err.message);
+
+  }
 
 });
