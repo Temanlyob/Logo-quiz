@@ -64,6 +64,8 @@ form.addEventListener("submit", async (e) => {
 
     });
 
+    alert("Firestore document created successfully");
+
     window.location.href = "home.html";
 
   } catch (err) {
@@ -95,9 +97,8 @@ googleSignup.addEventListener("click", async () => {
     window.location.href = "home.html";
 
   } catch (err) {
-
-    alert(err.message);
-
-  }
+  console.error(err);
+  alert(err.code + "\n" + err.message);
+}
 
 });
