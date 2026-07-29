@@ -11,45 +11,32 @@ import {
 
 import {
   doc,
-  getDoc,
   setDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-// Save user to Firestore if first login
+// Save user to Firestore
 async function createUserDocument(user) {
 
   try {
 
-    alert("createUserDocument Started");
+    alert("Before setDoc");
 
-    const ref = doc(db, "users", user.uid);
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      username: user.displayName || "User",
+      email: user.email,
+      photoURL: user.photoURL || "",
+      totalScore: 0,
+      puzzlesPlayed: 0,
+      gamesWon: 0,
+      gamesLost: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+      createdAt: serverTimestamp()
+    });
 
-    const snap = await getDoc(ref);
-
-    alert("Document Already Exists: " + snap.exists());
-
-    if (!snap.exists()) {
-
-      alert("Creating Firestore Document...");
-
-      await setDoc(ref, {
-        uid: user.uid,
-        username: user.displayName || "User",
-        email: user.email,
-        photoURL: user.photoURL || "",
-        totalScore: 0,
-        puzzlesPlayed: 0,
-        gamesWon: 0,
-        gamesLost: 0,
-        currentStreak: 0,
-        bestStreak: 0,
-        createdAt: serverTimestamp()
-      });
-
-      alert("Firestore Document Created");
-
-    }
+    alert("After setDoc");
 
   } catch (err) {
 
