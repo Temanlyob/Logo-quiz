@@ -1,15 +1,18 @@
-// Firebase SDK
+// Firebase App
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+// Firebase Auth
 import {
   getAuth,
   GoogleAuthProvider
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
+// Firestore
 import {
   getFirestore
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-// Firebase Config
+// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAxgGaTUiKTOZfy5O2QTr0qa8l6hU9IAk4",
   authDomain: "logo-quiz-70b96.firebaseapp.com",
@@ -23,13 +26,21 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Services
+// Authentication
 const auth = getAuth(app);
+
+// Firestore Database
 const db = getFirestore(app);
+
+// Google Provider
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: "select_account"
+});
 
 // Export
 export {
+  app,
   auth,
   db,
   googleProvider
