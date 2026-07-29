@@ -33,6 +33,13 @@ onAuthStateChanged(auth, async (user) => {
 
     const snap = await getDoc(doc(db, "users", user.uid));
 
+    console.log("UID:", user.uid);
+console.log("Document Exists:", snap.exists());
+
+if (snap.exists()) {
+  console.log("Data:", snap.data());
+}
+
     if (!snap.exists()) return;
 
     const data = snap.data();
