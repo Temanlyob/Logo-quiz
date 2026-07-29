@@ -25,7 +25,13 @@ onAuthStateChanged(auth, async (user) => {
     window.location.replace("login.html");
     return;
   }
-alert(user.uid);
+const snap = await getDoc(doc(db, "users", user.uid));
+
+alert("Document Exists: " + snap.exists());
+
+if (snap.exists()) {
+  alert(JSON.stringify(snap.data()));
+}
   try {
 
     const snap = await getDoc(doc(db, "users", user.uid));
