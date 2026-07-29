@@ -3,46 +3,64 @@ import {
   googleProvider,
   createUserDocument,
   signInWithEmailAndPassword,
-  signInWithPopup,
-  onAuthStateChanged
+  signInWithPopup
 } from "./auth.js";
 
-// Already logged in?
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    window.location.href = "home.html";
-  }
-});
-
+// ------------------------------
 // Email Login
+// ------------------------------
+
 const loginForm = document.getElementById("loginForm");
 
 loginForm.addEventListener("submit", async (e) => {
+
   e.preventDefault();
 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
-    window.location.href = "home.html";
+
+    const result = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    await createUserDocument(result.user);
+
+    window.location.replace("home.html");
+
   } catch (err) {
+
+    console.error(err);
     alert(err.message);
+
   }
+
 });
 
+// ------------------------------
 // Google Login
+// ------------------------------
+
 const googleBtn = document.getElementById("googleLogin");
 
 googleBtn.addEventListener("click", async () => {
+
   try {
+
     const result = await signInWithPopup(auth, googleProvider);
 
     await createUserDocument(result.user);
 
-    window.location.href = "home.html";
+    window.location.replace("home.html");
 
   } catch (err) {
+
+    console.error(err);
     alert(err.message);
+
   }
+
 });
