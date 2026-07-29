@@ -20,10 +20,12 @@ const playBtn = document.querySelector(".play-btn");
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
+
+    
     window.location.replace("login.html");
     return;
   }
-
+alert(user.uid);
   try {
 
     const snap = await getDoc(doc(db, "users", user.uid));
