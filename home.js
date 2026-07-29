@@ -28,6 +28,7 @@ onAuthStateChanged(auth, async (user) => {
     const snap = await getDoc(doc(db, "users", user.uid));
 
     alert("Document Exists: " + snap.exists());
+    alert(user.uid);
 
     if (snap.exists()) {
       alert(JSON.stringify(snap.data()));
