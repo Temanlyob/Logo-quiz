@@ -28,13 +28,16 @@ onAuthStateChanged(auth, async (user) => {
     const userRef = doc(db, "users", user.uid);
     const snap = await getDoc(userRef);
 
-    if (!snap.exists()) {
+if (!snap.exists()) {
 
-      console.warn("User document not found.");
-      window.location.replace("login.html");
-      return;
+  score.textContent = "0";
+  streak.textContent = "0";
+  acc.textContent = "0%";
 
-    }
+  console.warn("User document not found.");
+  return;
+
+}
 
     const data = snap.data();
 
