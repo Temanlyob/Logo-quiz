@@ -18,29 +18,38 @@ import {
 // Create or Update Firestore User Document
 async function createUserDocument(user, username = null) {
 
-  if (!user) return;
+  if (!user) return false;
 
-  const userRef = doc(db, "users", user.uid);
+  try {
 
-  await setDoc(
-    userRef,
-    {
-      uid: user.uid,
-      username: username || user.displayName || "User",
-      email: user.email || "",
-      photoURL: user.photoURL || "",
-      totalScore: 0,
-      puzzlesPlayed: 0,
-      gamesWon: 0,
-      gamesLost: 0,
-      currentStreak: 0,
-      bestStreak: 0,
-      createdAt: serverTimestamp()
-    },
-    {
-      merge: true
-    }
-  );
+    const userRef = doc(db, "users", user.uid);
+
+    await setDoc(
+      userRef,
+      {
+        uid: user.uid,
+        username: username || user.displayName || "User",
+        email: user.email || "",
+        photoURL: user.photoURL || "",
+        totalScore: 0,
+        puzzlesPlayed: 0,
+        gamesWon: 0,
+        gamesLost: 0,
+        currentStreak: 0,
+        bestStreak: 0,
+        createdAt: serverTimestamp()
+      },
+      { merge: true }
+    );
+
+    return true;
+
+  } catch (err) {
+
+    console.error("Firestore Error:", err);
+    throw err;
+
+  }
 
 }
 
