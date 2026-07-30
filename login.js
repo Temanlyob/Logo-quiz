@@ -27,10 +27,14 @@ loginForm.addEventListener("submit", async (e) => {
       password
     );
 
-    await createUserDocument(result.user);
+    const created = await createUserDocument(result.user);
 
-    window.location.replace("home.html");
+if (!created) {
+  alert("Failed to create user profile.");
+  return;
+}
 
+window.location.replace("home.html");
   } catch (err) {
 
     console.error(err);
