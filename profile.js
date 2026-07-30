@@ -28,28 +28,48 @@ onAuthStateChanged(auth, async (user) => {
 
     const snap = await getDoc(doc(db, "users", user.uid));
 
-    if (!snap.exists()) {
-      alert("User data not found.");
-      return;
+    let data = {};
+
+    if (snap.exists()) {
+      data = snap.data();
     }
 
-    const data = snap.data();
-
+    // Username
     if (profileName) {
-      profileName.textContent = data.username || "User";
+      profileName.textContent =
+        data.username ||
+        user.displayName ||
+        "User";
     }
 
+    // Email
     if (profileEmail) {
-      profileEmail.textContent = data.email || "";
+      profileEmail.textContent =
+        data.email ||
+        user.email ||
+        "";
     }
 
-    if (profilePhoto && data.photoURL) {
-      profilePhoto.src = data.photoURL;
+    // Profile Photo
+    if (profilePhoto) {
+
+      if (data.photoURL) {
+
+        profilePhoto.src = data.photoURL;
+
+      } else if (user.photoURL) {
+
+        profilePhoto.src = user.photoURL;
+
+      }
+
     }
 
   } catch (err) {
+
     console.error(err);
     alert(err.message);
+
   }
 
 });
@@ -62,7 +82,6 @@ if (logoutBtn) {
     try {
 
       await signOut(auth);
-
       window.location.replace("login.html");
 
     } catch (err) {
