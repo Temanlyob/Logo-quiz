@@ -170,6 +170,8 @@ localStorage.setItem(
 correct?"10":"0"
 );
 
+localStorage.setItem("resultProcessed","false");
+    
 restoreResult(data);
 
 option1.style.pointerEvents="none";
