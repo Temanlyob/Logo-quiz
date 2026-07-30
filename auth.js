@@ -11,22 +11,20 @@ import {
 
 import {
   doc,
-  getDoc,
   setDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-// Create Firestore document if missing
+// Create or Update Firestore User Document
 async function createUserDocument(user, username = null) {
 
   if (!user) return;
 
   const userRef = doc(db, "users", user.uid);
-  const snap = await getDoc(userRef);
 
-  if (!snap.exists()) {
-
-    await setDoc(userRef, {
+  await setDoc(
+    userRef,
+    {
       uid: user.uid,
       username: username || user.displayName || "User",
       email: user.email || "",
@@ -38,9 +36,11 @@ async function createUserDocument(user, username = null) {
       currentStreak: 0,
       bestStreak: 0,
       createdAt: serverTimestamp()
-    });
-
-  }
+    },
+    {
+      merge: true
+    }
+  );
 
 }
 
