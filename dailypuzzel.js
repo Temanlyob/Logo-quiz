@@ -47,12 +47,25 @@ todayKey=`${day}-${month}-${year}`;
 
 // Image paths
 
+// Image paths
+
 const rightImage =
 `images/${todayKey}right.png`;
 
 const wrongImage =
 `images/${todayKey}wrong.png`;
 
+console.log("todayKey =", todayKey);
+console.log("Right =", rightImage);
+console.log("Wrong =", wrongImage);
+
+img1.onerror = function () {
+  alert("Image 1 not found:\n" + rightImage);
+};
+
+img2.onerror = function () {
+  alert("Image 2 not found:\n" + wrongImage);
+};
 // --------------------------------------
 // RANDOM POSITION
 // --------------------------------------
