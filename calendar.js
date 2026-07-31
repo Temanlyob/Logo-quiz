@@ -63,14 +63,16 @@ cell.classList.add("locked");
 
 }else{
 
-cell.onclick=function(){
+cell.onclick = function () {
 
-const d=String(day).padStart(2,"0");
-const m=String(currentMonth+1).padStart(2,"0");
-const y=String(currentYear).slice(-2);
+    const d = String(day).padStart(2,"0");
+    const m = String(currentMonth+1).padStart(2,"0");
+    const y = String(currentYear).slice(-2);
 
-window.location.href=
-`dailypuzzel.html?date=${d}-${m}-${y}`;
+    alert(`Opening ${d}-${m}-${y}`);
+
+    window.location.href =
+    `dailypuzzel.html?date=${d}-${m}-${y}`;
 
 };
 
