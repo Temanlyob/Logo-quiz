@@ -29,13 +29,21 @@ const showResultsBtn = document.getElementById("showResultsBtn");
 // TODAY
 // --------------------------------------
 
-const now = new Date();
+const params=new URLSearchParams(window.location.search);
 
-const day = String(now.getDate()).padStart(2,"0");
-const month = String(now.getMonth()+1).padStart(2,"0");
-const year = String(now.getFullYear()).slice(-2);
+let todayKey=params.get("date");
 
-const todayKey = `${day}-${month}-${year}`;
+if(!todayKey){
+
+const now=new Date();
+
+const day=String(now.getDate()).padStart(2,"0");
+const month=String(now.getMonth()+1).padStart(2,"0");
+const year=String(now.getFullYear()).slice(-2);
+
+todayKey=`${day}-${month}-${year}`;
+
+}
 
 // Image paths
 
