@@ -65,7 +65,12 @@ cell.classList.add("locked");
 
 cell.onclick=function(){
 
-window.location.href="dailypuzzel.html";
+const d=String(day).padStart(2,"0");
+const m=String(currentMonth+1).padStart(2,"0");
+const y=String(currentYear).slice(-2);
+
+window.location.href=
+`dailypuzzel.html?date=${d}-${m}-${y}`;
 
 };
 
