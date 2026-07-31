@@ -11,18 +11,6 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-import { auth, db } from "./firebase.js";
-
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-
-import {
-  doc,
-  getDoc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
 // Buttons
 const homeBtn = document.getElementById("homeBtn");
 const calendarBtn = document.getElementById("calendarBtn");
@@ -35,8 +23,7 @@ const scoreValue = document.getElementById("scoreValue");
 // Load result
 const result = localStorage.getItem("lastResult");
 const score = Number(localStorage.getItem("lastScore")) || 0;
-const processed =
-localStorage.getItem("resultProcessed") === "true";
+const processed = localStorage.getItem("resultProcessed") === "true";
 
 const isCorrect = result === "correct";
 
@@ -50,6 +37,7 @@ onAuthStateChanged(auth, async (user) => {
   const userRef = doc(db, "users", user.uid);
 
   let totalScore = 0;
+  let puzzlesPlayed = 0;
   let gamesWon = 0;
   let gamesLost = 0;
   let currentStreak = 0;
@@ -62,6 +50,7 @@ onAuthStateChanged(auth, async (user) => {
     const d = snap.data();
 
     totalScore = d.totalScore || 0;
+    puzzlesPlayed = d.puzzlesPlayed || 0;
     gamesWon = d.gamesWon || 0;
     gamesLost = d.gamesLost || 0;
     currentStreak = d.currentStreak || 0;
@@ -70,6 +59,8 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   if (!processed) {
+
+    puzzlesPlayed++;
 
     if (isCorrect) {
 
@@ -88,20 +79,21 @@ onAuthStateChanged(auth, async (user) => {
 
     }
 
-    await setDoc(userRef, {
-
-      totalScore,
-      gamesWon,
-      gamesLost,
-      currentStreak,
-      bestStreak
-
-    }, { merge: true });
-
-    localStorage.setItem(
-      "resultProcessed",
-      "true"
+    await setDoc(
+      userRef,
+      {
+        totalScore,
+        puzzlesPlayed,
+        gamesWon,
+        gamesLost,
+        currentStreak,
+        bestStreak,
+        lastPlayed: serverTimestamp()
+      },
+      { merge: true }
     );
+
+    localStorage.setItem("resultProcessed", "true");
 
   }
 
@@ -112,23 +104,12 @@ onAuthStateChanged(auth, async (user) => {
       ? 0
       : Math.round((gamesWon / totalGames) * 100);
 
-  document.getElementById("totalGames").textContent =
-    totalGames;
-
-  document.getElementById("gamesWon").textContent =
-    gamesWon;
-
-  document.getElementById("gamesLost").textContent =
-    gamesLost;
-
-  document.getElementById("currentStreak").textContent =
-    currentStreak + " Days";
-
-  document.getElementById("bestStreak").textContent =
-    bestStreak + " Days";
-
-  document.getElementById("winRate").textContent =
-    winRate + "%";
+  document.getElementById("totalGames").textContent = totalGames;
+  document.getElementById("gamesWon").textContent = gamesWon;
+  document.getElementById("gamesLost").textContent = gamesLost;
+  document.getElementById("currentStreak").textContent = currentStreak + " Days";
+  document.getElementById("bestStreak").textContent = bestStreak + " Days";
+  document.getElementById("winRate").textContent = winRate + "%";
 
   if (isCorrect) {
 
@@ -149,13 +130,9 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 homeBtn.onclick = () => {
-
   window.location.href = "home.html";
-
 };
 
 calendarBtn.onclick = () => {
-
   window.location.href = "calendar.html";
-
 };
