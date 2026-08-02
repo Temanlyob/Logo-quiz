@@ -62,22 +62,77 @@ onAuthStateChanged(auth, async (user) => {
 
     puzzlesPlayed++;
 
-    if (isCorrect) {
+    const today = new Date().toISOString().split("T")[0];
 
-      gamesWon++;
-      currentStreak++;
-      totalScore += score;
+let lastPlayed = d.lastPlayed || null;
 
-      if (currentStreak > bestStreak) {
-        bestStreak = currentStreak;
-      }
+if (!processed) {
+
+  puzzlesPlayed++;
+
+  if (isCorrect) {
+
+    gamesWon++;
+    totalScore += score;
+
+    if (!lastPlayed) {
+
+      currentStreak = 1;
 
     } else {
 
-      gamesLost++;
-      currentStreak = 0;
+      const last = new Date(lastPlayed);
+      const now = new Date(today);
+
+      const diffDays =
+        Math.floor((now - last) / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) {
+
+        currentStreak++;
+
+      } else if (diffDays > 1) {
+
+        currentStreak = 1;
+
+      }
+
+      // diffDays === 0
+      // same day → streak same
 
     }
+
+    if (currentStreak > bestStreak) {
+      bestStreak = currentStreak;
+    }
+
+  } else {
+
+    gamesLost++;
+    currentStreak = 0;
+
+  }
+
+  await setDoc(
+    userRef,
+    {
+      totalScore,
+      puzzlesPlayed,
+      gamesWon,
+      gamesLost,
+      currentStreak,
+      bestStreak,
+      lastPlayed: today
+    },
+    { merge: true }
+  );
+
+  localStorage.setItem(
+    "resultProcessed",
+    "true"
+  );
+
+}
 
     const today = new Date().toISOString().split("T")[0];
 
