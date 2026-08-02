@@ -191,7 +191,10 @@ localStorage.setItem(
 correct?"10":"0"
 );
 
-localStorage.setItem("resultProcessed","false");
+localStorage.setItem(
+  "resultProcessed_" + todayKey,
+  "false"
+);
     
 restoreResult(data);
 
