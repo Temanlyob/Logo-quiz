@@ -79,19 +79,21 @@ onAuthStateChanged(auth, async (user) => {
 
     }
 
-    await setDoc(
-      userRef,
-      {
-        totalScore,
-        puzzlesPlayed,
-        gamesWon,
-        gamesLost,
-        currentStreak,
-        bestStreak,
-        lastPlayed: serverTimestamp()
-      },
-      { merge: true }
-    );
+    const today = new Date().toISOString().split("T")[0];
+
+await setDoc(
+  userRef,
+  {
+    totalScore,
+    puzzlesPlayed,
+    gamesWon,
+    gamesLost,
+    currentStreak,
+    bestStreak,
+    lastPlayed: today
+  },
+  { merge: true }
+);
 
     localStorage.setItem("resultProcessed", "true");
 
