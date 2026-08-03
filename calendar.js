@@ -50,6 +50,31 @@ cell.innerHTML=day;
 const thisDate =
 new Date(currentYear,currentMonth,day);
 
+const d = String(day).padStart(2,"0");
+const m = String(currentMonth+1).padStart(2,"0");
+const y = String(currentYear).slice(-2);
+
+const dateKey = `${d}-${m}-${y}`;
+
+const quiz =
+JSON.parse(
+localStorage.getItem("quiz_"+dateKey)
+);
+
+if(quiz){
+
+if(quiz.correct){
+
+cell.classList.add("correct-day");
+
+}else{
+
+cell.classList.add("wrong-day");
+
+}
+
+}    
+
 if(
 day===today.getDate() &&
 currentMonth===today.getMonth() &&
@@ -60,22 +85,20 @@ cell.classList.add("today");
 
 }
 
-if(thisDate>today){
+if(thisDate < firstPuzzleDate){
+
+cell.classList.add("disabled");
+
+}else if(thisDate > today){
 
 cell.classList.add("locked");
 
 }else{
 
-cell.onclick = function () {
+cell.onclick=function(){
 
-    const d = String(day).padStart(2,"0");
-    const m = String(currentMonth+1).padStart(2,"0");
-    const y = String(currentYear).slice(-2);
-
-    alert(`Opening ${d}-${m}-${y}`);
-
-    window.location.href =
-    `dailypuzzel.html?date=${d}-${m}-${y}`;
+window.location.href=
+`dailypuzzel.html?date=${dateKey}`;
 
 };
 
