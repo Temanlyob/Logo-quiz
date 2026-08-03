@@ -15,6 +15,84 @@ const streak = document.getElementById("currentStreak");
 const acc = document.getElementById("accuracy");
 const playBtn = document.querySelector(".play-btn");
 
+const achievementList =
+document.getElementById("achievementList");
+const achievements = [];
+
+if (gamesPlayed >= 1)
+  achievements.push("🥇 Logo Rookie");
+
+if (currentStreak >= 7)
+  achievements.push("🔥 7 Day Streak");
+
+if (totalScore >= 100)
+  achievements.push("⭐ 100 Points Club");
+
+if (gamesPlayed >= 30)
+  achievements.push("🎮 Puzzle Master");
+
+if (accuracy === 100 && gamesPlayed >= 10)
+  achievements.push("🎯 Accuracy Master");
+
+if (gamesPlayed >= 100)
+  achievements.push("👑 Logo Legend");
+
+achievementList.innerHTML = "";
+
+if (achievements.length === 0) {
+
+  achievementList.innerHTML =
+  "<div class='achievement-card'>No achievements yet.</div>";
+
+} else {
+
+  achievements.forEach(item => {
+
+    achievementList.innerHTML +=
+    `<div class="achievement-card">${item}</div>`;
+
+  });
+
+}
+
+const achievements = [];
+
+if (gamesPlayed >= 1)
+  achievements.push("🥇 Logo Rookie");
+
+if (currentStreak >= 7)
+  achievements.push("🔥 7 Day Streak");
+
+if (totalScore >= 100)
+  achievements.push("⭐ 100 Points Club");
+
+if (gamesPlayed >= 30)
+  achievements.push("🎮 Puzzle Master");
+
+if (accuracy === 100 && gamesPlayed >= 10)
+  achievements.push("🎯 Accuracy Master");
+
+if (gamesPlayed >= 100)
+  achievements.push("👑 Logo Legend");
+
+achievementList.innerHTML = "";
+
+if (achievements.length === 0) {
+
+  achievementList.innerHTML =
+  "<div class='achievement-card'>No achievements yet.</div>";
+
+} else {
+
+  achievements.forEach(item => {
+
+    achievementList.innerHTML +=
+    `<div class="achievement-card">${item}</div>`;
+
+  });
+
+}
+
 // Auth Check
 onAuthStateChanged(auth, async (user) => {
 
