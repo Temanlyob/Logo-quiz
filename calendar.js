@@ -13,6 +13,9 @@ let today = new Date();
 let currentMonth = today.getMonth();
 let currentYear = today.getFullYear();
 
+// First available puzzle
+const firstPuzzleDate = new Date(2026, 6, 27); // 27 July 2026
+
 function renderCalendar(){
 
 calendarGrid.innerHTML="";
