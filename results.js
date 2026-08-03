@@ -7,68 +7,97 @@ import {
 import {
   doc,
   getDoc,
-  setDoc,
-  serverTimestamp
+  setDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 // Buttons
 const homeBtn = document.getElementById("homeBtn");
 const calendarBtn = document.getElementById("calendarBtn");
 
-// Result Elements
+// Result UI
 const resultIcon = document.getElementById("resultIcon");
 const resultTitle = document.getElementById("resultTitle");
 const scoreValue = document.getElementById("scoreValue");
 
-// Load result
-const result = localStorage.getItem("lastResult");
-const score = Number(localStorage.getItem("lastScore")) || 0;
-const processed = localStorage.getItem("resultProcessed") === "true";
+// Last Puzzle Result
+const result =
+localStorage.getItem("lastResult");
 
-const isCorrect = result === "correct";
+const score =
+Number(localStorage.getItem("lastScore")) || 0;
 
-onAuthStateChanged(auth, async (user) => {
+const isCorrect =
+result === "correct";
 
-  if (!user) {
-    window.location.replace("login.html");
-    return;
-  }
+// Date
+const params =
+new URLSearchParams(window.location.search);
 
-  const userRef = doc(db, "users", user.uid);
+const puzzleDate =
+params.get("date") ||
+new Date().toLocaleDateString(
+"en-GB"
+).replace(/\//g,"-");
 
-  let totalScore = 0;
-  let puzzlesPlayed = 0;
-  let gamesWon = 0;
-  let gamesLost = 0;
-  let currentStreak = 0;
-  let bestStreak = 0;
+// Processed Flag
+const processedKey =
+"resultProcessed_" + puzzleDate;
 
-  const snap = await getDoc(userRef);
+const processed =
+localStorage.getItem(processedKey) === "true";
 
-  if (snap.exists()) {
+// Login
+onAuthStateChanged(auth, async(user)=>{
 
-    const d = snap.data();
+if(!user){
 
-    totalScore = d.totalScore || 0;
-    puzzlesPlayed = d.puzzlesPlayed || 0;
-    gamesWon = d.gamesWon || 0;
-    gamesLost = d.gamesLost || 0;
-    currentStreak = d.currentStreak || 0;
-    bestStreak = d.bestStreak || 0;
+window.location.replace("login.html");
+return;
 
-  }
+}
 
-  if (!processed) {
+const userRef =
+doc(db,"users",user.uid);
 
-    puzzlesPlayed++;
+// Default Values
 
-    const today = new Date().toISOString().split("T")[0];
+let totalScore=0;
+let puzzlesPlayed=0;
+let gamesWon=0;
+let gamesLost=0;
+let currentStreak=0;
+let bestStreak=0;
+let lastPlayed=null;
 
-let lastPlayed = d.lastPlayed || null;
+// Read Firestore
+
+const snap=
+await getDoc(userRef);
+
+if(snap.exists()){
+
+const d=snap.data();
+
+totalScore=d.totalScore||0;
+puzzlesPlayed=d.puzzlesPlayed||0;
+gamesWon=d.gamesWon||0;
+gamesLost=d.gamesLost||0;
+currentStreak=d.currentStreak||0;
+bestStreak=d.bestStreak||0;
+lastPlayed=d.lastPlayed||null;
+
+}
+
+// =====================================
+// Update Stats
+// =====================================
 
 if (!processed) {
 
   puzzlesPlayed++;
+
+  const today =
+  new Date().toISOString().split("T")[0];
 
   if (isCorrect) {
 
@@ -81,11 +110,16 @@ if (!processed) {
 
     } else {
 
-      const last = new Date(lastPlayed);
-      const now = new Date(today);
+      const last =
+      new Date(lastPlayed);
+
+      const now =
+      new Date(today);
 
       const diffDays =
-        Math.floor((now - last) / (1000 * 60 * 60 * 24));
+      Math.floor(
+      (now-last)/(1000*60*60*24)
+      );
 
       if (diffDays === 1) {
 
@@ -97,13 +131,12 @@ if (!processed) {
 
       }
 
-      // diffDays === 0
-      // same day → streak same
-
     }
 
     if (currentStreak > bestStreak) {
+
       bestStreak = currentStreak;
+
     }
 
   } else {
@@ -114,8 +147,11 @@ if (!processed) {
   }
 
   await setDoc(
+
     userRef,
+
     {
+
       totalScore,
       puzzlesPlayed,
       gamesWon,
@@ -123,73 +159,94 @@ if (!processed) {
       currentStreak,
       bestStreak,
       lastPlayed: today
+
     },
-    { merge: true }
+
+    {
+
+      merge:true
+
+    }
+
   );
 
   localStorage.setItem(
-    "resultProcessed",
+    processedKey,
     "true"
   );
 
 }
 
-    const today = new Date().toISOString().split("T")[0];
+// =====================================
+// Calculate Stats
+// =====================================
 
-await setDoc(
-  userRef,
-  {
-    totalScore,
-    puzzlesPlayed,
-    gamesWon,
-    gamesLost,
-    currentStreak,
-    bestStreak,
-    lastPlayed: today
-  },
-  { merge: true }
+const totalGames =
+gamesWon + gamesLost;
+
+const winRate =
+totalGames===0
+?0
+:Math.round(
+(gamesWon/totalGames)*100
 );
 
-    localStorage.setItem("resultProcessed", "true");
+// =====================================
+// Update UI
+// =====================================
 
-  }
+document.getElementById("totalGames").textContent =
+totalGames;
 
-  const totalGames = gamesWon + gamesLost;
+document.getElementById("gamesWon").textContent =
+gamesWon;
 
-  const winRate =
-    totalGames === 0
-      ? 0
-      : Math.round((gamesWon / totalGames) * 100);
+document.getElementById("gamesLost").textContent =
+gamesLost;
 
-  document.getElementById("totalGames").textContent = totalGames;
-  document.getElementById("gamesWon").textContent = gamesWon;
-  document.getElementById("gamesLost").textContent = gamesLost;
-  document.getElementById("currentStreak").textContent = currentStreak + " Days";
-  document.getElementById("bestStreak").textContent = bestStreak + " Days";
-  document.getElementById("winRate").textContent = winRate + "%";
+document.getElementById("currentStreak").textContent =
+currentStreak + " Days";
 
-  if (isCorrect) {
+document.getElementById("bestStreak").textContent =
+bestStreak + " Days";
 
-    resultIcon.innerHTML = "🏆";
-    resultTitle.innerHTML = "Today's Result";
-    scoreValue.innerHTML = "+" + score;
-    scoreValue.style.color = "#22c55e";
+document.getElementById("winRate").textContent =
+winRate + "%";
 
-  } else {
+// =====================================
+// Result Theme
+// =====================================
 
-    resultIcon.innerHTML = "❌";
-    resultTitle.innerHTML = "Better Luck Tomorrow";
-    scoreValue.innerHTML = "0";
-    scoreValue.style.color = "#ef4444";
+if (isCorrect) {
 
-  }
+  resultIcon.innerHTML = "🏆";
+  resultTitle.innerHTML = "Today's Result";
+  scoreValue.innerHTML = "+" + score;
+  scoreValue.style.color = "#22c55e";
+
+} else {
+
+  resultIcon.innerHTML = "❌";
+  resultTitle.innerHTML = "Better Luck Tomorrow";
+  scoreValue.innerHTML = "0";
+  scoreValue.style.color = "#ef4444";
+
+}
 
 });
 
-homeBtn.onclick = () => {
+// =====================================
+// Buttons
+// =====================================
+
+homeBtn.onclick = function () {
+
   window.location.href = "home.html";
+
 };
 
-calendarBtn.onclick = () => {
+calendarBtn.onclick = function () {
+
   window.location.href = "calendar.html";
-};
+
+};                   
