@@ -1,6 +1,17 @@
+import { auth, db } from "./firebase.js";
+
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+import {
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
 // ======================================
 // DAILY LOGO QUIZ
-// PART 1
 // ======================================
 
 // Cards
@@ -16,38 +27,80 @@ const badge1 = document.getElementById("badge1");
 const badge2 = document.getElementById("badge2");
 
 // Result
-const resultSection = document.getElementById("resultSection");
-const resultCircle = document.getElementById("resultCircle");
-const resultTitle = document.getElementById("resultTitle");
-const resultText = document.getElementById("resultText");
-const pointsCard = document.getElementById("pointsCard");
-const infoTitle = document.getElementById("infoTitle");
-const infoText = document.getElementById("infoText");
-const showResultsBtn = document.getElementById("showResultsBtn");
+const resultSection =
+document.getElementById("resultSection");
 
-// --------------------------------------
-// TODAY
-// --------------------------------------
+const resultCircle =
+document.getElementById("resultCircle");
 
-const params=new URLSearchParams(window.location.search);
+const resultTitle =
+document.getElementById("resultTitle");
 
-let todayKey=params.get("date");
+const resultText =
+document.getElementById("resultText");
 
-if(!todayKey){
+const pointsCard =
+document.getElementById("pointsCard");
 
-const now=new Date();
+const infoTitle =
+document.getElementById("infoTitle");
 
-const day=String(now.getDate()).padStart(2,"0");
-const month=String(now.getMonth()+1).padStart(2,"0");
-const year=String(now.getFullYear()).slice(-2);
+const infoText =
+document.getElementById("infoText");
 
-todayKey=`${day}-${month}-${year}`;
+const showResultsBtn =
+document.getElementById("showResultsBtn");
+
+// ======================================
+// Current User
+// ======================================
+
+let currentUser = null;
+
+onAuthStateChanged(auth,(user)=>{
+
+if(!user){
+
+window.location.replace("login.html");
+return;
 
 }
 
-// Image paths
+currentUser = user;
 
-// Image paths
+});
+
+// ======================================
+// Puzzle Date
+// ======================================
+
+const params =
+new URLSearchParams(window.location.search);
+
+let todayKey =
+params.get("date");
+
+if(!todayKey){
+
+const now = new Date();
+
+const day =
+String(now.getDate()).padStart(2,"0");
+
+const month =
+String(now.getMonth()+1).padStart(2,"0");
+
+const year =
+String(now.getFullYear()).slice(-2);
+
+todayKey =
+`${day}-${month}-${year}`;
+
+}
+
+// ======================================
+// Image Paths
+// ======================================
 
 const rightImage =
 `images/${todayKey}right.png`;
@@ -55,32 +108,46 @@ const rightImage =
 const wrongImage =
 `images/${todayKey}wrong.png`;
 
-console.log("todayKey =", todayKey);
-console.log("Right =", rightImage);
-console.log("Wrong =", wrongImage);
+img1.onerror = ()=>{
 
-img1.onerror = function () {
-  alert("Image 1 not found:\n" + rightImage);
+console.error(
+"Missing:",
+rightImage
+);
+
 };
 
-img2.onerror = function () {
-  alert("Image 2 not found:\n" + wrongImage);
+img2.onerror = ()=>{
+
+console.error(
+"Missing:",
+wrongImage
+);
+
 };
-// --------------------------------------
-// RANDOM POSITION
-// --------------------------------------
+
+// ======================================
+// Random Position
+// ======================================
 
 let randomPosition =
-localStorage.getItem("random_"+todayKey);
+localStorage.getItem(
+"random_"+todayKey
+);
 
 if(randomPosition===null){
 
-randomPosition=
-Math.random()<0.5 ? "left":"right";
+randomPosition =
+Math.random()<0.5
+? "left"
+: "right";
 
 localStorage.setItem(
+
 "random_"+todayKey,
+
 randomPosition
+
 );
 
 }
@@ -89,127 +156,193 @@ let correctOption;
 
 if(randomPosition==="left"){
 
-img1.src=rightImage;
-img2.src=wrongImage;
+img1.src = rightImage;
+img2.src = wrongImage;
 
-correctOption=option1;
+correctOption = option1;
 
 }else{
 
-img1.src=wrongImage;
-img2.src=rightImage;
+img1.src = wrongImage;
+img2.src = rightImage;
 
-correctOption=option2;
+correctOption = option2;
 
 }
 
-// --------------------------------------
-// ATTEMPT DATA
-// --------------------------------------
+// ======================================
+// Attempt Data
+// ======================================
 
-const saveKey=
+const saveKey =
 "quiz_"+todayKey;
 
-let savedQuiz=
+let savedQuiz =
 localStorage.getItem(saveKey);
 
-let answered=false;
+let answered = false;
 
+  // ======================================
+// Already Attempted
 // ======================================
-// PART 2
-// ONE ATTEMPT SYSTEM
-// ======================================
-
-// Already attempted?
 
 if(savedQuiz){
 
-answered=true;
+answered = true;
 
-const data=JSON.parse(savedQuiz);
+const data =
+JSON.parse(savedQuiz);
 
 restoreResult(data);
 
-option1.style.pointerEvents="none";
-option2.style.pointerEvents="none";
+option1.style.pointerEvents = "none";
+option2.style.pointerEvents = "none";
 
 }
 
-// -------------------------------
-// CLICK EVENTS
-// -------------------------------
+// ======================================
+// Click Events
+// ======================================
 
-option1.onclick=function(){
+option1.onclick = function(){
 
 checkAnswer(option1);
 
 };
 
-option2.onclick=function(){
+option2.onclick = function(){
 
 checkAnswer(option2);
 
 };
 
-// -------------------------------
-// CHECK ANSWER
-// -------------------------------
+// ======================================
+// Check Answer
+// ======================================
 
-function checkAnswer(selected){
+async function checkAnswer(selected){
 
 if(answered) return;
 
-answered=true;
+answered = true;
 
-const correct=
-selected===correctOption;
+const correct =
+selected === correctOption;
 
-const data={
+const data = {
 
-date:todayKey,
+date: todayKey,
 
-correct:correct,
+correct: correct,
 
-score:correct?10:0,
+score: correct ? 10 : 0,
 
-attempted:true
+attempted: true
 
 };
 
+// Save Local
+
 localStorage.setItem(
+
 saveKey,
+
 JSON.stringify(data)
+
 );
 
 localStorage.setItem(
+
 "lastResult",
-correct?"correct":"wrong"
+
+correct ? "correct" : "wrong"
+
 );
 
 localStorage.setItem(
+
 "lastScore",
-correct?"10":"0"
+
+correct ? "10" : "0"
+
 );
 
 localStorage.setItem(
-  "resultProcessed_" + todayKey,
-  "false"
-);
-    
-restoreResult(data);
 
-option1.style.pointerEvents="none";
-option2.style.pointerEvents="none";
+"resultProcessed_" + todayKey,
+
+"false"
+
+);
+
+// Save Firestore
+
+if(currentUser){
+
+const userRef =
+doc(db,"users",currentUser.uid);
+
+const snap =
+await getDoc(userRef);
+
+let history = {};
+
+if(snap.exists()){
+
+history =
+snap.data().history || {};
 
 }
 
-// -------------------------------
-// SHOW RESULT
-// -------------------------------
+history[todayKey] = {
+
+played: true,
+
+correct: correct,
+
+score: correct ? 10 : 0,
+
+playedAt:
+new Date().toISOString()
+
+};
+
+await setDoc(
+
+userRef,
+
+{
+
+history: history
+
+},
+
+{
+
+merge: true
+
+}
+
+);
+
+}
+
+// Restore Result
+
+restoreResult(data);
+
+option1.style.pointerEvents = "none";
+option2.style.pointerEvents = "none";
+
+  }
+
+// ======================================
+// Restore Result
+// ======================================
 
 function restoreResult(data){
 
-resultSection.style.display="block";
+resultSection.style.display = "block";
 
 if(data.correct){
 
@@ -234,19 +367,21 @@ resultTitle.innerHTML="Correct!";
 resultText.innerHTML=
 "You selected the real logo.";
 
-pointsCard.innerHTML="+10 Points ⭐";
+pointsCard.innerHTML=
+"+10 Points ⭐";
 
-infoTitle.innerHTML="Great Job!";
+infoTitle.innerHTML=
+"Great Job!";
 
 infoText.innerHTML=
 "You spotted the authentic logo.";
 
 }else{
 
-const wrong=
-correctOption===option1?
-option2:
-option1;
+const wrong =
+correctOption===option1
+? option2
+: option1;
 
 wrong.classList.add("wrong");
 
@@ -277,9 +412,11 @@ resultTitle.innerHTML="Incorrect!";
 resultText.innerHTML=
 "That wasn't the authentic logo.";
 
-pointsCard.innerHTML="0 Points";
+pointsCard.innerHTML=
+"0 Points";
 
-infoTitle.innerHTML="Correct Answer";
+infoTitle.innerHTML=
+"Correct Answer";
 
 infoText.innerHTML=
 "The highlighted logo was the original one.";
@@ -288,13 +425,181 @@ infoText.innerHTML=
 
 resultSection.scrollIntoView({
 
-behavior:"smooth"
+behavior
 
-});
+// ======================================
+// Firestore Sync (Already Played)
+// ======================================
+
+if(currentUser){
+
+try{
+
+const userRef =
+doc(db,"users",currentUser.uid);
+
+const snap =
+await getDoc(userRef);
+
+if(snap.exists()){
+
+const history =
+snap.data().history || {};
+
+if(history[todayKey]){
+
+answered = true;
+
+restoreResult(history[todayKey]);
+
+option1.style.pointerEvents = "none";
+option2.style.pointerEvents = "none";
 
 }
 
-showResultsBtn.addEventListener("click", function () {
-    window.location.href =
-`results.html?date=${todayKey}`;
+}
+
+}catch(err){
+
+console.error(err);
+
+}
+
+}
+
+// ======================================
+// Image Preload
+// ======================================
+
+const preloadRight =
+new Image();
+
+preloadRight.src =
+rightImage;
+
+const preloadWrong =
+new Image();
+
+preloadWrong.src =
+wrongImage;
+
+// ======================================
+// Disable Browser Drag
+// ======================================
+
+img1.draggable = false;
+img2.draggable = false;
+
+img1.oncontextmenu = () => false;
+img2.oncontextmenu = () => false;
+
+// ======================================
+// Prevent Text Selection
+// ======================================
+
+document.body.style.userSelect = "none";
+document.body.style.webkitUserSelect = "none";
+
+// ======================================
+// End Of File
+// ======================================
+
+// ======================================
+// Reset Daily Process Flag
+// ======================================
+
+window.addEventListener("pageshow",()=>{
+
+const key =
+"resultProcessed_"+todayKey;
+
+if(!localStorage.getItem(key)){
+
+localStorage.setItem(
+key,
+"false"
+);
+
+}
+
 });
+
+// ======================================
+// Reset Card Styles
+// ======================================
+
+function resetCards(){
+
+option1.classList.remove(
+"correct",
+"wrong"
+);
+
+option2.classList.remove(
+"correct",
+"wrong"
+);
+
+badge1.style.display="none";
+badge2.style.display="none";
+
+}
+
+// ======================================
+// Browser Back Support
+// ======================================
+
+window.addEventListener("popstate",()=>{
+
+location.reload();
+
+});
+
+// ======================================
+// Visibility Change
+// ======================================
+
+document.addEventListener(
+"visibilitychange",
+()=>{
+
+if(document.visibilityState==="visible"){
+
+console.log(
+"Puzzle Active:",
+todayKey
+);
+
+}
+
+}
+);
+
+// ======================================
+// Keyboard Support
+// ======================================
+
+document.addEventListener(
+"keydown",
+(e)=>{
+
+if(answered) return;
+
+if(e.key==="ArrowLeft"){
+
+checkAnswer(option1);
+
+}
+
+if(e.key==="ArrowRight"){
+
+checkAnswer(option2);
+
+}
+
+}
+);
+
+// ======================================
+// End
+// ======================================
