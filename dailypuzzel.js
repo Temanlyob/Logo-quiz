@@ -295,5 +295,6 @@ behavior:"smooth"
 }
 
 showResultsBtn.addEventListener("click", function () {
-    window.location.href = "results.html";
+    window.location.href =
+`results.html?date=${todayKey}`;
 });
