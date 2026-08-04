@@ -33,15 +33,26 @@
 
 <section class="profile-card">
 
-<img src="default-avatar.png" class="avatar">
+<img
+id="profilePhoto"
+src="default-avatar.png"
+class="avatar">
 
-<h2 id="username">Guest User</h2>
+<h2 id="username">
 
-<p>Logo Quiz Player</p>
+Loading...
+
+</h2>
+
+<p id="profileEmail">
+
+Loading...
+
+</p>
 
 <div class="level">
 
-⭐ Level 3
+⭐ Level 1
 
 </div>
 
@@ -53,7 +64,7 @@
 
 <div class="icon">🏆</div>
 
-<h3 id="score">180</h3>
+<h3 id="score">0</h3>
 
 <p>Total Score</p>
 
@@ -63,7 +74,7 @@
 
 <div class="icon">🔥</div>
 
-<h3 id="streak">8</h3>
+<h3 id="streak">0</h3>
 
 <p>Current Streak</p>
 
@@ -73,7 +84,7 @@
 
 <div class="icon">🎯</div>
 
-<h3 id="accuracy">92%</h3>
+<h3 id="accuracy">0%</h3>
 
 <p>Accuracy</p>
 
@@ -83,7 +94,7 @@
 
 <div class="icon">🧩</div>
 
-<h3 id="played">25</h3>
+<h3 id="played">0</h3>
 
 <p>Puzzles Played</p>
 
@@ -91,57 +102,29 @@
 
 </section>
 
-<!-- Achievements -->
-
-<section class="achievement-section">
+  <section class="achievement-section">
 
 <h2>Achievements</h2>
 
-<div class="achievement-item">
-
-<span>🥇</span>
-
-<div>
-
-<h3>Logo Rookie</h3>
-
-<p>Completed your first puzzle.</p>
-
-</div>
-
-</div>
+<div id="achievementList">
 
 <div class="achievement-item">
 
-<span>🔥</span>
+<span>🔒</span>
 
 <div>
 
-<h3>7 Day Streak</h3>
+<h3>No Achievements Yet</h3>
 
-<p>Solved puzzles for 7 consecutive days.</p>
-
-</div>
+<p>Keep playing to unlock achievements.</p>
 
 </div>
-
-<div class="achievement-item">
-
-<span>⭐</span>
-
-<div>
-
-<h3>100 Points Club</h3>
-
-<p>Earned more than 100 points.</p>
 
 </div>
 
 </div>
 
 </section>
-
-<!-- Settings -->
 
 <section class="settings-section">
 
@@ -189,19 +172,17 @@
 
 </section>
 
-<!-- Logout -->
+  <section class="logout-section">
 
-<section class="logout-section">
-
-<button class="logout-btn">
+<button
+id="logoutBtn"
+class="logout-btn">
 
 🚪 Logout
 
 </button>
 
 </section>
-
-<!-- Bottom Navigation -->
 
 <nav class="bottom-nav">
 
@@ -239,7 +220,7 @@
 
 </nav>
 
-</div>
+  </div>
 
 <script type="module" src="profile.js"></script>
 
