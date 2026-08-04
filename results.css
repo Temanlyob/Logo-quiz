@@ -262,3 +262,65 @@ font-size:16px;
 }
 
 }
+
+.bottom-nav{
+
+position:fixed;
+
+left:0;
+
+right:0;
+
+bottom:0;
+
+background:#fff;
+
+display:flex;
+
+justify-content:space-around;
+
+align-items:center;
+
+padding:12px 0;
+
+box-shadow:0 -5px 20px rgba(0,0,0,.08);
+
+z-index:999;
+
+}
+
+.bottom-nav a{
+
+text-decoration:none;
+
+color:#64748b;
+
+display:flex;
+
+flex-direction:column;
+
+align-items:center;
+
+font-size:14px;
+
+font-weight:600;
+
+}
+
+.bottom-nav a span{
+
+margin-top:4px;
+
+}
+
+.bottom-nav a.active{
+
+color:#22c55e;
+
+}
+
+.container{
+
+padding-bottom:110px;
+
+}
