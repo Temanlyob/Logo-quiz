@@ -1,96 +1,241 @@
 import { auth, db } from "./firebase.js";
 
 import {
-  onAuthStateChanged,
-  signOut
+onAuthStateChanged,
+signOut
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 import {
-  doc,
-  getDoc
+doc,
+getDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
+// =============================
 // Elements
-const profileName = document.getElementById("profileName");
-const profileEmail = document.getElementById("profileEmail");
-const profilePhoto = document.getElementById("profilePhoto");
-const logoutBtn = document.getElementById("logoutBtn");
+// =============================
 
-// Auth Check
-onAuthStateChanged(auth, async (user) => {
+const avatar =
+document.querySelector(".avatar");
 
-  if (!user) {
-    window.location.replace("login.html");
-    return;
-  }
+const username =
+document.getElementById("username");
 
-  try {
+const score =
+document.getElementById("score");
 
-    const snap = await getDoc(doc(db, "users", user.uid));
+const streak =
+document.getElementById("streak");
 
-    let data = {};
+const accuracy =
+document.getElementById("accuracy");
 
-    if (snap.exists()) {
-      data = snap.data();
-    }
+const played =
+document.getElementById("played");
 
-    // Username
-    if (profileName) {
-      profileName.textContent =
-        data.username ||
-        user.displayName ||
-        "User";
-    }
+const level =
+document.querySelector(".level");
 
-    // Email
-    if (profileEmail) {
-      profileEmail.textContent =
-        data.email ||
-        user.email ||
-        "";
-    }
+const logoutBtn =
+document.querySelector(".logout-btn");
 
-    // Profile Photo
-    if (profilePhoto) {
+const achievementSection =
+document.querySelector(".achievement-section");
 
-      if (data.photoURL) {
+// =============================
+// Firebase
+// =============================
 
-        profilePhoto.src = data.photoURL;
+onAuthStateChanged(auth, async(user)=>{
 
-      } else if (user.photoURL) {
+if(!user){
 
-        profilePhoto.src = user.photoURL;
-
-      }
-
-    }
-
-  } catch (err) {
-
-    console.error(err);
-    alert(err.message);
-
-  }
-
-});
-
-// Logout
-if (logoutBtn) {
-
-  logoutBtn.addEventListener("click", async () => {
-
-    try {
-
-      await signOut(auth);
-      window.location.replace("login.html");
-
-    } catch (err) {
-
-      console.error(err);
-      alert(err.message);
-
-    }
-
-  });
+window.location.replace("login.html");
+return;
 
 }
+
+const snap =
+await getDoc(
+doc(db,"users",user.uid)
+);
+
+if(!snap.exists()) return;
+
+const data =
+snap.data();
+username.textContent =
+data.username || user.displayName || "User";
+
+if(avatar){
+
+avatar.src =
+data.photoURL ||
+user.photoURL ||
+"default-avatar.png";
+
+}
+
+const totalScore =
+data.totalScore ?? 0;
+
+const currentStreak =
+data.currentStreak ?? 0;
+
+const gamesWon =
+data.gamesWon ?? 0;
+
+const gamesLost =
+data.gamesLost ?? 0;
+
+const puzzlesPlayed =
+data.puzzlesPlayed ?? 0;
+
+const gamesPlayed =
+gamesWon + gamesLost;
+
+const winRate =
+gamesPlayed===0
+?0
+:Math.round(
+(gamesWon/gamesPlayed)*100
+);
+
+score.textContent =
+totalScore;
+
+streak.textContent =
+currentStreak;
+
+accuracy.textContent =
+winRate + "%";
+
+played.textContent =
+puzzlesPlayed;
+
+// =============================
+// Level
+// =============================
+
+let levelText="⭐ Level 1";
+
+if(totalScore>=1000){
+
+levelText="👑 Level 5";
+
+}else if(totalScore>=500){
+
+levelText="💎 Level 4";
+
+}else if(totalScore>=250){
+
+levelText="🥇 Level 3";
+
+}else if(totalScore>=100){
+
+levelText="🥈 Level 2";
+
+}
+
+level.textContent=
+levelText;
+  
+          // =============================
+// Achievements
+// =============================
+
+let html="";
+
+if(gamesPlayed>=1){
+
+html+=`
+<div class="achievement-item">
+<span>🥇</span>
+<div>
+<h3>Logo Rookie</h3>
+<p>Completed your first puzzle.</p>
+</div>
+</div>`;
+
+}
+
+if(currentStreak>=7){
+
+html+=`
+<div class="achievement-item">
+<span>🔥</span>
+<div>
+<h3>7 Day Streak</h3>
+<p>Solved puzzles for 7 consecutive days.</p>
+</div>
+</div>`;
+
+}
+
+if(totalScore>=100){
+
+html+=`
+<div class="achievement-item">
+<span>⭐</span>
+<div>
+<h3>100 Points Club</h3>
+<p>Earned 100+ points.</p>
+</div>
+</div>`;
+
+}
+
+if(gamesPlayed>=30){
+
+html+=`
+<div class="achievement-item">
+<span>🎮</span>
+<div>
+<h3>Puzzle Master</h3>
+<p>Played 30 puzzles.</p>
+</div>
+</div>`;
+
+}
+
+if(winRate===100 && gamesPlayed>=10){
+
+html+=`
+<div class="achievement-item">
+<span>🎯</span>
+<div>
+<h3>Accuracy Master</h3>
+<p>100% accuracy in 10 games.</p>
+</div>
+</div>`;
+
+}
+
+if(html===""){
+
+html=`
+<div class="achievement-item">
+<span>🔒</span>
+<div>
+<h3>No Achievements Yet</h3>
+<p>Keep playing to unlock achievements.</p>
+</div>
+</div>`;
+
+}
+
+achievementSection.innerHTML=
+"<h2>Achievements</h2>"+html;
+
+// =============================
+// Logout
+// =============================
+
+logoutBtn.onclick=async()=>{
+
+await signOut(auth);
+
+window.location.replace("login.html");
+
+};
+
+});         
