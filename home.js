@@ -1,5 +1,8 @@
 import { auth, db } from "./firebase.js";
 
+import { getTranslation } from "./translations.js";
+import { LANGUAGES } from "./languages.js";
+
 import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
@@ -50,6 +53,65 @@ onAuthStateChanged(auth, async (user) => {
 
     const data = snap.data();
 
+    const language =
+localStorage.getItem("language") || "en";
+
+const t =
+getTranslation(language);
+
+// Today's Puzzle Heading
+const heading =
+document.querySelector(".hero h1");
+
+if(heading)
+heading.textContent =
+t.todaysPuzzle;
+
+// Stats Labels
+const statLabels =
+document.querySelectorAll(".stats-card p, .stat-card p");
+
+if(statLabels.length >= 3){
+
+statLabels[0].textContent =
+t.totalScore;
+
+statLabels[1].textContent =
+t.currentStreak;
+
+statLabels[2].textContent =
+t.accuracy;
+
+}
+
+// Achievement Title
+const achievementTitle =
+document.querySelector(".achievement-section h2");
+
+if(achievementTitle){
+
+achievementTitle.textContent =
+t.achievements;
+
+}
+    
+    // Bottom Navigation
+document.querySelectorAll(".bottom-nav span")[0].textContent =
+t.home;
+
+document.querySelectorAll(".bottom-nav span")[1].textContent =
+t.calendar;
+
+document.querySelectorAll(".bottom-nav span")[2].textContent =
+t.results;
+
+document.querySelectorAll(".bottom-nav span")[3].textContent =
+t.profile;
+
+// Play Button
+playBtn.textContent =
+t.playNow;
+
     const totalScore =
     data.totalScore ?? 0;
 
@@ -88,22 +150,22 @@ gamesPlayed - gamesWon;
     const achievements = [];
 
     if (gamesPlayed >= 1)
-      achievements.push("🥇 Logo Rookie");
-
+      achievements.push("🥇 " + t.logoRookie);
+    
     if (currentStreak >= 7)
-      achievements.push("🔥 7 Day Streak");
+      achievements.push("🔥 " + t.sevenDay);
 
     if (totalScore >= 100)
-      achievements.push("⭐ 100 Points Club");
+      achievements.push("⭐ " + t.pointsClub);
 
     if (gamesPlayed >= 30)
-      achievements.push("🎮 Puzzle Master");
+      achievements.push("🎮 " + t.puzzleMaster);
 
     if (accuracy === 100 && gamesPlayed >= 10)
-      achievements.push("🎯 Accuracy Master");
+      achievements.push("🎯 " + t.accuracyMaster);
 
     if (gamesPlayed >= 100)
-      achievements.push("👑 Logo Legend");
+      achievements.push("👑 " + t.logoLegend);
 
     achievementList.innerHTML = "";
 
