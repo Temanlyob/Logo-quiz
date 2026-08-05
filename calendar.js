@@ -78,8 +78,13 @@ cell.classList.add("wrong-day");
 if(
 day===today.getDate() &&
 currentMonth===today.getMonth() &&
-currentYear===today.getFullYear()
+currentYear===today.getFullYear() &&
+!quiz
 ){
+
+cell.classList.add("today");
+
+}{
 
 cell.classList.add("today");
 
