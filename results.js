@@ -150,6 +150,8 @@ if (!processed) {
     Number(puzzle[0])
   );
 
+  puzzlesPlayed++;
+
   if (isCorrect) {
 
     gamesWon++;
