@@ -252,7 +252,7 @@ accuracyMaster:"Mestre da Precisão"
 
 },
 
-  zhCN:{
+  zh-CN:{
 
 home:"首页",
 calendar:"日历",
