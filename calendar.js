@@ -46,6 +46,53 @@ localStorage.getItem("language") || "en";
 const t =
 getTranslation(language);
 
+// Page Title
+
+document.querySelector(".top h1").textContent =
+"📅 " + t.calendar;
+
+document.querySelector(".top p").textContent =
+t.playPreviousPuzzles || "Play previous daily logo puzzles";
+
+// Week Days
+
+const weekDays = {
+
+en:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
+
+hi:["रवि","सोम","मंगल","बुध","गुरु","शुक्र","शनि"],
+
+gu:["રવિ","સોમ","મંગળ","બુધ","ગુરુ","શુક્ર","શનિ"]
+
+};
+
+const days =
+weekDays[language] ||
+weekDays.en;
+
+document
+.querySelectorAll(".weekdays span")
+.forEach((item,index)=>{
+
+item.textContent =
+days[index];
+
+});
+
+// Legend
+
+const legend =
+document.querySelectorAll(".legend-item span");
+
+legend[0].textContent =
+t.solved || "Solved";
+
+legend[1].textContent =
+t.today || "Today";
+
+legend[2].textContent =
+t.notPlayed || "Not Played";
+
 // Bottom Navigation
 
 const nav =
