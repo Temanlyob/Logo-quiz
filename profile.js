@@ -91,8 +91,14 @@ const puzzlesPlayed =
 data.puzzlesPlayed ?? 0;
 
 const gamesPlayed =
-gamesWon + gamesLost;
+data.puzzlesPlayed ?? 0;
 
+const winRate =
+gamesPlayed === 0
+? 0
+: Math.round(
+(gamesWon / gamesPlayed) * 100
+);
 const winRate =
 gamesPlayed===0
 ?0
