@@ -1,5 +1,7 @@
 import { auth, db } from "./firebase.js";
 
+import { getTranslation } from "./translations.js";
+
 import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
@@ -84,6 +86,26 @@ return;
 
 const userRef =
 doc(db,"users",user.uid);
+
+const language =
+localStorage.getItem("language") || "en";
+
+const t =
+getTranslation(language);
+
+// Bottom Navigation
+
+const nav =
+document.querySelectorAll(".bottom-nav span");
+
+if(nav.length >= 4){
+
+nav[0].textContent = t.home;
+nav[1].textContent = t.calendar;
+nav[2].textContent = t.results;
+nav[3].textContent = t.profile;
+
+}
 
 // =====================================
 // Default Values
@@ -282,14 +304,15 @@ winRate + "%";
 if (isCorrect) {
 
   resultIcon.innerHTML = "🏆";
-  resultTitle.innerHTML = "Today's Result";
+  resultTitle.innerHTML = t.todaysResult || "Today's Result";
   scoreValue.innerHTML = "+" + score;
   scoreValue.style.color = "#22c55e";
 
 } else {
 
   resultIcon.innerHTML = "❌";
-  resultTitle.innerHTML = "Better Luck Tomorrow";
+  resultTitle.innerHTML =
+t.betterLuckTomorrow || "Better Luck Tomorrow";
   scoreValue.innerHTML = "0";
   scoreValue.style.color = "#ef4444";
 
