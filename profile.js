@@ -99,12 +99,6 @@ gamesPlayed === 0
 : Math.round(
 (gamesWon / gamesPlayed) * 100
 );
-const winRate =
-gamesPlayed===0
-?0
-:Math.round(
-(gamesWon/gamesPlayed)*100
-);
 
 score.textContent =
 totalScore;
