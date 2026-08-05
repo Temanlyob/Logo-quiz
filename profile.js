@@ -15,10 +15,13 @@ getDoc
 // =============================
 
 const avatar =
-document.querySelector(".avatar");
+document.getElementById("profilePhoto");
 
 const username =
 document.getElementById("username");
+
+const email =
+document.getElementById("profileEmail");
 
 const score =
 document.getElementById("score");
@@ -61,8 +64,8 @@ doc(db,"users",user.uid)
 
 if(!snap.exists()){
 
-alert("Firestore document not found");
-
+username.textContent="User";
+email.textContent="";
 return;
 
 }
@@ -70,16 +73,19 @@ return;
 const data =
 snap.data();
 username.textContent =
-data.username || user.displayName || "User";
+data.username ||
+user.displayName ||
+"User";
 
-if(avatar){
+email.textContent =
+data.email ||
+user.email ||
+"";
 
 avatar.src =
 data.photoURL ||
 user.photoURL ||
 "default-avatar.png";
-
-}
 
 const totalScore =
 data.totalScore ?? 0;
@@ -93,17 +99,14 @@ data.gamesWon ?? 0;
 const gamesLost =
 data.gamesLost ?? 0;
 
-const gamesPlayed =
+const puzzlesPlayed =
 data.puzzlesPlayed ?? 0;
 
-played.textContent =
-gamesPlayed;
-  
 const winRate =
-gamesPlayed === 0
+puzzlesPlayed === 0
 ? 0
 : Math.round(
-(gamesWon / gamesPlayed) * 100
+(gamesWon / puzzlesPlayed) * 100
 );
 
 score.textContent =
@@ -122,38 +125,37 @@ puzzlesPlayed;
 // Level
 // =============================
 
-let levelText="⭐ Level 1";
+let levelText = "⭐ Level 1";
 
-if(totalScore>=1000){
+if(totalScore >= 1000){
 
-levelText="👑 Level 5";
+levelText = "👑 Level 5";
 
-}else if(totalScore>=500){
+}else if(totalScore >= 500){
 
-levelText="💎 Level 4";
+levelText = "💎 Level 4";
 
-}else if(totalScore>=250){
+}else if(totalScore >= 250){
 
-levelText="🥇 Level 3";
+levelText = "🥇 Level 3";
 
-}else if(totalScore>=100){
+}else if(totalScore >= 100){
 
-levelText="🥈 Level 2";
+levelText = "🥈 Level 2";
 
 }
 
-level.textContent=
-levelText;
-  
-          // =============================
+level.textContent = levelText;
+
+// =============================
 // Achievements
 // =============================
 
-let html="";
+let html = "";
 
-if(gamesPlayed>=1){
+if(puzzlesPlayed >= 1){
 
-html+=`
+html += `
 <div class="achievement-item">
 <span>🥇</span>
 <div>
@@ -164,9 +166,9 @@ html+=`
 
 }
 
-if(currentStreak>=7){
+if(currentStreak >= 7){
 
-html+=`
+html += `
 <div class="achievement-item">
 <span>🔥</span>
 <div>
@@ -177,9 +179,9 @@ html+=`
 
 }
 
-if(totalScore>=100){
+if(totalScore >= 100){
 
-html+=`
+html += `
 <div class="achievement-item">
 <span>⭐</span>
 <div>
@@ -190,9 +192,9 @@ html+=`
 
 }
 
-if(gamesPlayed>=30){
+if(puzzlesPlayed >= 30){
 
-html+=`
+html += `
 <div class="achievement-item">
 <span>🎮</span>
 <div>
@@ -203,22 +205,22 @@ html+=`
 
 }
 
-if(winRate===100 && gamesPlayed>=10){
+if(winRate === 100 && puzzlesPlayed >= 10){
 
-html+=`
+html += `
 <div class="achievement-item">
 <span>🎯</span>
 <div>
 <h3>Accuracy Master</h3>
-<p>100% accuracy in 10 games.</p>
+<p>100% accuracy in 10 puzzles.</p>
 </div>
 </div>`;
 
 }
 
-if(html===""){
+if(html === ""){
 
-html=`
+html = `
 <div class="achievement-item">
 <span>🔒</span>
 <div>
@@ -229,14 +231,14 @@ html=`
 
 }
 
-achievementSection.innerHTML=
-"<h2>Achievements</h2>"+html;
+achievementSection.innerHTML =
+"<h2>Achievements</h2>" + html;
 
 // =============================
 // Logout
 // =============================
 
-logoutBtn.onclick=async()=>{
+logoutBtn.onclick = async () => {
 
 await signOut(auth);
 
@@ -244,4 +246,4 @@ window.location.replace("login.html");
 
 };
 
-});         
+});           
