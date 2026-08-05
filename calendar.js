@@ -84,10 +84,6 @@ currentYear===today.getFullYear() &&
 
 cell.classList.add("today");
 
-}{
-
-cell.classList.add("today");
-
 }
 
 if(thisDate < firstPuzzleDate){
