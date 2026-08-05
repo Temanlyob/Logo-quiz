@@ -42,6 +42,10 @@ today:"Today",
 
 notPlayed:"Not Played",
 
+todaysResult:"Today's Result",
+
+betterLuckTomorrow:"Better Luck Tomorrow",
+
 },
 
   hi:{
@@ -86,6 +90,10 @@ today:"आज",
 
 notPlayed:"नहीं खेला",
 
+todaysResult:"आज का परिणाम",
+
+betterLuckTomorrow:"कल फिर कोशिश करें",
+
 },
 
 gu:{
@@ -129,6 +137,10 @@ solved:"પૂર્ણ",
 today:"આજે",
 
 notPlayed:"રમાયું નથી",
+
+todaysResult:"આજનું પરિણામ",
+
+betterLuckTomorrow:"કાલે ફરી પ્રયાસ કરો",
 
 },
 
