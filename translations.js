@@ -34,6 +34,14 @@ pointsClub:"100 Points Club",
 puzzleMaster:"Puzzle Master",
 accuracyMaster:"Accuracy Master"
 
+playPreviousPuzzles:"Play previous daily logo puzzles",
+
+solved:"Solved",
+
+today:"Today",
+
+notPlayed:"Not Played",
+
 },
 
   hi:{
@@ -70,6 +78,14 @@ pointsClub:"100 अंक क्लब",
 puzzleMaster:"पज़ल मास्टर",
 accuracyMaster:"सटीकता मास्टर"
 
+playPreviousPuzzles:"पिछली दैनिक लोगो पहेलियाँ खेलें",
+
+solved:"हल किया",
+
+today:"आज",
+
+notPlayed:"नहीं खेला",
+
 },
 
 gu:{
@@ -105,6 +121,14 @@ sevenDay:"7 દિવસની સ્ટ્રીક",
 pointsClub:"100 પોઈન્ટ્સ ક્લબ",
 puzzleMaster:"પઝલ માસ્ટર",
 accuracyMaster:"ચોકસાઈ માસ્ટર"
+
+playPreviousPuzzles:"પહેલાની દૈનિક લોગો પહેલી રમો",
+
+solved:"પૂર્ણ",
+
+today:"આજે",
+
+notPlayed:"રમાયું નથી",
 
 },
 
