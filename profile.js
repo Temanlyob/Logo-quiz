@@ -87,25 +87,55 @@ data.photoURL ||
 user.photoURL ||
 "default-avatar.png";
 
+function getCalendarStats() {
+
+  let played = 0;
+  let won = 0;
+
+  for (let key in localStorage) {
+
+    if (key.startsWith("quiz_")) {
+
+      const quiz = JSON.parse(localStorage.getItem(key));
+
+      if (quiz) {
+
+        played++;
+
+        if (quiz.correct) {
+
+          won++;
+
+        }
+
+      }
+
+    }
+
+  }
+
+  return {
+    played,
+    won,
+    lost: played - won
+  };
+
+}
+
 const totalScore =
 data.totalScore ?? 0;
 
 const currentStreak =
 data.currentStreak ?? 0;
 
-const history =
-data.history ?? {};
+const stats = getCalendarStats();
 
-const puzzlesPlayed =
-Object.keys(history).length;
+const puzzlesPlayed = stats.played;
 
-const gamesWon =
-Object.values(history)
-.filter(item => item.correct === true)
-.length;
+const gamesWon = stats.won;
 
-const gamesLost =
-puzzlesPlayed - gamesWon;
+const gamesLost = stats.lost;
+  
 const winRate =
 puzzlesPlayed === 0
 ? 0
