@@ -87,17 +87,11 @@ data.gamesWon ?? 0;
 const gamesLost =
 data.gamesLost ?? 0;
 
-const puzzlesPlayed =
-data.puzzlesPlayed ?? 0;
-
 const gamesPlayed =
 data.puzzlesPlayed ?? 0;
 
-const puzzlesPlayed =
-data.puzzlesPlayed ?? 0;
-
 played.textContent =
-puzzlesPlayed;
+gamesPlayed;
   
 const winRate =
 gamesPlayed === 0
