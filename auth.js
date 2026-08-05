@@ -25,22 +25,16 @@ async function createUserDocument(user, username = null) {
     const userRef = doc(db, "users", user.uid);
 
     await setDoc(
-      userRef,
-      {
-        uid: user.uid,
-        username: username || user.displayName || "User",
-        email: user.email || "",
-        photoURL: user.photoURL || "",
-        totalScore: 0,
-        puzzlesPlayed: 0,
-        gamesWon: 0,
-        gamesLost: 0,
-        currentStreak: 0,
-        bestStreak: 0,
-        createdAt: serverTimestamp()
-      },
-      { merge: true }
-    );
+  userRef,
+  {
+    uid: user.uid,
+    username: username || user.displayName || "User",
+    email: user.email || "",
+    photoURL: user.photoURL || "",
+    createdAt: serverTimestamp()
+  },
+  { merge: true }
+);
 
     return true;
 
