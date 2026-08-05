@@ -63,8 +63,8 @@ onAuthStateChanged(auth, async (user) => {
     data.gamesLost ?? 0;
 
     const gamesPlayed =
-    gamesWon + gamesLost;
-
+data.puzzlesPlayed ?? 0;
+    
     const accuracy =
     gamesPlayed === 0
     ? 0
