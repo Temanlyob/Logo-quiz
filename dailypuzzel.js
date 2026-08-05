@@ -1,5 +1,7 @@
 import { auth, db } from "./firebase.js";
 
+import { getTranslation } from "./translations.js";
+
 import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
@@ -116,6 +118,12 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     currentUser = user;
+
+  const language =
+localStorage.getItem("language") || "en";
+
+const t =
+getTranslation(language);
 
     // Check Firestore if not already answered locally
     if (!answered) {
@@ -239,12 +247,14 @@ function restoreResult(data) {
         }
 
         if (resultCircle) resultCircle.innerHTML = "✅";
-        if (resultTitle) resultTitle.innerHTML = "Correct!";
-        if (resultText) resultText.innerHTML = "You selected the real logo.";
+        if (resultTitle) resultTitle.innerHTML = t.correct;";
+        if (resultText) resultText.innerHTML =
+t.selectedRealLogo || "You selected the real logo.";
         if (pointsCard) pointsCard.innerHTML = "+10 Points ⭐";
 
-        if (infoTitle) infoTitle.innerHTML = "Great Job!";
-        if (infoText) infoText.innerHTML = "You spotted the authentic logo.";
+        if (infoTitle) infoTitle.innerHTML = t.greatJob;";
+        if (infoText) infoText.innerHTML =
+t.spottedLogo || "You spotted the authentic logo.";
     } else {
         const wrongOption = correctOption === option1 ? option2 : option1;
 
@@ -264,12 +274,15 @@ function restoreResult(data) {
         }
 
         if (resultCircle) resultCircle.innerHTML = "❌";
-        if (resultTitle) resultTitle.innerHTML = "Incorrect!";
-        if (resultText) resultText.innerHTML = "That wasn't the authentic logo.";
+        if (resultTitle) resultTitle.innerHTML = t.incorrect;";
+        if (resultText) resultText.innerHTML =
+t.wrongLogo || "That wasn't the authentic logo.";
         if (pointsCard) pointsCard.innerHTML = "0 Points";
 
-        if (infoTitle) infoTitle.innerHTML = "Correct Answer";
-        if (infoText) infoText.innerHTML = "The highlighted logo was the original one.";
+        if (infoTitle) infoTitle.innerHTML =
+t.correctAnswer || "Correct Answer";
+        if (infoText) infoText.innerHTML =
+t.originalLogo || "The highlighted logo was the original one.";
     }
 
     if (resultSection) {
@@ -278,6 +291,12 @@ function restoreResult(data) {
         });
     }
 }
+
+const language =
+localStorage.getItem("language") || "en";
+
+const t =
+getTranslation(language);
 
 // ======================================
 // Show Results Button Event
