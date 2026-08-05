@@ -112,15 +112,19 @@ snap.data();
 totalScore =
 data.totalScore ?? 0;
 
+const history =
+data.history ?? {};
+
 puzzlesPlayed =
-data.puzzlesPlayed ?? 0;
+Object.keys(history).length;
 
 gamesWon =
-data.gamesWon ?? 0;
+Object.values(history)
+.filter(item => item.correct === true)
+.length;
 
 gamesLost =
-data.gamesLost ?? 0;
-
+puzzlesPlayed - gamesWon;
 currentStreak =
 data.currentStreak ?? 0;
 
@@ -137,8 +141,6 @@ data.lastPlayed ?? null;
 // =====================================
 
 if (!processed) {
-
-  puzzlesPlayed++;
 
   const puzzle =
   puzzleDate.split("-");
