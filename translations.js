@@ -34,7 +34,7 @@ pointsClub:"100 Points Club",
 puzzleMaster:"Puzzle Master",
 accuracyMaster:"Accuracy Master"
 
-}
+},
 
   hi:{
 
