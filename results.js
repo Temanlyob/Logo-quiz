@@ -152,11 +152,8 @@ if (!processed) {
     Number(puzzle[0])
   );
 
-  puzzlesPlayed++;
-
   if (isCorrect) {
 
-    gamesWon++;
     totalScore += score;
 
     if (!lastPlayed) {
@@ -197,27 +194,23 @@ if (!processed) {
 
   } else {
 
-    gamesLost++;
     currentStreak = 0;
 
   }
 
   await setDoc(
-
-    userRef,
-
-    {
-
-      totalScore,
-      puzzlesPlayed,
-      gamesWon,
-      gamesLost,
-      currentStreak,
-      bestStreak,
-      lastPlayed:
-      puzzleDateObj.toISOString()
-
-    },
+userRef,
+{
+  totalScore,
+  currentStreak,
+  bestStreak,
+  lastPlayed:
+  puzzleDateObj.toISOString()
+},
+{
+  merge:true
+}
+);
 
     {
 
