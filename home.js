@@ -56,14 +56,19 @@ onAuthStateChanged(auth, async (user) => {
     const currentStreak =
     data.currentStreak ?? 0;
 
-    const gamesWon =
-    data.gamesWon ?? 0;
+    const history =
+data.history ?? {};
 
-    const gamesLost =
-    data.gamesLost ?? 0;
+const gamesPlayed =
+Object.keys(history).length;
 
-    const gamesPlayed =
-data.puzzlesPlayed ?? 0;
+const gamesWon =
+Object.values(history)
+.filter(item => item.correct === true)
+.length;
+
+const gamesLost =
+gamesPlayed - gamesWon;
     
     const accuracy =
     gamesPlayed === 0
