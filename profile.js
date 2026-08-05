@@ -93,15 +93,19 @@ data.totalScore ?? 0;
 const currentStreak =
 data.currentStreak ?? 0;
 
-const gamesWon =
-data.gamesWon ?? 0;
-
-const gamesLost =
-data.gamesLost ?? 0;
+const history =
+data.history ?? {};
 
 const puzzlesPlayed =
-data.puzzlesPlayed ?? 0;
+Object.keys(history).length;
 
+const gamesWon =
+Object.values(history)
+.filter(item => item.correct === true)
+.length;
+
+const gamesLost =
+puzzlesPlayed - gamesWon;
 const winRate =
 puzzlesPlayed === 0
 ? 0
