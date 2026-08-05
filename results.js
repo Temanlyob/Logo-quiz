@@ -235,13 +235,13 @@ if (!processed) {
 // =====================================
 
 const totalGames =
-gamesWon + gamesLost;
+puzzlesPlayed;
 
 const winRate =
-totalGames === 0
+puzzlesPlayed === 0
 ? 0
 : Math.round(
-(gamesWon / totalGames) * 100
+(gamesWon / puzzlesPlayed) * 100
 );
 
 // =====================================
@@ -251,7 +251,7 @@ totalGames === 0
 document.getElementById(
 "totalGames"
 ).textContent =
-totalGames;
+puzzlesPlayed;
 
 document.getElementById(
 "gamesWon"
