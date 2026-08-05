@@ -93,6 +93,54 @@ return;
 
 const data =
 snap.data();
+
+const language =
+localStorage.getItem("language") || "en";
+
+const t =
+getTranslation(language);
+
+// Page title
+document.querySelector(".top h1").textContent =
+t.profile;
+
+// Stats labels
+document.querySelectorAll(".stat-card p")[0].textContent =
+t.totalScore;
+
+document.querySelectorAll(".stat-card p")[1].textContent =
+t.currentStreak;
+
+document.querySelectorAll(".stat-card p")[2].textContent =
+t.accuracy;
+
+document.querySelectorAll(".stat-card p")[3].textContent =
+t.puzzlesPlayed;
+
+// Settings title
+document.querySelector(".settings-section h2").textContent =
+t.settings;
+
+// Setting names
+const settingNames =
+document.querySelectorAll(".setting-item span:nth-child(2)");
+
+settingNames[0].textContent =
+t.language;
+
+settingNames[1].textContent =
+t.darkMode;
+
+settingNames[2].textContent =
+t.notifications;
+
+settingNames[3].textContent =
+t.about;
+
+// Logout
+logoutBtn.textContent =
+"🚪 " + t.logout;
+  
 username.textContent =
 data.username ||
 user.displayName ||
@@ -287,7 +335,7 @@ html = `
 }
 
 achievementSection.innerHTML =
-"<h2>Achievements</h2>" + html;
+`<h2>${t.achievements}</h2>` + html;
 
 // =============================
 // Logout
