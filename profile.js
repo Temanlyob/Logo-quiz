@@ -59,7 +59,13 @@ await getDoc(
 doc(db,"users",user.uid)
 );
 
-if(!snap.exists()) return;
+if(!snap.exists()){
+
+alert("Firestore document not found");
+
+return;
+
+}
 
 const data =
 snap.data();
