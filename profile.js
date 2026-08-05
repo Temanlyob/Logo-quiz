@@ -95,6 +95,9 @@ data.puzzlesPlayed ?? 0;
 
 const puzzlesPlayed =
 data.puzzlesPlayed ?? 0;
+
+played.textContent =
+puzzlesPlayed;
   
 const winRate =
 gamesPlayed === 0
