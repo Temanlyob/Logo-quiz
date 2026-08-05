@@ -1,5 +1,8 @@
 import { auth, db } from "./firebase.js";
 
+import { LANGUAGES } from "./languages.js";
+import { getTranslation } from "./translations.js";
+
 import {
 onAuthStateChanged,
 signOut
@@ -43,6 +46,24 @@ document.querySelector(".logout-btn");
 
 const achievementSection =
 document.querySelector(".achievement-section");
+
+const languageBtn =
+document.getElementById("languageBtn");
+
+const currentLanguage =
+document.getElementById("currentLanguage");
+
+const languageModal =
+document.getElementById("languageModal");
+
+const languageList =
+document.getElementById("languageList");
+
+const languageSearch =
+document.getElementById("languageSearch");
+
+const closeLanguage =
+document.getElementById("closeLanguage");
 
 // =============================
 // Firebase
@@ -281,3 +302,81 @@ window.location.replace("login.html");
 };
 
 });           
+
+const selectedLanguage =
+localStorage.getItem("language") || "en";
+
+currentLanguage.textContent =
+(
+LANGUAGES.find(
+l => l.code === selectedLanguage
+)?.name || "English"
+) + " >";
+
+languageBtn.onclick = () => {
+
+languageModal.style.display = "flex";
+
+renderLanguages("");
+
+};
+
+closeLanguage.onclick = () => {
+
+languageModal.style.display = "none";
+
+};
+
+languageSearch.oninput = e => {
+
+renderLanguages(
+e.target.value.toLowerCase()
+);
+
+};
+
+function renderLanguages(search){
+
+languageList.innerHTML = "";
+
+LANGUAGES
+.filter(lang =>
+lang.name
+.toLowerCase()
+.includes(search)
+)
+.forEach(lang=>{
+
+const item =
+document.createElement("div");
+
+item.className =
+"language-item";
+
+if(
+lang.code === selectedLanguage
+){
+
+item.classList.add("active");
+
+}
+
+item.innerHTML =
+`${lang.flag} ${lang.name}`;
+
+item.onclick = ()=>{
+
+localStorage.setItem(
+"language",
+lang.code
+);
+
+location.reload();
+
+};
+
+languageList.appendChild(item);
+
+});
+
+}
