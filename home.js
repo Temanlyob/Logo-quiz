@@ -1,8 +1,5 @@
 import { auth, db } from "./firebase.js";
 
-import { getTranslation } from "./translations.js";
-import { LANGUAGES } from "./languages.js";
-
 import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
@@ -53,87 +50,6 @@ onAuthStateChanged(auth, async (user) => {
 
     const data = snap.data();
 
-const language =
-localStorage.getItem("language") || "en";
-
-const t =
-getTranslation(language);
-
-// Today's Puzzle Heading
-const heading =
-document.querySelector(".today-card h2");
-
-if(heading)
-heading.textContent =
-t.todaysPuzzle;
-
-// Today's Puzzle Description
-document.querySelector(".today-card p").textContent =
-t.identifyLogo || "Can you identify the real logo?";
-
-// Reward
-document.querySelector(".reward").textContent =
-"⭐ +10 " + (t.points || "Points");
-
-// Calendar Card
-document.querySelector(".calendar-card h3").textContent =
-t.calendar;
-
-document.querySelector(".calendar-card p").textContent =
-t.playPreviousPuzzles;
-
-document.querySelector(".calendar-btn").textContent =
-t.open || "Open";
-
-// Progress Title
-document.querySelector(".progress-section h2").textContent =
-t.yourProgress || "Your Progress";
-    
-// Stats Labels
-const statLabels =
-document.querySelectorAll(".stats-card p, .stat-card p");
-
-if(statLabels.length >= 3){
-
-statLabels[0].textContent =
-t.totalScore;
-
-statLabels[1].textContent =
-t.currentStreak;
-
-statLabels[2].textContent =
-t.accuracy;
-
-}
-
-// Achievement Title
-const achievementTitle =
-document.querySelector(".achievement-section h2");
-
-if(achievementTitle){
-
-achievementTitle.textContent =
-t.achievements;
-
-}
-    
-    // Bottom Navigation
-document.querySelectorAll(".bottom-nav span")[0].textContent =
-t.home;
-
-document.querySelectorAll(".bottom-nav span")[1].textContent =
-t.calendar;
-
-document.querySelectorAll(".bottom-nav span")[2].textContent =
-t.results;
-
-document.querySelectorAll(".bottom-nav span")[3].textContent =
-t.profile;
-
-// Play Button
-playBtn.textContent =
-t.playNow;
-
     const totalScore =
     data.totalScore ?? 0;
 
@@ -150,7 +66,10 @@ const gamesWon =
 Object.values(history)
 .filter(item => item.correct === true)
 .length;
- 
+
+const gamesLost =
+gamesPlayed - gamesWon;
+    
     const accuracy =
     gamesPlayed === 0
     ? 0
@@ -169,22 +88,22 @@ Object.values(history)
     const achievements = [];
 
     if (gamesPlayed >= 1)
-      achievements.push("🥇 " + t.logoRookie);
-    
+      achievements.push("🥇 Logo Rookie");
+
     if (currentStreak >= 7)
-      achievements.push("🔥 " + t.sevenDay);
+      achievements.push("🔥 7 Day Streak");
 
     if (totalScore >= 100)
-      achievements.push("⭐ " + t.pointsClub);
+      achievements.push("⭐ 100 Points Club");
 
     if (gamesPlayed >= 30)
-      achievements.push("🎮 " + t.puzzleMaster);
+      achievements.push("🎮 Puzzle Master");
 
     if (accuracy === 100 && gamesPlayed >= 10)
-      achievements.push("🎯 " + t.accuracyMaster);
+      achievements.push("🎯 Accuracy Master");
 
     if (gamesPlayed >= 100)
-      achievements.push("👑 " + t.logoLegend);
+      achievements.push("👑 Logo Legend");
 
     achievementList.innerHTML = "";
 
