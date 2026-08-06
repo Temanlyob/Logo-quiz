@@ -306,12 +306,6 @@ themeModal.style.display = "none";
 
 };
 
-closeTheme.onclick=()=>{
-
-themeModal.style.display="none";
-
-};
-
 options.forEach(item=>{
 
 item.onclick=()=>{
@@ -352,3 +346,59 @@ item.querySelector(".tick").textContent="✓";
 });
 
 }
+
+const themesBtn = document.getElementById("themesBtn");
+const themeModal = document.getElementById("themeModal");
+const closeTheme = document.getElementById("closeTheme");
+const options = document.querySelectorAll(".theme-option");
+
+themesBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    themeModal.style.display = "flex";
+    loadTheme();
+});
+
+closeTheme.addEventListener("click", () => {
+    themeModal.style.display = "none";
+});
+
+themeModal.addEventListener("click", (e) => {
+    if (e.target === themeModal) {
+        themeModal.style.display = "none";
+    }
+});
+
+options.forEach(option => {
+
+    option.addEventListener("click", () => {
+
+        const theme = option.dataset.theme;
+
+        localStorage.setItem("theme", theme);
+
+        loadTheme();
+
+    });
+
+});
+
+function loadTheme() {
+
+    const current = localStorage.getItem("theme") || "default";
+
+    options.forEach(option => {
+
+        option.classList.remove("active");
+
+        option.querySelector(".tick").textContent = "";
+
+        if (option.dataset.theme === current) {
+
+            option.classList.add("active");
+            option.querySelector(".tick").textContent = "✓";
+
+        }
+
+    });
+
+}  
