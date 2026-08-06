@@ -106,6 +106,8 @@ function getCalendarStats() {
 
 onAuthStateChanged(auth, async(user)=>{
 
+  try{
+
 if(!user){
 
 window.location.replace("login.html");
@@ -416,6 +418,13 @@ applyLanguage();
 languageList.appendChild(item);
 
 });
+
+  }catch(err){
+
+console.error(err);
+alert(err);
+
+}
 
 }
 
