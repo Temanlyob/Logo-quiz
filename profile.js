@@ -135,6 +135,16 @@ const puzzlesPlayed = stats.played;
 const gamesWon = stats.won;
 
 const gamesLost = stats.lost;
+
+const themesBtn = document.getElementById("themesBtn");
+
+themesBtn.addEventListener("click", (e) => {
+
+e.preventDefault();
+
+alert("Theme Clicked");
+
+});
   
 const winRate =
 puzzlesPlayed === 0
