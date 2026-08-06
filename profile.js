@@ -95,7 +95,7 @@ const data =
 snap.data();
 
 const language =
-localStorage.getItem("language") || "en";
+detectLanguage();
 
 const t =
 getTranslation(language);
