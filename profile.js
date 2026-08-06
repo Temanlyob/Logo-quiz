@@ -428,3 +428,9 @@ languageList.appendChild(item);
 });
 
 }
+
+function applyLanguage(){
+
+// ... poora function jo maine diya tha ...
+
+}
