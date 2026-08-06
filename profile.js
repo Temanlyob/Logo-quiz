@@ -1,8 +1,5 @@
 import { auth, db } from "./firebase.js";
 
-import { LANGUAGES } from "./languages.js";
-import { getTranslation } from "./translations.js";
-
 import {
 onAuthStateChanged,
 signOut
@@ -47,23 +44,48 @@ document.querySelector(".logout-btn");
 const achievementSection =
 document.querySelector(".achievement-section");
 
-const languageBtn =
-document.getElementById("languageBtn");
+// =============================
+// Firebase
+// =============================
 
-const currentLanguage =
-document.getElementById("currentLanguage");
+onAuthStateChanged(auth, async(user)=>{
 
-const languageModal =
-document.getElementById("languageModal");
+if(!user){
 
-const languageList =
-document.getElementById("languageList");
+window.location.replace("login.html");
+return;
 
-const languageSearch =
-document.getElementById("languageSearch");
+}
 
-const closeLanguage =
-document.getElementById("closeLanguage");
+const snap =
+await getDoc(
+doc(db,"users",user.uid)
+);
+
+if(!snap.exists()){
+
+username.textContent="User";
+email.textContent="";
+return;
+
+}
+
+const data =
+snap.data();
+username.textContent =
+data.username ||
+user.displayName ||
+"User";
+
+email.textContent =
+data.email ||
+user.email ||
+"";
+
+avatar.src =
+data.photoURL ||
+user.photoURL ||
+"default-avatar.png";
 
 function getCalendarStats() {
 
@@ -100,99 +122,6 @@ function getCalendarStats() {
 
 }
 
-// =============================
-// Firebase
-// =============================
-
-onAuthStateChanged(auth, async(user)=>{
-
-  try{
-
-if(!user){
-
-window.location.replace("login.html");
-return;
-
-}
-
-const snap =
-await getDoc(
-doc(db,"users",user.uid)
-);
-
-if(!snap.exists()){
-
-username.textContent="User";
-email.textContent="";
-return;
-
-}
-
-const data =
-snap.data();
-
-const language =
-detectLanguage();
-
-const t =
-getTranslation(language);
-
-// Page title
-document.querySelector(".top h1").textContent =
-t.profile;
-
-// Stats labels
-document.querySelectorAll(".stat-card p")[0].textContent =
-t.totalScore;
-
-document.querySelectorAll(".stat-card p")[1].textContent =
-t.currentStreak;
-
-document.querySelectorAll(".stat-card p")[2].textContent =
-t.accuracy;
-
-document.querySelectorAll(".stat-card p")[3].textContent =
-t.puzzlesPlayed;
-
-// Settings title
-document.querySelector(".settings-section h2").textContent =
-t.settings;
-
-// Setting names
-const settingNames =
-document.querySelectorAll(".setting-item span:nth-child(2)");
-
-settingNames[0].textContent =
-t.language;
-
-settingNames[1].textContent =
-t.darkMode;
-
-settingNames[2].textContent =
-t.notifications;
-
-settingNames[3].textContent =
-t.about;
-
-// Logout
-logoutBtn.textContent =
-"🚪 " + t.logout;
-  
-username.textContent =
-data.username ||
-user.displayName ||
-"User";
-
-email.textContent =
-data.email ||
-user.email ||
-"";
-
-avatar.src =
-data.photoURL ||
-user.photoURL ||
-"default-avatar.png";
-
 const totalScore =
 data.totalScore ?? 0;
 
@@ -205,6 +134,8 @@ const puzzlesPlayed = stats.played;
 
 const gamesWon = stats.won;
 
+const gamesLost = stats.lost;
+  
 const winRate =
 puzzlesPlayed === 0
 ? 0
@@ -335,7 +266,7 @@ html = `
 }
 
 achievementSection.innerHTML =
-`<h2>${t.achievements}</h2>` + html;
+"<h2>Achievements</h2>" + html;
 
 // =============================
 // Logout
@@ -350,179 +281,3 @@ window.location.replace("login.html");
 };
 
 });           
-
-languageBtn.onclick = () => {
-
-languageModal.style.display = "flex";
-
-renderLanguages("");
-
-};
-
-closeLanguage.onclick = () => {
-
-languageModal.style.display = "none";
-
-};
-
-languageSearch.oninput = e => {
-
-renderLanguages(
-e.target.value.toLowerCase()
-);
-
-};
-
-function renderLanguages(search){
-
-languageList.innerHTML = "";
-
-LANGUAGES
-.filter(lang =>
-lang.name
-.toLowerCase()
-.includes(search)
-)
-.forEach(lang=>{
-
-const item =
-document.createElement("div");
-
-item.className =
-"language-item";
-
-if(
-lang.code === detectLanguage()
-){
-
-item.classList.add("active");
-
-}
-
-item.innerHTML =
-`${lang.flag} ${lang.name}`;
-
-item.onclick = ()=>{
-
-localStorage.setItem(
-"language",
-lang.code
-);
-
-languageModal.style.display = "none";
-
-applyLanguage();
-
-};
-
-languageList.appendChild(item);
-
-});
-
-  }catch(err){
-
-console.error(err);
-alert(err);
-
-}
-
-}
-
-function detectLanguage(){
-
-let saved =
-localStorage.getItem("language");
-
-if(saved){
-
-return saved;
-
-}
-
-const phone =
-navigator.language ||
-navigator.userLanguage ||
-"en";
-
-const code =
-LANGUAGES.some(
-l => l.code === phone
-)
-? phone
-: phone.split("-")[0];
-  
-const exists =
-LANGUAGES.some(
-l=>l.code===code
-);
-
-const language =
-exists ? code : "en";
-
-localStorage.setItem(
-"language",
-language
-);
-
-return language;
-
-}
-
-function applyLanguage(){
-
-const language =
-detectLanguage();
-
-const t =
-getTranslation(language);
-
-currentLanguage.textContent =
-(
-LANGUAGES.find(
-l => l.code === language
-)?.name || "English"
-) + " >";
-
-// Header
-document.querySelector(".top h1").textContent =
-t.profile;
-
-// Stats
-document.querySelectorAll(".stat-card p")[0].textContent =
-t.totalScore;
-
-document.querySelectorAll(".stat-card p")[1].textContent =
-t.currentStreak;
-
-document.querySelectorAll(".stat-card p")[2].textContent =
-t.accuracy;
-
-document.querySelectorAll(".stat-card p")[3].textContent =
-t.puzzlesPlayed;
-
-// Settings
-document.querySelector(".settings-section h2").textContent =
-t.settings;
-
-const settingNames =
-document.querySelectorAll(".setting-item span:nth-child(2));
-
-settingNames[0].textContent =
-t.language;
-
-settingNames[1].textContent =
-t.darkMode;
-
-settingNames[2].textContent =
-t.notifications;
-
-settingNames[3].textContent =
-t.about;
-
-// Logout
-logoutBtn.textContent =
-"🚪 " + t.logout;
-
-}
-
-applyLanguage();
