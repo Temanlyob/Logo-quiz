@@ -34,6 +34,11 @@ pointsClub:"100 Points Club",
 puzzleMaster:"Puzzle Master",
 accuracyMaster:"Accuracy Master",
 
+identifyLogo:"Can you identify the real logo?",
+points:"Points",
+open:"Open",
+yourProgress:"Your Progress",
+
 playPreviousPuzzles:"Play previous daily logo puzzles",
 
 solved:"Solved",
@@ -104,6 +109,11 @@ pointsClub:"100 अंक क्लब",
 puzzleMaster:"पज़ल मास्टर",
 accuracyMaster:"सटीकता मास्टर",
 
+identifyLogo:"क्या आप असली लोगो पहचान सकते हैं?",
+points:"अंक",
+open:"खोलें",
+yourProgress:"आपकी प्रगति",
+
 playPreviousPuzzles:"पिछली दैनिक लोगो पहेलियाँ खेलें",
 
 solved:"हल किया",
@@ -173,6 +183,11 @@ sevenDay:"7 દિવસની સ્ટ્રીક",
 pointsClub:"100 પોઈન્ટ્સ ક્લબ",
 puzzleMaster:"પઝલ માસ્ટર",
 accuracyMaster:"ચોકસાઈ માસ્ટર",
+
+identifyLogo:"શું તમે અસલી લોગો ઓળખી શકો છો?",
+points:"પોઈન્ટ્સ",
+open:"ખોલો",
+yourProgress:"તમારી પ્રગતિ",
 
 playPreviousPuzzles:"પહેલાની દૈનિક લોગો પહેલી રમો",
 
