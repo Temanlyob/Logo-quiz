@@ -53,7 +53,7 @@ onAuthStateChanged(auth, async (user) => {
 
     const data = snap.data();
 
-    const language =
+const language =
 localStorage.getItem("language") || "en";
 
 const t =
@@ -61,12 +61,34 @@ getTranslation(language);
 
 // Today's Puzzle Heading
 const heading =
-document.querySelector(".hero h1");
+document.querySelector(".today-card h2");
 
 if(heading)
 heading.textContent =
 t.todaysPuzzle;
 
+// Today's Puzzle Description
+document.querySelector(".today-card p").textContent =
+t.identifyLogo || "Can you identify the real logo?";
+
+// Reward
+document.querySelector(".reward").textContent =
+"⭐ +10 " + (t.points || "Points");
+
+// Calendar Card
+document.querySelector(".calendar-card h3").textContent =
+t.calendar;
+
+document.querySelector(".calendar-card p").textContent =
+t.playPreviousPuzzles;
+
+document.querySelector(".calendar-btn").textContent =
+t.open || "Open";
+
+// Progress Title
+document.querySelector(".progress-section h2").textContent =
+t.yourProgress || "Your Progress";
+    
 // Stats Labels
 const statLabels =
 document.querySelectorAll(".stats-card p, .stat-card p");
@@ -128,10 +150,7 @@ const gamesWon =
 Object.values(history)
 .filter(item => item.correct === true)
 .length;
-
-const gamesLost =
-gamesPlayed - gamesWon;
-    
+ 
     const accuracy =
     gamesPlayed === 0
     ? 0
