@@ -46,6 +46,40 @@ todaysResult:"Today's Result",
 
 betterLuckTomorrow:"Better Luck Tomorrow",
 
+logoLegend:"Logo Legend",
+
+playPreviousPuzzles:"Play previous daily logo puzzles",
+
+solved:"Solved",
+
+today:"Today",
+
+notPlayed:"Not Played",
+
+todaysResult:"Today's Result",
+
+betterLuckTomorrow:"Better Luck Tomorrow",
+
+correctAnswer:"Correct Answer",
+
+selectedRealLogo:"You selected the real logo.",
+
+wrongLogo:"That wasn't the authentic logo.",
+
+spottedLogo:"You spotted the authentic logo.",
+
+originalLogo:"The highlighted logo was the original one.",
+
+selectLanguage:"Select Language",
+
+searchLanguage:"Search language...",
+
+close:"Close",
+
+noAchievements:"No Achievements Yet",
+
+keepPlaying:"Keep playing to unlock achievements."
+
 },
 
   hi:{
@@ -94,6 +128,40 @@ todaysResult:"आज का परिणाम",
 
 betterLuckTomorrow:"कल फिर कोशिश करें",
 
+logoLegend:"लोगो लीजेंड",
+
+playPreviousPuzzles:"पिछली दैनिक लोगो पहेलियाँ खेलें",
+
+solved:"हल किया",
+
+today:"आज",
+
+notPlayed:"नहीं खेला",
+
+todaysResult:"आज का परिणाम",
+
+betterLuckTomorrow:"कल फिर प्रयास करें",
+
+correctAnswer:"सही उत्तर",
+
+selectedRealLogo:"आपने असली लोगो चुना।",
+
+wrongLogo:"यह असली लोगो नहीं था।",
+
+spottedLogo:"आपने सही लोगो पहचान लिया।",
+
+originalLogo:"हाइलाइट किया गया लोगो असली था।",
+
+selectLanguage:"भाषा चुनें",
+
+searchLanguage:"भाषा खोजें...",
+
+close:"बंद करें",
+
+noAchievements:"अभी तक कोई उपलब्धि नहीं",
+
+keepPlaying:"उपलब्धियाँ अनलॉक करने के लिए खेलते रहें।"
+
 },
 
 gu:{
@@ -141,6 +209,40 @@ notPlayed:"રમાયું નથી",
 todaysResult:"આજનું પરિણામ",
 
 betterLuckTomorrow:"કાલે ફરી પ્રયાસ કરો",
+
+logoLegend:"લોગો લેજેન્ડ",
+
+playPreviousPuzzles:"પહેલાની દૈનિક લોગો પહેલી રમો",
+
+solved:"પૂર્ણ",
+
+today:"આજે",
+
+notPlayed:"રમાયું નથી",
+
+todaysResult:"આજનું પરિણામ",
+
+betterLuckTomorrow:"આવતી કાલે ફરી પ્રયાસ કરો",
+
+correctAnswer:"સાચો જવાબ",
+
+selectedRealLogo:"તમે સાચો લોગો પસંદ કર્યો.",
+
+wrongLogo:"આ અસલી લોગો નહોતો.",
+
+spottedLogo:"તમે અસલી લોગો ઓળખી લીધો.",
+
+originalLogo:"હાઇલાઇટ કરેલો લોગો અસલી હતો.",
+
+selectLanguage:"ભાષા પસંદ કરો",
+
+searchLanguage:"ભાષા શોધો...",
+
+close:"બંધ કરો",
+
+noAchievements:"હજુ સુધી કોઈ સિદ્ધિ નથી",
+
+keepPlaying:"સિદ્ધિઓ અનલોક કરવા રમતા રહો."
 
 },
 
