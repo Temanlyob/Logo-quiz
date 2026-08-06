@@ -1,7 +1,5 @@
 import { auth, db } from "./firebase.js";
 
-import { getTranslation } from "./translations.js";
-
 import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
@@ -87,26 +85,6 @@ return;
 const userRef =
 doc(db,"users",user.uid);
 
-const language =
-localStorage.getItem("language") || "en";
-
-const t =
-getTranslation(language);
-
-// Bottom Navigation
-
-const nav =
-document.querySelectorAll(".bottom-nav span");
-
-if(nav.length >= 4){
-
-nav[0].textContent = t.home;
-nav[1].textContent = t.calendar;
-nav[2].textContent = t.results;
-nav[3].textContent = t.profile;
-
-}
-
 // =====================================
 // Default Values
 // =====================================
@@ -118,7 +96,6 @@ let gamesLost = 0;
 let currentStreak = 0;
 let bestStreak = 0;
 let lastPlayed = null;
-let history = {};
 
 // =====================================
 // Read Firestore
@@ -135,7 +112,7 @@ snap.data();
 totalScore =
 data.totalScore ?? 0;
 
-history =
+const history =
 data.history ?? {};
 
 puzzlesPlayed =
@@ -221,32 +198,27 @@ if (!processed) {
 
   }
 
-  history[puzzleDate] = {
-  correct: isCorrect,
-  score: score
-};
-
-  puzzlesPlayed = Object.keys(history).length;
-
-gamesWon = Object.values(history)
-.filter(item => item.correct)
-.length;
-
-gamesLost = puzzlesPlayed - gamesWon;
-
   await setDoc(
-  userRef,
-  {
-    totalScore,
-    currentStreak,
-    bestStreak,
-    lastPlayed: puzzleDateObj.toISOString(),
-    history
-  },
-  {
-    merge: true
-  }
+userRef,
+{
+  totalScore,
+  currentStreak,
+  bestStreak,
+  lastPlayed:
+  puzzleDateObj.toISOString()
+},
+{
+  merge:true
+}
 );
+
+    {
+
+      merge: true
+
+    }
+
+  );
 
   localStorage.setItem(
     processedKey,
@@ -310,15 +282,14 @@ winRate + "%";
 if (isCorrect) {
 
   resultIcon.innerHTML = "🏆";
-  resultTitle.innerHTML = t.todaysResult || "Today's Result";
+  resultTitle.innerHTML = "Today's Result";
   scoreValue.innerHTML = "+" + score;
   scoreValue.style.color = "#22c55e";
 
 } else {
 
   resultIcon.innerHTML = "❌";
-  resultTitle.innerHTML =
-t.betterLuckTomorrow || "Better Luck Tomorrow";
+  resultTitle.innerHTML = "Better Luck Tomorrow";
   scoreValue.innerHTML = "0";
   scoreValue.style.color = "#ef4444";
 
@@ -341,4 +312,3 @@ calendarBtn.addEventListener("click", () => {
   window.location.href = "calendar.html";
 
 });
-
