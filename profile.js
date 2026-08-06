@@ -65,6 +65,41 @@ document.getElementById("languageSearch");
 const closeLanguage =
 document.getElementById("closeLanguage");
 
+function getCalendarStats() {
+
+  let played = 0;
+  let won = 0;
+
+  for (let key in localStorage) {
+
+    if (key.startsWith("quiz_")) {
+
+      const quiz = JSON.parse(localStorage.getItem(key));
+
+      if (quiz) {
+
+        played++;
+
+        if (quiz.correct) {
+
+          won++;
+
+        }
+
+      }
+
+    }
+
+  }
+
+  return {
+    played,
+    won,
+    lost: played - won
+  };
+
+}
+
 // =============================
 // Firebase
 // =============================
@@ -156,41 +191,6 @@ data.photoURL ||
 user.photoURL ||
 "default-avatar.png";
 
-function getCalendarStats() {
-
-  let played = 0;
-  let won = 0;
-
-  for (let key in localStorage) {
-
-    if (key.startsWith("quiz_")) {
-
-      const quiz = JSON.parse(localStorage.getItem(key));
-
-      if (quiz) {
-
-        played++;
-
-        if (quiz.correct) {
-
-          won++;
-
-        }
-
-      }
-
-    }
-
-  }
-
-  return {
-    played,
-    won,
-    lost: played - won
-  };
-
-}
-
 const totalScore =
 data.totalScore ?? 0;
 
@@ -203,8 +203,6 @@ const puzzlesPlayed = stats.played;
 
 const gamesWon = stats.won;
 
-const gamesLost = stats.lost;
-  
 const winRate =
 puzzlesPlayed === 0
 ? 0
@@ -402,7 +400,7 @@ item.className =
 "language-item";
 
 if(
-lang.code === selectedLanguage
+lang.code === detectLanguage()
 ){
 
 item.classList.add("active");
@@ -428,6 +426,42 @@ applyLanguage();
 languageList.appendChild(item);
 
 });
+
+}
+
+function detectLanguage(){
+
+let saved =
+localStorage.getItem("language");
+
+if(saved){
+
+return saved;
+
+}
+
+const phone =
+navigator.language ||
+navigator.userLanguage ||
+"en";
+
+const code =
+phone.split("-")[0];
+
+const exists =
+LANGUAGES.some(
+l=>l.code===code
+);
+
+const language =
+exists ? code : "en";
+
+localStorage.setItem(
+"language",
+language
+);
+
+return language;
 
 }
 
