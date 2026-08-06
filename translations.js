@@ -32,7 +32,7 @@ logoRookie:"Logo Rookie",
 sevenDay:"7 Day Streak",
 pointsClub:"100 Points Club",
 puzzleMaster:"Puzzle Master",
-accuracyMaster:"Accuracy Master"
+accuracyMaster:"Accuracy Master",
 
 playPreviousPuzzles:"Play previous daily logo puzzles",
 
@@ -114,7 +114,7 @@ logoRookie:"लोगो रूकी",
 sevenDay:"7 दिन की स्ट्रीक",
 pointsClub:"100 अंक क्लब",
 puzzleMaster:"पज़ल मास्टर",
-accuracyMaster:"सटीकता मास्टर"
+accuracyMaster:"सटीकता मास्टर",
 
 playPreviousPuzzles:"पिछली दैनिक लोगो पहेलियाँ खेलें",
 
@@ -196,7 +196,7 @@ logoRookie:"લોગો રૂકી",
 sevenDay:"7 દિવસની સ્ટ્રીક",
 pointsClub:"100 પોઈન્ટ્સ ક્લબ",
 puzzleMaster:"પઝલ માસ્ટર",
-accuracyMaster:"ચોકસાઈ માસ્ટર"
+accuracyMaster:"ચોકસાઈ માસ્ટર",
 
 playPreviousPuzzles:"પહેલાની દૈનિક લોગો પહેલી રમો",
 
