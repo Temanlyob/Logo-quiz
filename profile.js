@@ -10,6 +10,8 @@ doc,
 getDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
+console.log("Profile JS Loaded");
+
 // =============================
 // Elements
 // =============================
@@ -136,16 +138,6 @@ const gamesWon = stats.won;
 
 const gamesLost = stats.lost;
 
-const themesBtn = document.getElementById("themesBtn");
-
-themesBtn.addEventListener("click", (e) => {
-
-e.preventDefault();
-
-alert("Theme Clicked");
-
-});
-  
 const winRate =
 puzzlesPlayed === 0
 ? 0
@@ -304,11 +296,13 @@ document.getElementById("closeTheme");
 const options =
 document.querySelectorAll(".theme-option");
 
-themesBtn.onclick=()=>{
+closeTheme.onclick = (e) => {
 
-themeModal.style.display="flex";
+console.log("Theme Button Clicked");
 
-loadTheme();
+e.preventDefault();
+
+themeModal.style.display = "none";
 
 };
 
