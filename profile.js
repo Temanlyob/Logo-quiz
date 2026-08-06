@@ -434,3 +434,5 @@ function applyLanguage(){
 // ... poora function jo maine diya tha ...
 
 }
+
+applyLanguage();
