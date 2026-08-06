@@ -247,12 +247,12 @@ function restoreResult(data) {
         }
 
         if (resultCircle) resultCircle.innerHTML = "✅";
-        if (resultTitle) resultTitle.innerHTML = t.correct;";
+        if (resultTitle) resultTitle.innerHTML = t.correct;
         if (resultText) resultText.innerHTML =
 t.selectedRealLogo || "You selected the real logo.";
         if (pointsCard) pointsCard.innerHTML = "+10 Points ⭐";
 
-        if (infoTitle) infoTitle.innerHTML = t.greatJob;";
+        if (infoTitle) infoTitle.innerHTML = t.greatJob;
         if (infoText) infoText.innerHTML =
 t.spottedLogo || "You spotted the authentic logo.";
     } else {
@@ -274,7 +274,7 @@ t.spottedLogo || "You spotted the authentic logo.";
         }
 
         if (resultCircle) resultCircle.innerHTML = "❌";
-        if (resultTitle) resultTitle.innerHTML = t.incorrect;";
+        if (resultTitle) resultTitle.innerHTML = t.incorrect;
         if (resultText) resultText.innerHTML =
 t.wrongLogo || "That wasn't the authentic logo.";
         if (pointsCard) pointsCard.innerHTML = "0 Points";
