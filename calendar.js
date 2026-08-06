@@ -1,15 +1,3 @@
-import { getTranslation } from "./translations.js";
-import { auth, db } from "./firebase.js";
-
-import {
-onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-
-import {
-doc,
-getDoc
-} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
 const monthTitle = document.getElementById("monthTitle");
 const calendarGrid = document.getElementById("calendarGrid");
 const prevBtn = document.getElementById("prevMonth");
@@ -19,26 +7,6 @@ const months = [
 "January","February","March","April","May","June",
 "July","August","September","October","November","December"
 ];
-
-const monthNames = {
-
-en:[
-"January","February","March","April","May","June",
-"July","August","September","October","November","December"
-],
-
-hi:[
-"जनवरी","फ़रवरी","मार्च","अप्रैल","मई","जून",
-"जुलाई","अगस्त","सितंबर","अक्टूबर","नवंबर","दिसंबर"
-],
-
-gu:[
-"જાન્યુઆરી","ફેબ્રુઆરી","માર્ચ","એપ્રિલ","મે",
-"જૂન","જુલાઈ","ઑગસ્ટ","સપ્ટેમ્બર",
-"ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર"
-]
-
-};
 
 let today = new Date();
 
@@ -50,88 +18,11 @@ const firstPuzzleDate = new Date(2026, 6, 27); // 27 July 2026
 
 function renderCalendar(){
 
-  const language =
-localStorage.getItem("language") || "en";
-
-const t =
-getTranslation(language);
-
-// Page Title
-
-document.querySelector(".top h1").textContent =
-"📅 " + t.calendar;
-
-document.querySelector(".top p").textContent =
-t.playPreviousPuzzles || "Play previous daily logo puzzles";
-
-// Week Days
-
-const weekDays = {
-
-en:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
-
-hi:["रवि","सोम","मंगल","बुध","गुरु","शुक्र","शनि"],
-
-gu:["રવિ","સોમ","મંગળ","બુધ","ગુરુ","શુક્ર","શનિ"]
-
-};
-
-const days =
-weekDays[language] ||
-weekDays.en;
-
-document
-.querySelectorAll(".weekdays span")
-.forEach((item,index)=>{
-
-item.textContent =
-days[index];
-
-});
-
-// Legend
-
-const legend =
-document.querySelectorAll(".legend-item span");
-
-legend[0].textContent =
-t.solved || "Solved";
-
-legend[1].textContent =
-t.today || "Today";
-
-legend[2].textContent =
-t.notPlayed || "Not Played";
-
-// Bottom Navigation
-
-const nav =
-document.querySelectorAll(".bottom-nav span");
-
-if(nav.length >= 4){
-
-nav[0].textContent =
-t.home;
-
-nav[1].textContent =
-t.calendar;
-
-nav[2].textContent =
-t.results;
-
-nav[3].textContent =
-t.profile;
-
-}
-
 calendarGrid.innerHTML="";
-
-const months =
-monthNames[language] ||
-monthNames.en;
 
 monthTitle.innerHTML =
 months[currentMonth] + " " + currentYear;
+
 const firstDay =
 new Date(currentYear,currentMonth,1).getDay();
 
