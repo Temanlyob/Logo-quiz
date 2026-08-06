@@ -352,7 +352,7 @@ window.location.replace("login.html");
 });           
 
 const selectedLanguage =
-localStorage.getItem("language") || "en";
+detectLanguage();
 
 currentLanguage.textContent =
 (
@@ -419,7 +419,9 @@ localStorage.setItem(
 lang.code
 );
 
-location.reload();
+languageModal.style.display = "none";
+
+applyLanguage();
 
 };
 
@@ -431,7 +433,58 @@ languageList.appendChild(item);
 
 function applyLanguage(){
 
-// ... poora function jo maine diya tha ...
+const language =
+detectLanguage();
+
+const t =
+getTranslation(language);
+
+currentLanguage.textContent =
+(
+LANGUAGES.find(
+l => l.code === language
+)?.name || "English"
+) + " >";
+
+// Header
+document.querySelector(".top h1").textContent =
+t.profile;
+
+// Stats
+document.querySelectorAll(".stat-card p")[0].textContent =
+t.totalScore;
+
+document.querySelectorAll(".stat-card p")[1].textContent =
+t.currentStreak;
+
+document.querySelectorAll(".stat-card p")[2].textContent =
+t.accuracy;
+
+document.querySelectorAll(".stat-card p")[3].textContent =
+t.puzzlesPlayed;
+
+// Settings
+document.querySelector(".settings-section h2").textContent =
+t.settings;
+
+const settingNames =
+document.querySelectorAll(".setting-item span:nth-child(2));
+
+settingNames[0].textContent =
+t.language;
+
+settingNames[1].textContent =
+t.darkMode;
+
+settingNames[2].textContent =
+t.notifications;
+
+settingNames[3].textContent =
+t.about;
+
+// Logout
+logoutBtn.textContent =
+"🚪 " + t.logout;
 
 }
 
