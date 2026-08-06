@@ -349,16 +349,6 @@ window.location.replace("login.html");
 
 });           
 
-const selectedLanguage =
-detectLanguage();
-
-currentLanguage.textContent =
-(
-LANGUAGES.find(
-l => l.code === selectedLanguage
-)?.name || "English"
-) + " >";
-
 languageBtn.onclick = () => {
 
 languageModal.style.display = "flex";
@@ -446,8 +436,12 @@ navigator.userLanguage ||
 "en";
 
 const code =
-phone.split("-")[0];
-
+LANGUAGES.some(
+l => l.code === phone
+)
+? phone
+: phone.split("-")[0];
+  
 const exists =
 LANGUAGES.some(
 l=>l.code===code
