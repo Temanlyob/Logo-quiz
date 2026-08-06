@@ -118,6 +118,7 @@ let gamesLost = 0;
 let currentStreak = 0;
 let bestStreak = 0;
 let lastPlayed = null;
+let history = {};
 
 // =====================================
 // Read Firestore
@@ -134,7 +135,7 @@ snap.data();
 totalScore =
 data.totalScore ?? 0;
 
-const history =
+history =
 data.history ?? {};
 
 puzzlesPlayed =
@@ -220,27 +221,32 @@ if (!processed) {
 
   }
 
+  history[puzzleDate] = {
+  correct: isCorrect,
+  score: score
+};
+
+  puzzlesPlayed = Object.keys(history).length;
+
+gamesWon = Object.values(history)
+.filter(item => item.correct)
+.length;
+
+gamesLost = puzzlesPlayed - gamesWon;
+
   await setDoc(
-userRef,
-{
-  totalScore,
-  currentStreak,
-  bestStreak,
-  lastPlayed:
-  puzzleDateObj.toISOString()
-},
-{
-  merge:true
-}
+  userRef,
+  {
+    totalScore,
+    currentStreak,
+    bestStreak,
+    lastPlayed: puzzleDateObj.toISOString(),
+    history
+  },
+  {
+    merge: true
+  }
 );
-
-    {
-
-      merge: true
-
-    }
-
-  );
 
   localStorage.setItem(
     processedKey,
