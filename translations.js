@@ -48,18 +48,6 @@ betterLuckTomorrow:"Better Luck Tomorrow",
 
 logoLegend:"Logo Legend",
 
-playPreviousPuzzles:"Play previous daily logo puzzles",
-
-solved:"Solved",
-
-today:"Today",
-
-notPlayed:"Not Played",
-
-todaysResult:"Today's Result",
-
-betterLuckTomorrow:"Better Luck Tomorrow",
-
 correctAnswer:"Correct Answer",
 
 selectedRealLogo:"You selected the real logo.",
@@ -130,18 +118,6 @@ betterLuckTomorrow:"कल फिर कोशिश करें",
 
 logoLegend:"लोगो लीजेंड",
 
-playPreviousPuzzles:"पिछली दैनिक लोगो पहेलियाँ खेलें",
-
-solved:"हल किया",
-
-today:"आज",
-
-notPlayed:"नहीं खेला",
-
-todaysResult:"आज का परिणाम",
-
-betterLuckTomorrow:"कल फिर प्रयास करें",
-
 correctAnswer:"सही उत्तर",
 
 selectedRealLogo:"आपने असली लोगो चुना।",
@@ -211,18 +187,6 @@ todaysResult:"આજનું પરિણામ",
 betterLuckTomorrow:"કાલે ફરી પ્રયાસ કરો",
 
 logoLegend:"લોગો લેજેન્ડ",
-
-playPreviousPuzzles:"પહેલાની દૈનિક લોગો પહેલી રમો",
-
-solved:"પૂર્ણ",
-
-today:"આજે",
-
-notPlayed:"રમાયું નથી",
-
-todaysResult:"આજનું પરિણામ",
-
-betterLuckTomorrow:"આવતી કાલે ફરી પ્રયાસ કરો",
 
 correctAnswer:"સાચો જવાબ",
 
