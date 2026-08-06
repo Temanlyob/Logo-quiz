@@ -281,3 +281,70 @@ window.location.replace("login.html");
 };
 
 });           
+
+const themesBtn =
+document.getElementById("themesBtn");
+
+const themeModal =
+document.getElementById("themeModal");
+
+const closeTheme =
+document.getElementById("closeTheme");
+
+const options =
+document.querySelectorAll(".theme-option");
+
+themesBtn.onclick=()=>{
+
+themeModal.style.display="flex";
+
+loadTheme();
+
+};
+
+closeTheme.onclick=()=>{
+
+themeModal.style.display="none";
+
+};
+
+options.forEach(item=>{
+
+item.onclick=()=>{
+
+const theme =
+item.dataset.theme;
+
+localStorage.setItem(
+"theme",
+theme
+);
+
+loadTheme();
+
+};
+
+});
+
+function loadTheme(){
+
+const current =
+localStorage.getItem("theme") || "default";
+
+options.forEach(item=>{
+
+item.classList.remove("active");
+
+item.querySelector(".tick").textContent="";
+
+if(item.dataset.theme===current){
+
+item.classList.add("active");
+
+item.querySelector(".tick").textContent="✓";
+
+}
+
+});
+
+}
