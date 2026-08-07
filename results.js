@@ -10,6 +10,8 @@ import {
   setDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
+console.log(localStorage.getItem("theme"));
+
 function applyTheme(theme){
 
 document.body.classList.remove(
