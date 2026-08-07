@@ -289,6 +289,7 @@ window.location.replace("login.html");
 const themesBtn = document.getElementById("themesBtn");
 const themeModal = document.getElementById("themeModal");
 const closeTheme = document.getElementById("closeTheme");
+const themeOptions = document.querySelectorAll(".theme-option");
 
 themesBtn.addEventListener("click", (e) => {
 
@@ -313,3 +314,44 @@ themeModal.addEventListener("click", (e) => {
     }
 
 });
+
+function updateThemeSelection() {
+
+    const currentTheme =
+        localStorage.getItem("theme") || "default";
+
+    themeOptions.forEach(option => {
+
+        option.classList.remove("active");
+
+        option.querySelector(".tick").textContent = "";
+
+        if(option.dataset.theme === currentTheme){
+
+            option.classList.add("active");
+            option.querySelector(".tick").textContent = "✓";
+
+        }
+
+    });
+
+}
+
+themeOptions.forEach(option => {
+
+    option.addEventListener("click", () => {
+
+        const selectedTheme = option.dataset.theme;
+
+        localStorage.setItem(
+            "theme",
+            selectedTheme
+        );
+
+        updateThemeSelection();
+
+    });
+
+});
+
+updateThemeSelection();
