@@ -324,3 +324,50 @@ color:#22c55e;
 padding-bottom:110px;
 
 }
+
+/* ==========================
+   LIGHT THEME
+========================== */
+
+body.theme-light{
+
+background:#f5f8ff;
+color:#102a54;
+
+}
+
+/* ==========================
+   DARK THEME
+========================== */
+
+body.theme-dark{
+
+background:#121212;
+color:#ffffff;
+
+}
+
+body.theme-dark .result-card,
+body.theme-dark .score-box,
+body.theme-dark .stat,
+body.theme-dark .bottom-nav{
+
+background:#1f1f1f;
+color:#ffffff;
+box-shadow:none;
+
+}
+
+body.theme-dark .result-card h1,
+body.theme-dark .stat strong{
+
+color:#ffffff;
+
+}
+
+body.theme-dark .score-box span,
+body.theme-dark .stat span{
+
+color:#bdbdbd;
+
+}
