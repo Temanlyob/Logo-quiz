@@ -10,6 +10,48 @@ import {
   setDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
+function applyTheme(theme){
+
+document.body.classList.remove(
+"theme-light",
+"theme-dark"
+);
+
+if(theme==="light"){
+
+document.body.classList.add("theme-light");
+
+}else if(theme==="dark"){
+
+document.body.classList.add("theme-dark");
+
+}else{
+
+if(window.matchMedia("(prefers-color-scheme: dark)").matches){
+
+document.body.classList.add("theme-dark");
+
+}
+
+}
+
+}
+
+applyTheme(
+localStorage.getItem("theme") || "default"
+);
+
+window.matchMedia("(prefers-color-scheme: dark)")
+.addEventListener("change",()=>{
+
+if((localStorage.getItem("theme") || "default")==="default"){
+
+applyTheme("default");
+
+}
+
+});
+
 // =====================================
 // Buttons
 // =====================================
