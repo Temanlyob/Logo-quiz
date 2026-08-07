@@ -352,6 +352,14 @@ document.body.classList.add("theme-light");
 
 document.body.classList.add("theme-dark");
 
+}else{
+
+if(window.matchMedia("(prefers-color-scheme: dark)").matches){
+
+document.body.classList.add("theme-dark");
+
+}
+
 }
 
 }
@@ -379,3 +387,17 @@ updateThemeSelection();
 applyTheme(
 localStorage.getItem("theme") || "default"
 );
+
+window.matchMedia("(prefers-color-scheme: dark)")
+.addEventListener("change",()=>{
+
+const theme =
+localStorage.getItem("theme") || "default";
+
+if(theme==="default"){
+
+applyTheme("default");
+
+}
+
+});
