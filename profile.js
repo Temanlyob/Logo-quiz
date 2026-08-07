@@ -337,6 +337,25 @@ function updateThemeSelection() {
 
 }
 
+function applyTheme(theme){
+
+document.body.classList.remove(
+"theme-light",
+"theme-dark"
+);
+
+if(theme==="light"){
+
+document.body.classList.add("theme-light");
+
+}else if(theme==="dark"){
+
+document.body.classList.add("theme-dark");
+
+}
+
+}
+
 themeOptions.forEach(option => {
 
     option.addEventListener("click", () => {
@@ -348,10 +367,15 @@ themeOptions.forEach(option => {
             selectedTheme
         );
 
-        updateThemeSelection();
+      applyTheme(selectedTheme);
+
+      updateThemeSelection();
 
     });
 
 });
 
 updateThemeSelection();
+applyTheme(
+localStorage.getItem("theme") || "default"
+);
