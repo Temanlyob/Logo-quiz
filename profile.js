@@ -313,3 +313,5 @@ themeModal.addEventListener("click", (e) => {
     }
 
 });
+
+alert("JS Loaded");
