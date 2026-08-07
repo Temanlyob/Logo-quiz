@@ -675,3 +675,76 @@ color:#fff;
 font-size:16px;
 
 }
+/* ==========================
+   LIGHT THEME
+========================== */
+
+body.theme-light{
+
+background:#f5f8ff;
+color:#102a54;
+
+}
+
+body.theme-light .profile-card,
+body.theme-light .stat-card,
+body.theme-light .achievement-item,
+body.theme-light .setting-item,
+body.theme-light .theme-box,
+body.theme-light .bottom-nav{
+
+background:#ffffff;
+color:#102a54;
+
+}
+
+/* ==========================
+   DARK THEME
+========================== */
+
+body.theme-dark{
+
+background:#121212;
+color:#ffffff;
+
+}
+
+body.theme-dark .profile-card,
+body.theme-dark .stat-card,
+body.theme-dark .achievement-item,
+body.theme-dark .setting-item,
+body.theme-dark .theme-box,
+body.theme-dark .bottom-nav{
+
+background:#1f1f1f;
+color:#ffffff;
+box-shadow:none;
+
+}
+
+body.theme-dark .back-btn{
+
+background:#1f1f1f;
+color:#ffffff;
+
+}
+
+body.theme-dark .stat-card p,
+body.theme-dark .profile-card p,
+body.theme-dark .achievement-item p{
+
+color:#bdbdbd;
+
+}
+
+body.theme-dark .theme-option{
+
+background:#2a2a2a;
+
+}
+
+body.theme-dark #closeTheme{
+
+background:#ef4444;
+
+}
