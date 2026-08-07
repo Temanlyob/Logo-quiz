@@ -281,3 +281,35 @@ window.location.replace("login.html");
 };
 
 });           
+
+// =============================
+// Theme Popup
+// =============================
+
+const themesBtn = document.getElementById("themesBtn");
+const themeModal = document.getElementById("themeModal");
+const closeTheme = document.getElementById("closeTheme");
+
+themesBtn.addEventListener("click", (e) => {
+
+    e.preventDefault();
+
+    themeModal.style.display = "flex";
+
+});
+
+closeTheme.addEventListener("click", () => {
+
+    themeModal.style.display = "none";
+
+});
+
+themeModal.addEventListener("click", (e) => {
+
+    if (e.target === themeModal) {
+
+        themeModal.style.display = "none";
+
+    }
+
+});
