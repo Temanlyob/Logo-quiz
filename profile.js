@@ -296,15 +296,6 @@ document.getElementById("closeTheme");
 const options =
 document.querySelectorAll(".theme-option");
 
-closeTheme.onclick = (e) => {
-
-console.log("Theme Button Clicked");
-
-e.preventDefault();
-
-themeModal.style.display = "none";
-
-};
 
 options.forEach(item=>{
 
@@ -346,11 +337,6 @@ item.querySelector(".tick").textContent="✓";
 });
 
 }
-
-const themesBtn = document.getElementById("themesBtn");
-const themeModal = document.getElementById("themeModal");
-const closeTheme = document.getElementById("closeTheme");
-const options = document.querySelectorAll(".theme-option");
 
 themesBtn.addEventListener("click", (e) => {
     e.preventDefault();
