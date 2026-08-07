@@ -97,12 +97,18 @@ options.forEach(option => {
 // =============================
 
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
+
+try {
+  
     window.location.replace("login.html");
     return;
   }
 
+  console.log("User:", user);
+
   const snap = await getDoc(doc(db, "users", user.uid));
+
+  console.log("Firestore Snapshot:", snap.exists(), snap.data());
 
   if (!snap.exists()) {
     username.textContent = "User";
@@ -255,4 +261,11 @@ onAuthStateChanged(auth, async (user) => {
     await signOut(auth);
     window.location.replace("login.html");
   });
+});
+
+} catch (err) {
+    console.error("PROFILE ERROR:", err);
+    alert(err.message);
+}
+
 });
