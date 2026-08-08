@@ -562,3 +562,158 @@ color:#22c55e;
 padding-bottom:110px;
 
 }
+
+/* ==========================
+   THEME - LIGHT
+========================== */
+
+body.theme-light{
+    background:#f5f8ff;
+    color:#102a54;
+}
+
+body.theme-light .calendar-card{
+    background:#ffffff;
+}
+
+body.theme-light .back-btn{
+    background:#ffffff;
+    color:#102a54;
+}
+
+
+/* ==========================
+   THEME - DARK
+========================== */
+
+body.theme-dark{
+    background:#121212;
+    color:#ffffff;
+}
+
+
+/* Header */
+
+body.theme-dark .top h1{
+    color:#ffffff;
+}
+
+body.theme-dark .top p{
+    color:#bdbdbd;
+}
+
+
+/* Back Button */
+
+body.theme-dark .back-btn{
+    background:#1f1f1f;
+    color:#ffffff;
+    box-shadow:none;
+}
+
+
+/* Calendar Card */
+
+body.theme-dark .calendar-card{
+    background:#1f1f1f;
+    box-shadow:none;
+}
+
+
+/* Month */
+
+body.theme-dark .month-bar h2{
+    color:#ffffff;
+}
+
+
+/* Weekdays */
+
+body.theme-dark .weekdays{
+    color:#bdbdbd;
+}
+
+
+/* Normal Days */
+
+body.theme-dark .day{
+    background:#2a2a2a;
+    color:#ffffff;
+}
+
+
+/* Hover */
+
+body.theme-dark .day:hover{
+    background:#333333;
+}
+
+
+/* Empty */
+
+body.theme-dark .day.empty{
+    background:transparent;
+}
+
+
+/* Future */
+
+body.theme-dark .day.locked{
+    background:#252525;
+    color:#777777;
+}
+
+
+/* Disabled */
+
+body.theme-dark .day.disabled{
+    background:#202020;
+    color:#666666;
+}
+
+
+/* Today */
+
+body.theme-dark .day.today{
+    background:#3b82f6;
+    color:#ffffff;
+}
+
+
+/* Correct */
+
+body.theme-dark .day.correct-day{
+    background:#22c55e;
+    color:#ffffff;
+}
+
+
+/* Wrong */
+
+body.theme-dark .day.wrong-day{
+    background:#ef4444;
+    color:#ffffff;
+}
+
+
+/* Legend */
+
+body.theme-dark .legend-item{
+    color:#bdbdbd;
+}
+
+
+/* Bottom Navigation */
+
+body.theme-dark .bottom-nav{
+    background:#1f1f1f;
+    box-shadow:none;
+}
+
+body.theme-dark .bottom-nav a{
+    color:#bdbdbd;
+}
+
+body.theme-dark .bottom-nav a.active{
+    color:#22c55e;
+   }
