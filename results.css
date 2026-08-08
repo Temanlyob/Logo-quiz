@@ -371,3 +371,54 @@ body.theme-dark .stat span{
 color:#bdbdbd;
 
 }
+
+/* ==========================
+   DARK THEME
+========================== */
+
+body.theme-dark{
+    background:#121212;
+    color:#ffffff;
+}
+
+body.theme-dark .result-card{
+    background:#1f1f1f;
+    color:#ffffff;
+    box-shadow:none;
+}
+
+body.theme-dark .result-card h1{
+    color:#ffffff;
+}
+
+body.theme-dark .result-icon{
+    background:#2d2d2d;
+}
+
+body.theme-dark .score-box,
+body.theme-dark .stat{
+    background:#2a2a2a;
+    color:#ffffff;
+}
+
+body.theme-dark .score-box span,
+body.theme-dark .stat span{
+    color:#bdbdbd;
+}
+
+body.theme-dark .stat strong{
+    color:#ffffff;
+}
+
+body.theme-dark .bottom-nav{
+    background:#1f1f1f;
+    box-shadow:none;
+}
+
+body.theme-dark .bottom-nav a{
+    color:#bdbdbd;
+}
+
+body.theme-dark .bottom-nav a.active{
+    color:#22c55e;
+}
