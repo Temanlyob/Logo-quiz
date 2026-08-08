@@ -10,6 +10,54 @@ import {
   setDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
+console.log("RESULTS PAGE LOADED");
+
+console.log(
+  "SAVED THEME:",
+  localStorage.getItem("theme")
+);
+
+function applyTheme(theme){
+
+  console.log("APPLYING THEME:", theme);
+
+  document.body.classList.remove(
+    "theme-light",
+    "theme-dark"
+  );
+
+  if(theme === "light"){
+
+    document.body.classList.add("theme-light");
+
+  }else if(theme === "dark"){
+
+    document.body.classList.add("theme-dark");
+
+  }else{
+
+    if(
+      window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches
+    ){
+
+      document.body.classList.add("theme-dark");
+
+    }
+
+  }
+
+  console.log(
+    "BODY CLASS:",
+    document.body.className
+  );
+}
+
+applyTheme(
+  localStorage.getItem("theme") || "default"
+);
+
 console.log(localStorage.getItem("theme"));
 
 function applyTheme(theme){
