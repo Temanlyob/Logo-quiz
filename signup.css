@@ -146,3 +146,96 @@ color:#2563eb;
 font-weight:bold;
 
 }
+
+/* ==============================
+   DEVICE LIGHT THEME
+============================== */
+
+body.theme-light{
+    background:#f5f8ff;
+    color:#102a54;
+}
+
+body.theme-light .signup-container{
+    background:#ffffff;
+}
+
+
+/* ==============================
+   DEVICE DARK THEME
+============================== */
+
+body.theme-dark{
+    background:#0b0f14;
+    color:#f8fafc;
+}
+
+body.theme-dark .signup-container{
+    background:#151b23;
+    color:#f8fafc;
+
+    border:1px solid #273142;
+
+    box-shadow:
+        0 20px 50px rgba(0,0,0,.45);
+}
+
+body.theme-dark .logo-area h1{
+    color:#4d7cff;
+}
+
+body.theme-dark .logo-area p{
+    color:#a8b3c2;
+}
+
+body.theme-dark input{
+    background:#202732;
+    color:#ffffff;
+    border-color:#303b4a;
+}
+
+body.theme-dark input::placeholder{
+    color:#8995a5;
+}
+
+body.theme-dark input:focus{
+    background:#232c38;
+    border-color:#4d7cff;
+    outline:none;
+
+    box-shadow:
+        0 0 0 3px rgba(77,124,255,.15);
+}
+
+body.theme-dark form button{
+    background:#3167e8;
+    color:#ffffff;
+}
+
+body.theme-dark #googleSignup{
+    background:#202732;
+    color:#ffffff;
+    border-color:#303b4a;
+}
+
+body.theme-dark .signup-container > p{
+    color:#9aa6b5;
+}
+
+body.theme-dark .signup-container a{
+    color:#6d9aff;
+}
+
+
+/* Smooth transition */
+
+body,
+.signup-container,
+input,
+#googleSignup{
+    transition:
+        background .25s ease,
+        color .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease;
+}
