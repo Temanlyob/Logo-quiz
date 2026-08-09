@@ -6,41 +6,49 @@ import {
   signInWithPopup
 } from "./auth.js";
 
-function applyTheme(theme){
+// =============================
+// DEVICE THEME ONLY
+// =============================
+
+function applyDeviceTheme(){
 
     document.body.classList.remove(
         "theme-light",
         "theme-dark"
     );
 
-    if(theme === "light"){
-
-        document.body.classList.add("theme-light");
-
-    }else if(theme === "dark"){
+    if(
+        window.matchMedia(
+            "(prefers-color-scheme: dark)"
+        ).matches
+    ){
 
         document.body.classList.add("theme-dark");
 
     }else{
 
-        // DEFAULT = PHONE SYSTEM THEME
-        if(
-            window.matchMedia(
-                "(prefers-color-scheme: dark)"
-            ).matches
-        ){
-
-            document.body.classList.add("theme-dark");
-
-        }else{
-
-            document.body.classList.add("theme-light");
-
-        }
+        document.body.classList.add("theme-light");
 
     }
 
 }
+
+
+// Initial device theme
+applyDeviceTheme();
+
+
+// Automatically follow device theme changes
+const deviceTheme =
+window.matchMedia(
+    "(prefers-color-scheme: dark)"
+);
+
+deviceTheme.addEventListener("change", () => {
+
+    applyDeviceTheme();
+
+});
 
 applyTheme(
     localStorage.getItem("theme") || "default"
