@@ -139,7 +139,17 @@ font-size:15px;
 
 }
 /* ==========================
-   DARK THEME
+   DEVICE LIGHT THEME
+========================== */
+
+body.theme-light{
+    background:#f4f7ff;
+    color:#102a54;
+}
+
+
+/* ==========================
+   DEVICE DARK THEME
 ========================== */
 
 body.theme-dark{
@@ -172,13 +182,3 @@ body.theme-dark .google-btn{
     color:#ffffff;
     border-color:#444;
 }
-a{
-
-text-decoration:none;
-
-color:#2563eb;
-
-font-weight:bold;
-
-}
-
