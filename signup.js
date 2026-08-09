@@ -6,6 +6,45 @@ import {
   signInWithPopup
 } from "./auth.js";
 
+// =============================
+// DEVICE THEME ONLY
+// =============================
+
+function applyDeviceTheme(){
+
+    document.body.classList.remove(
+        "theme-light",
+        "theme-dark"
+    );
+
+    if(
+        window.matchMedia(
+            "(prefers-color-scheme: dark)"
+        ).matches
+    ){
+
+        document.body.classList.add("theme-dark");
+
+    }else{
+
+        document.body.classList.add("theme-light");
+
+    }
+}
+
+applyDeviceTheme();
+
+const deviceTheme =
+window.matchMedia(
+    "(prefers-color-scheme: dark)"
+);
+
+deviceTheme.addEventListener("change", () => {
+
+    applyDeviceTheme();
+
+});
+
 // ------------------------------
 // Email Sign Up
 // ------------------------------
