@@ -138,47 +138,113 @@ text-align:center;
 font-size:15px;
 
 }
-/* ==========================
-   DEVICE LIGHT THEME
-========================== */
+/* =================================
+   DEVICE THEME - LIGHT
+================================= */
 
 body.theme-light{
-    background:#f4f7ff;
+    background:#f5f8ff;
+    color:#102a54;
+}
+
+body.theme-light .login-container{
+    background:#ffffff;
     color:#102a54;
 }
 
 
-/* ==========================
-   DEVICE DARK THEME
-========================== */
+/* =================================
+   DEVICE THEME - DARK
+================================= */
 
 body.theme-dark{
     background:#121212;
     color:#ffffff;
+    color-scheme:dark;
 }
 
-body.theme-dark .login-card{
+
+/* LOGIN CARD */
+
+body.theme-dark .login-container{
     background:#1f1f1f;
     color:#ffffff;
-    box-shadow:none;
+    box-shadow:0 15px 40px rgba(0,0,0,.45);
 }
+
+
+/* LOGO / TITLE */
+
+body.theme-dark .logo-area h1{
+    color:#ffffff;
+}
+
+
+/* WELCOME BACK */
+
+body.theme-dark .logo-area p{
+    color:#bdbdbd;
+}
+
+
+/* INPUTS */
 
 body.theme-dark input{
     background:#2a2a2a;
     color:#ffffff;
-    border-color:#444;
+    border-color:#555555;
 }
 
 body.theme-dark input::placeholder{
-    color:#aaa;
-}
-
-body.theme-dark .subtitle{
     color:#bdbdbd;
 }
 
-body.theme-dark .google-btn{
+body.theme-dark input:focus{
     background:#2a2a2a;
     color:#ffffff;
-    border-color:#444;
+    border-color:#3b82f6;
+}
+
+
+/* GOOGLE BUTTON */
+
+body.theme-dark #googleLogin{
+    background:#2a2a2a;
+    color:#ffffff;
+    border-color:#555555;
+}
+
+
+/* BOTTOM TEXT */
+
+body.theme-dark .login-container > p{
+    color:#bdbdbd;
+}
+
+
+/* CREATE ACCOUNT */
+
+body.theme-dark .login-container a{
+    color:#60a5fa;
+}
+
+
+/* LOGIN BUTTON */
+
+body.theme-dark form button{
+    background:#2563eb;
+    color:#ffffff;
+}
+
+
+/* =================================
+   DEVICE THEME CHANGE
+================================= */
+
+@media (prefers-color-scheme: dark){
+
+    body:not(.theme-light){
+        background:#121212;
+    }
+
 }
