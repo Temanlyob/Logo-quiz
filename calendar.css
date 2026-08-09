@@ -562,3 +562,111 @@ color:#22c55e;
 padding-bottom:110px;
 
 }
+
+/* ==========================
+   LIGHT THEME
+========================== */
+
+body.theme-light{
+    background:#f5f8ff;
+    color:#102a54;
+}
+
+body.theme-light .back-btn{
+    background:#fff;
+    color:#102a54;
+}
+
+body.theme-light .calendar-card{
+    background:#fff;
+}
+
+body.theme-light .day{
+    background:#f8faff;
+    color:#102a54;
+}
+
+body.theme-light .legend-item{
+    color:#475569;
+}
+
+body.theme-light .bottom-nav{
+    background:#fff;
+}
+
+
+/* ==========================
+   DARK THEME
+========================== */
+
+body.theme-dark{
+    background:#121212;
+    color:#fff;
+}
+
+body.theme-dark .top h1{
+    color:#fff;
+}
+
+body.theme-dark .top p{
+    color:#bdbdbd;
+}
+
+body.theme-dark .back-btn{
+    background:#1f1f1f;
+    color:#fff;
+    box-shadow:none;
+}
+
+body.theme-dark .calendar-card{
+    background:#1f1f1f;
+    box-shadow:none;
+}
+
+body.theme-dark .month-bar h2{
+    color:#fff;
+}
+
+body.theme-dark .weekdays{
+    color:#bdbdbd;
+}
+
+body.theme-dark .day{
+    background:#2a2a2a;
+    color:#fff;
+}
+
+body.theme-dark .day:hover{
+    background:#333;
+}
+
+body.theme-dark .day.empty{
+    background:transparent;
+}
+
+body.theme-dark .day.locked{
+    background:#252525;
+    color:#777;
+}
+
+body.theme-dark .day.disabled{
+    background:#202020;
+    color:#666;
+}
+
+body.theme-dark .legend-item{
+    color:#bdbdbd;
+}
+
+body.theme-dark .bottom-nav{
+    background:#1f1f1f;
+    box-shadow:none;
+}
+
+body.theme-dark .bottom-nav a{
+    color:#bdbdbd;
+}
+
+body.theme-dark .bottom-nav a.active{
+    color:#22c55e;
+}
