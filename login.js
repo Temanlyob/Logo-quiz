@@ -6,6 +6,54 @@ import {
   signInWithPopup
 } from "./auth.js";
 
+// ======================================
+// THEME SYSTEM
+// ======================================
+
+// DAILY PUZZLE ALWAYS USES DEFAULT THEME
+
+function applyDefaultTheme() {
+
+    document.body.classList.remove(
+        "theme-light",
+        "theme-dark"
+    );
+
+    // Default = phone system theme
+    if (
+        window.matchMedia(
+            "(prefers-color-scheme: dark)"
+        ).matches
+    ) {
+
+        document.body.classList.add(
+            "theme-dark"
+        );
+
+    }
+
+}
+
+
+// Apply Default theme
+applyDefaultTheme();
+
+
+// Follow phone system theme
+const systemTheme =
+    window.matchMedia(
+        "(prefers-color-scheme: dark)"
+    );
+
+systemTheme.addEventListener(
+    "change",
+    () => {
+
+        applyDefaultTheme();
+
+    }
+);
+
 // ------------------------------
 // Email Login
 // ------------------------------
