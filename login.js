@@ -50,10 +50,6 @@ deviceTheme.addEventListener("change", () => {
 
 });
 
-applyTheme(
-    localStorage.getItem("theme") || "default"
-);
-
 const systemTheme =
 window.matchMedia(
     "(prefers-color-scheme: dark)"
