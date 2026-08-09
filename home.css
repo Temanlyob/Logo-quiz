@@ -547,3 +547,88 @@ font-size:24px;
 }
 
 }
+
+/* ==========================
+   LIGHT THEME
+========================== */
+
+body.theme-light{
+    background:#f5f8ff;
+    color:#102a54;
+}
+
+body.theme-light .top h1{
+    color:#102a54;
+}
+
+body.theme-light .today-card,
+body.theme-light .calendar-card,
+body.theme-light .progress-card,
+body.theme-light .achievement-card{
+    background:#ffffff;
+}
+
+body.theme-light .bottom-nav{
+    background:#ffffff;
+}
+
+
+/* ==========================
+   DARK THEME
+========================== */
+
+body.theme-dark{
+    background:#121212;
+    color:#ffffff;
+}
+
+body.theme-dark .top h1{
+    color:#ffffff;
+}
+
+body.theme-dark .top p{
+    color:#bdbdbd;
+}
+
+body.theme-dark .today-card,
+body.theme-dark .calendar-card,
+body.theme-dark .progress-card,
+body.theme-dark .achievement-card{
+    background:#1f1f1f;
+    color:#ffffff;
+    box-shadow:none;
+}
+
+body.theme-dark .today-card h2{
+    color:#ffffff;
+}
+
+body.theme-dark .today-card p{
+    color:#bdbdbd;
+}
+
+body.theme-dark .calendar-card p{
+    color:#bdbdbd;
+}
+
+body.theme-dark .progress-section h2,
+body.theme-dark .achievement-section h2{
+    color:#ffffff;
+}
+
+body.theme-dark .progress-card p{
+    color:#bdbdbd;
+}
+
+body.theme-dark .bottom-nav{
+    background:#1f1f1f;
+    box-shadow:none;
+}
+
+body.theme-dark .bottom-nav a{
+    color:#bdbdbd;
+}
+
+body.theme-dark .bottom-nav a.active{
+    color:#22c55e;
+}
