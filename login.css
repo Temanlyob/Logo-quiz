@@ -148,25 +148,3 @@ color:#2563eb;
 font-weight:bold;
 
 }
-
-body.theme-light{
-    background:#f4f7ff;
-    color:#102a54;
-}
-
-body.theme-dark{
-    background:#121212;
-    color:#ffffff;
-}
-
-body.theme-dark .card{
-    background:#1f1f1f;
-}
-
-body.theme-dark .result-section{
-    background:#1f1f1f;
-}
-
-body.theme-dark .info-card{
-    background:#2a2a2a;
-}
