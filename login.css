@@ -139,8 +139,10 @@ font-size:15px;
 
 }
 /* =================================
-   DEVICE THEME - LIGHT
+   LOGIN - DEVICE THEME
 ================================= */
+
+/* LIGHT */
 
 body.theme-light{
     background:#f5f8ff;
@@ -149,102 +151,123 @@ body.theme-light{
 
 body.theme-light .login-container{
     background:#ffffff;
-    color:#102a54;
 }
 
 
 /* =================================
-   DEVICE THEME - DARK
+   DARK MODE
 ================================= */
 
 body.theme-dark{
-    background:#121212;
-    color:#ffffff;
-    color-scheme:dark;
+    background:#0b0f14;
+    color:#f8fafc;
 }
 
-
-/* LOGIN CARD */
+/* Main Card */
 
 body.theme-dark .login-container{
-    background:#1f1f1f;
-    color:#ffffff;
-    box-shadow:0 15px 40px rgba(0,0,0,.45);
+    background:#151b23;
+    color:#f8fafc;
+
+    border:1px solid #273142;
+
+    box-shadow:
+        0 20px 50px rgba(0,0,0,.45);
 }
 
 
-/* LOGO / TITLE */
+/* Logo */
 
 body.theme-dark .logo-area h1{
-    color:#ffffff;
+    color:#4d7cff;
 }
 
 
-/* WELCOME BACK */
+/* Welcome Back */
 
 body.theme-dark .logo-area p{
-    color:#bdbdbd;
+    color:#a8b3c2;
 }
 
 
-/* INPUTS */
+/* Inputs */
 
 body.theme-dark input{
-    background:#2a2a2a;
+    background:#202732;
     color:#ffffff;
-    border-color:#555555;
+
+    border:2px solid #303b4a;
+
+    box-shadow:none;
 }
 
 body.theme-dark input::placeholder{
-    color:#bdbdbd;
+    color:#8995a5;
 }
 
 body.theme-dark input:focus{
-    background:#2a2a2a;
-    color:#ffffff;
-    border-color:#3b82f6;
+    background:#232c38;
+    border-color:#4d7cff;
+    outline:none;
+
+    box-shadow:
+        0 0 0 3px rgba(77,124,255,.15);
 }
 
 
-/* GOOGLE BUTTON */
+/* Login Button */
+
+body.theme-dark #loginForm button{
+    background:#3167e8;
+    color:#ffffff;
+
+    border:none;
+}
+
+body.theme-dark #loginForm button:hover{
+    background:#2859cf;
+}
+
+
+/* Google Button */
 
 body.theme-dark #googleLogin{
-    background:#2a2a2a;
+    background:#202732;
     color:#ffffff;
-    border-color:#555555;
+
+    border:2px solid #303b4a;
+}
+
+body.theme-dark #googleLogin:hover{
+    background:#283240;
 }
 
 
-/* BOTTOM TEXT */
+/* Bottom Text */
 
 body.theme-dark .login-container > p{
-    color:#bdbdbd;
+    color:#9aa6b5;
 }
 
 
-/* CREATE ACCOUNT */
+/* Create Account */
 
 body.theme-dark .login-container a{
-    color:#60a5fa;
-}
-
-
-/* LOGIN BUTTON */
-
-body.theme-dark form button{
-    background:#2563eb;
-    color:#ffffff;
+    color:#6d9aff;
 }
 
 
 /* =================================
-   DEVICE THEME CHANGE
+   SMOOTH TRANSITION
 ================================= */
 
-@media (prefers-color-scheme: dark){
-
-    body:not(.theme-light){
-        background:#121212;
-    }
-
+body,
+.login-container,
+input,
+#googleLogin{
+    transition:
+        background .25s ease,
+        color .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease;
 }
