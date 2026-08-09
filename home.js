@@ -20,6 +20,69 @@ const playBtn = document.querySelector(".play-btn");
 const achievementList = document.getElementById("achievementList");
 
 // ======================================
+// THEME SYSTEM
+// ======================================
+
+function applyTheme(theme) {
+
+  document.body.classList.remove(
+    "theme-light",
+    "theme-dark"
+  );
+
+  if (theme === "light") {
+
+    document.body.classList.add("theme-light");
+
+  } else if (theme === "dark") {
+
+    document.body.classList.add("theme-dark");
+
+  } else {
+
+    // DEFAULT = PHONE SYSTEM THEME
+
+    if (
+      window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches
+    ) {
+
+      document.body.classList.add("theme-dark");
+
+    }
+
+  }
+
+}
+
+
+// Load saved theme
+applyTheme(
+  localStorage.getItem("theme") || "default"
+);
+
+
+// Follow phone theme when Default is selected
+const systemTheme =
+window.matchMedia(
+  "(prefers-color-scheme: dark)"
+);
+
+systemTheme.addEventListener("change", () => {
+
+  const currentTheme =
+  localStorage.getItem("theme") || "default";
+
+  if (currentTheme === "default") {
+
+    applyTheme("default");
+
+  }
+
+});
+
+// ======================================
 // Auth
 // ======================================
 
