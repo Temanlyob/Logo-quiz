@@ -189,22 +189,42 @@ onAuthStateChanged(
           data.totalScore ?? 0;
 
         const history =
-          data.history ?? {};
+  data.history ?? {};
 
-        puzzlesPlayed =
-          Object.keys(history).length;
 
-        gamesWon =
-          Object.values(history)
-            .filter(
-              item =>
-                item.correct === true
-            )
-            .length;
+// =====================================
+// COUNT GAMES FROM PLAYED PUZZLES
+// GREEN DATE = WON
+// RED DATE = LOST
+// =====================================
 
-        gamesLost =
-          puzzlesPlayed -
-          gamesWon;
+const playedGames =
+  Object.values(history).filter(
+    item =>
+      item &&
+      item.played === true
+  );
+
+
+// 🟢 Green dates
+const gamesWon =
+  playedGames.filter(
+    item =>
+      item.correct === true
+  ).length;
+
+
+// 🔴 Red dates
+const gamesLost =
+  playedGames.filter(
+    item =>
+      item.correct === false
+  ).length;
+
+
+// 🎮 Total = Green + Red
+const puzzlesPlayed =
+  gamesWon + gamesLost;
 
         currentStreak =
           data.currentStreak ?? 0;
