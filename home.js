@@ -106,65 +106,69 @@ onAuthStateChanged(
       // ==================================
 
       let gamesPlayed = 0;
+// ======================================
+// ACCURACY
+// EXACT SAME LOGIC AS PROFILE
+// ======================================
 
-      let gamesWon = 0;
+function getCalendarStats() {
 
+  let played = 0;
+  let won = 0;
 
-      for (
-        let key in localStorage
-      ) {
+  for (let key in localStorage) {
 
-        if (
-          key.startsWith("quiz_")
-        ) {
+    if (key.startsWith("quiz_")) {
 
-          try {
+      const quiz =
+        JSON.parse(
+          localStorage.getItem(key)
+        );
 
-            const quiz =
-              JSON.parse(
-                localStorage.getItem(key)
-              );
+      if (quiz) {
 
+        played++;
 
-            if (quiz) {
+        if (quiz.correct) {
 
-              gamesPlayed++;
-
-
-              if (
-                quiz.correct === true
-              ) {
-
-                gamesWon++;
-
-              }
-
-            }
-
-          } catch (error) {
-
-            console.error(
-              "Quiz data error:",
-              error
-            );
-
-          }
+          won++;
 
         }
 
       }
 
+    }
 
-      // ==================================
-      // ACCURACY
-      // ==================================
+  }
 
-      const accuracy =
-        gamesPlayed === 0
-          ? 0
-          : Math.round(
-              (gamesWon / gamesPlayed) * 100
-            );
+  return {
+    played: played,
+    won: won,
+    lost: played - won
+  };
+
+}
+
+
+const stats =
+  getCalendarStats();
+
+const gamesPlayed =
+  stats.played;
+
+const gamesWon =
+  stats.won;
+
+const gamesLost =
+  stats.lost;
+
+
+const accuracy =
+  gamesPlayed === 0
+    ? 0
+    : Math.round(
+        (gamesWon / gamesPlayed) * 100
+      );
 
 
       // ==================================
