@@ -1,16 +1,14 @@
-import { auth, db } from "./firebase.js";
+import { auth } from "./firebase.js";
 
 import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-import {
-  doc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+console.log("HOME JS LOADED");
+
 
 // ======================================
-// Elements
+// ELEMENTS
 // ======================================
 
 const score =
@@ -19,14 +17,77 @@ const score =
 const streak =
   document.getElementById("currentStreak");
 
-const acc =
+const accuracy =
   document.getElementById("accuracy");
 
-const playBtn =
-  document.querySelector(".play-btn");
 
-const achievementList =
-  document.getElementById("achievementList");
+// ======================================
+// LOAD PROFILE PROGRESS
+// ======================================
+
+function loadProfileProgress() {
+
+  const saved =
+    localStorage.getItem(
+      "profileProgress"
+    );
+
+
+  if (!saved) {
+
+    console.log(
+      "No profile progress found"
+    );
+
+    score.textContent = "0";
+
+    streak.textContent = "0";
+
+    accuracy.textContent = "0%";
+
+    return;
+
+  }
+
+
+  try {
+
+    const progress =
+      JSON.parse(saved);
+
+
+    // ================================
+    // SAME VALUES AS PROFILE
+    // ================================
+
+    score.textContent =
+      progress.score ?? 0;
+
+
+    streak.textContent =
+      progress.streak ?? 0;
+
+
+    accuracy.textContent =
+      (progress.accuracy ?? 0) + "%";
+
+
+    console.log(
+      "HOME PROFILE PROGRESS:",
+      progress
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "PROFILE PROGRESS ERROR:",
+      error
+    );
+
+  }
+
+}
 
 
 // ======================================
@@ -35,7 +96,7 @@ const achievementList =
 
 onAuthStateChanged(
   auth,
-  async (user) => {
+  (user) => {
 
     if (!user) {
 
@@ -47,305 +108,46 @@ onAuthStateChanged(
 
     }
 
-    try {
 
-      // ==================================
-      // FIRESTORE USER
-      // ==================================
+    // Load exactly the values
+    // saved by Profile
 
-      const userRef =
-        doc(
-          db,
-          "users",
-          user.uid
-        );
-
-      const snap =
-        await getDoc(userRef);
-
-
-      if (!snap.exists()) {
-
-        score.textContent = "0";
-        streak.textContent = "0";
-        acc.textContent = "0%";
-
-        achievementList.innerHTML =
-          "<div class='achievement-card'>No achievements yet.</div>";
-
-        return;
-
-      }
-
-
-      const data =
-        snap.data();
-
-
-      // ==================================
-      // TOTAL SCORE
-      // Same as Profile
-      // ==================================
-
-      const totalScore =
-        data.totalScore ?? 0;
-
-
-      // ==================================
-      // CURRENT STREAK
-      // Same as Profile
-      // ==================================
-
-      const currentStreak =
-        data.currentStreak ?? 0;
-
-
-      // ==================================
-      // REAL PUZZLE PROGRESS
-      // Same logic as Profile
-      // ==================================
-
-      let gamesPlayed = 0;
-// ======================================
-// ACCURACY
-// EXACT SAME LOGIC AS PROFILE
-// ======================================
-
-function getCalendarStats() {
-
-  let played = 0;
-  let won = 0;
-
-  for (let key in localStorage) {
-
-    if (key.startsWith("quiz_")) {
-
-      const quiz =
-        JSON.parse(
-          localStorage.getItem(key)
-        );
-
-      if (quiz) {
-
-        played++;
-
-        if (quiz.correct) {
-
-          won++;
-
-        }
-
-      }
-
-    }
-
-  }
-
-  return {
-    played: played,
-    won: won,
-    lost: played - won
-  };
-
-}
-
-
-const stats =
-  getCalendarStats();
-
-const gamesPlayed =
-  stats.played;
-
-const gamesWon =
-  stats.won;
-
-const gamesLost =
-  stats.lost;
-
-
-const accuracy =
-  gamesPlayed === 0
-    ? 0
-    : Math.round(
-        (gamesWon / gamesPlayed) * 100
-      );
-
-
-      // ==================================
-      // UPDATE HOME PROGRESS
-      // ==================================
-
-      score.textContent =
-        totalScore;
-
-      streak.textContent =
-        currentStreak;
-
-      acc.textContent =
-        accuracy + "%";
-
-
-      // ==================================
-      // ACHIEVEMENTS
-      // ==================================
-
-      const achievements = [];
-
-
-      if (gamesPlayed >= 1) {
-
-        achievements.push(
-          "🥇 Logo Rookie"
-        );
-
-      }
-
-
-      if (currentStreak >= 7) {
-
-        achievements.push(
-          "🔥 7 Day Streak"
-        );
-
-      }
-
-
-      if (totalScore >= 100) {
-
-        achievements.push(
-          "⭐ 100 Points Club"
-        );
-
-      }
-
-
-      if (gamesPlayed >= 30) {
-
-        achievements.push(
-          "🎮 Puzzle Master"
-        );
-
-      }
-
-
-      if (
-        accuracy === 100 &&
-        gamesPlayed >= 10
-      ) {
-
-        achievements.push(
-          "🎯 Accuracy Master"
-        );
-
-      }
-
-
-      if (gamesPlayed >= 100) {
-
-        achievements.push(
-          "👑 Logo Legend"
-        );
-
-      }
-
-
-      // ==================================
-      // SHOW ACHIEVEMENTS
-      // ==================================
-
-      achievementList.innerHTML = "";
-
-
-      if (
-        achievements.length === 0
-      ) {
-
-        achievementList.innerHTML =
-          `
-          <div class="achievement-card">
-            No achievements yet.
-          </div>
-          `;
-
-      } else {
-
-        achievements.forEach(
-          (item) => {
-
-            achievementList.innerHTML +=
-              `
-              <div class="achievement-card">
-                ${item}
-              </div>
-              `;
-
-          }
-        );
-
-      }
-
-
-      // ==================================
-      // DEBUG
-      // ==================================
-
-      console.log(
-        "HOME PROGRESS"
-      );
-
-      console.log(
-        "Total Score:",
-        totalScore
-      );
-
-      console.log(
-        "Current Streak:",
-        currentStreak
-      );
-
-      console.log(
-        "Games Played:",
-        gamesPlayed
-      );
-
-      console.log(
-        "Games Won:",
-        gamesWon
-      );
-
-      console.log(
-        "Accuracy:",
-        accuracy + "%"
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        "HOME ERROR:",
-        error
-      );
-
-    }
+    loadProfileProgress();
 
   }
 );
 
 
 // ======================================
-// PLAY BUTTON
+// REFRESH WHEN RETURNING TO HOME
 // ======================================
 
-if (playBtn) {
+window.addEventListener(
+  "pageshow",
+  () => {
 
-  playBtn.addEventListener(
-    "click",
-    () => {
+    loadProfileProgress();
 
-      window.location.href =
-        "dailypuzzel.html";
+  }
+);
+
+
+// ======================================
+// ALSO REFRESH WHEN TAB BECOMES ACTIVE
+// ======================================
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+
+    if (
+      document.visibilityState ===
+      "visible"
+    ) {
+
+      loadProfileProgress();
 
     }
-  );
 
-}
+  }
+);
