@@ -156,6 +156,20 @@ played.textContent =
 puzzlesPlayed;
 
 // =============================
+// SAVE PROFILE PROGRESS
+// Home page will use these exact values
+// =============================
+
+localStorage.setItem(
+  "profileProgress",
+  JSON.stringify({
+    score: totalScore,
+    streak: currentStreak,
+    accuracy: winRate
+  })
+);
+
+// =============================
 // Level
 // =============================
 
