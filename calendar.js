@@ -86,7 +86,7 @@ systemTheme.addEventListener(
 );
 
 // First available puzzle
-const firstPuzzleDate = new Date(2026, 6, 27); // 27 July 2026
+const firstPuzzleDate = new Date(2026, 6, 28); // 27 July 2026
 
 function renderCalendar(){
 
