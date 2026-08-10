@@ -670,3 +670,31 @@ body.theme-dark .bottom-nav a{
 body.theme-dark .bottom-nav a.active{
     color:#22c55e;
 }
+
+/* ==========================
+   DARK THEME - RESULT DAYS
+========================== */
+
+body.theme-dark .day.correct-day{
+    background:#22c55e;
+    color:#ffffff;
+    opacity:1;
+}
+
+body.theme-dark .day.wrong-day{
+    background:#ef4444;
+    color:#ffffff;
+    opacity:1;
+}
+
+/* Correct/Wrong par dark day rule override na ho */
+body.theme-dark .day.correct-day:hover,
+body.theme-dark .day.wrong-day:hover{
+    background:#22c55e;
+    color:#ffffff;
+}
+
+body.theme-dark .day.wrong-day:hover{
+    background:#ef4444;
+    color:#ffffff;
+}
