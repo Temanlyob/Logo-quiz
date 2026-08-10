@@ -113,33 +113,72 @@ onAuthStateChanged(auth, async (user) => {
 
     const data = snap.data();
 
-    const totalScore =
-    data.totalScore ?? 0;
+// ======================================
+// REAL PROGRESS
+// Same calculation as Profile
+// ======================================
 
-    const currentStreak =
-    data.currentStreak ?? 0;
+const totalScore =
+data.totalScore ?? 0;
 
-    const history =
-data.history ?? {};
+const currentStreak =
+data.currentStreak ?? 0;
 
-const gamesPlayed =
-Object.keys(history).length;
 
-const gamesWon =
-Object.values(history)
-.filter(item => item.correct === true)
-.length;
+// Read actual played puzzles
+// from localStorage
+
+let gamesPlayed = 0;
+let gamesWon = 0;
+
+for (let key in localStorage) {
+
+  if (key.startsWith("quiz_")) {
+
+    try {
+
+      const quiz =
+        JSON.parse(
+          localStorage.getItem(key)
+        );
+
+      if (quiz) {
+
+        gamesPlayed++;
+
+        if (quiz.correct === true) {
+
+          gamesWon++;
+
+        }
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Progress read error:",
+        error
+      );
+
+    }
+
+  }
+
+}
 
 const gamesLost =
 gamesPlayed - gamesWon;
-    
-    const accuracy =
-    gamesPlayed === 0
-    ? 0
-    : Math.round(
-      (gamesWon / gamesPlayed) * 100
-    );
 
+
+// Accuracy
+
+const accuracy =
+gamesPlayed === 0
+? 0
+: Math.round(
+    (gamesWon / gamesPlayed) * 100
+  );
     score.textContent = totalScore;
     streak.textContent = currentStreak;
     acc.textContent = accuracy + "%";
