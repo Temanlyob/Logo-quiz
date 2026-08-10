@@ -698,3 +698,36 @@ body.theme-dark .day.wrong-day:hover{
     background:#ef4444;
     color:#ffffff;
 }
+
+/* ==========================
+   LIGHT THEME - RESULT DAYS
+========================== */
+
+body.theme-light .day.correct-day{
+    background:#22c55e !important;
+    color:#ffffff !important;
+    opacity:1 !important;
+}
+
+body.theme-light .day.wrong-day{
+    background:#ef4444 !important;
+    color:#ffffff !important;
+    opacity:1 !important;
+}
+
+
+/* ==========================
+   DARK THEME - RESULT DAYS
+========================== */
+
+body.theme-dark .day.correct-day{
+    background:#22c55e !important;
+    color:#ffffff !important;
+    opacity:1 !important;
+}
+
+body.theme-dark .day.wrong-day{
+    background:#ef4444 !important;
+    color:#ffffff !important;
+    opacity:1 !important;
+}
