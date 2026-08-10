@@ -24,19 +24,18 @@ const streak =
 const accuracy =
   document.getElementById("accuracy");
 
+const achievementList =
+  document.getElementById("achievementList");
+
 
 // ======================================
 // LOAD PROGRESS
-// EXACT SAME LOGIC AS PROFILE
+// SAME LOGIC AS PROFILE
 // ======================================
 
 async function loadProgress(user) {
 
   try {
-
-    // ==================================
-    // FIRESTORE
-    // ==================================
 
     const userRef =
       doc(
@@ -68,7 +67,7 @@ async function loadProgress(user) {
 
 
     // ==================================
-    // LOCAL PUZZLE DATA
+    // REAL PUZZLE DATA
     // SAME AS PROFILE
     // ==================================
 
@@ -91,11 +90,9 @@ async function loadProgress(user) {
               localStorage.getItem(key)
             );
 
-
           if (quiz) {
 
             puzzlesPlayed++;
-
 
             if (
               quiz.correct === true
@@ -134,7 +131,7 @@ async function loadProgress(user) {
 
 
     // ==================================
-    // SHOW ON HOME
+    // UPDATE PROGRESS
     // ==================================
 
     score.textContent =
@@ -148,32 +145,183 @@ async function loadProgress(user) {
 
 
     // ==================================
+    // ACHIEVEMENTS
+    // SAME LOGIC AS PROFILE
+    // ==================================
+
+    let html = "";
+
+
+    if (puzzlesPlayed >= 1) {
+
+      html += `
+        <div class="achievement-item">
+
+          <span>🥇</span>
+
+          <div>
+
+            <h3>Logo Rookie</h3>
+
+            <p>
+              Completed your first puzzle.
+            </p>
+
+          </div>
+
+        </div>
+      `;
+
+    }
+
+
+    if (currentStreak >= 7) {
+
+      html += `
+        <div class="achievement-item">
+
+          <span>🔥</span>
+
+          <div>
+
+            <h3>7 Day Streak</h3>
+
+            <p>
+              Solved puzzles for 7 consecutive days.
+            </p>
+
+          </div>
+
+        </div>
+      `;
+
+    }
+
+
+    if (totalScore >= 100) {
+
+      html += `
+        <div class="achievement-item">
+
+          <span>⭐</span>
+
+          <div>
+
+            <h3>100 Points Club</h3>
+
+            <p>
+              Earned 100+ points.
+            </p>
+
+          </div>
+
+        </div>
+      `;
+
+    }
+
+
+    if (puzzlesPlayed >= 30) {
+
+      html += `
+        <div class="achievement-item">
+
+          <span>🎮</span>
+
+          <div>
+
+            <h3>Puzzle Master</h3>
+
+            <p>
+              Played 30 puzzles.
+            </p>
+
+          </div>
+
+        </div>
+      `;
+
+    }
+
+
+    if (
+      winRate === 100 &&
+      puzzlesPlayed >= 10
+    ) {
+
+      html += `
+        <div class="achievement-item">
+
+          <span>🎯</span>
+
+          <div>
+
+            <h3>Accuracy Master</h3>
+
+            <p>
+              100% accuracy in 10 puzzles.
+            </p>
+
+          </div>
+
+        </div>
+      `;
+
+    }
+
+
+    // ==================================
+    // NO ACHIEVEMENT
+    // ==================================
+
+    if (html === "") {
+
+      html = `
+        <div class="achievement-item">
+
+          <span>🔒</span>
+
+          <div>
+
+            <h3>No Achievements Yet</h3>
+
+            <p>
+              Keep playing to unlock achievements.
+            </p>
+
+          </div>
+
+        </div>
+      `;
+
+    }
+
+
+    // ==================================
+    // SHOW ACHIEVEMENTS
+    // ==================================
+
+    if (achievementList) {
+
+      achievementList.innerHTML =
+        html;
+
+    }
+
+
+    // ==================================
     // DEBUG
     // ==================================
 
     console.log(
-      "HOME SCORE:",
-      totalScore
-    );
-
-    console.log(
-      "HOME STREAK:",
-      currentStreak
-    );
-
-    console.log(
-      "HOME PLAYED:",
-      puzzlesPlayed
-    );
-
-    console.log(
-      "HOME WON:",
-      gamesWon
-    );
-
-    console.log(
-      "HOME ACCURACY:",
-      winRate + "%"
+      "HOME PROGRESS:",
+      {
+        score: totalScore,
+        streak: currentStreak,
+        played: puzzlesPlayed,
+        won: gamesWon,
+        accuracy: winRate
+      }
     );
 
 
@@ -227,6 +375,34 @@ window.addEventListener(
     if (user) {
 
       await loadProgress(user);
+
+    }
+
+  }
+);
+
+
+// ======================================
+// REFRESH WHEN PAGE BECOMES VISIBLE
+// ======================================
+
+document.addEventListener(
+  "visibilitychange",
+  async () => {
+
+    if (
+      document.visibilityState ===
+      "visible"
+    ) {
+
+      const user =
+        auth.currentUser;
+
+      if (user) {
+
+        await loadProgress(user);
+
+      }
 
     }
 
