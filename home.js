@@ -1,11 +1,15 @@
-import { auth } from "./firebase.js";
+import { auth, db } from "./firebase.js";
 
 import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-console.log("HOME JS LOADED");
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
+console.log("HOME JS LOADED");
 
 // ======================================
 // ELEMENTS
@@ -22,66 +26,161 @@ const accuracy =
 
 
 // ======================================
-// LOAD PROFILE PROGRESS
+// LOAD PROGRESS
+// EXACT SAME LOGIC AS PROFILE
 // ======================================
 
-function loadProfileProgress() {
-
-  const saved =
-    localStorage.getItem(
-      "profileProgress"
-    );
-
-
-  if (!saved) {
-
-    console.log(
-      "No profile progress found"
-    );
-
-    score.textContent = "0";
-
-    streak.textContent = "0";
-
-    accuracy.textContent = "0%";
-
-    return;
-
-  }
-
+async function loadProgress(user) {
 
   try {
 
-    const progress =
-      JSON.parse(saved);
+    // ==================================
+    // FIRESTORE
+    // ==================================
+
+    const userRef =
+      doc(
+        db,
+        "users",
+        user.uid
+      );
+
+    const snap =
+      await getDoc(userRef);
 
 
-    // ================================
-    // SAME VALUES AS PROFILE
-    // ================================
+    let totalScore = 0;
+    let currentStreak = 0;
+
+
+    if (snap.exists()) {
+
+      const data =
+        snap.data();
+
+      totalScore =
+        data.totalScore ?? 0;
+
+      currentStreak =
+        data.currentStreak ?? 0;
+
+    }
+
+
+    // ==================================
+    // LOCAL PUZZLE DATA
+    // SAME AS PROFILE
+    // ==================================
+
+    let puzzlesPlayed = 0;
+    let gamesWon = 0;
+
+
+    for (
+      let key in localStorage
+    ) {
+
+      if (
+        key.startsWith("quiz_")
+      ) {
+
+        try {
+
+          const quiz =
+            JSON.parse(
+              localStorage.getItem(key)
+            );
+
+
+          if (quiz) {
+
+            puzzlesPlayed++;
+
+
+            if (
+              quiz.correct === true
+            ) {
+
+              gamesWon++;
+
+            }
+
+          }
+
+        } catch (error) {
+
+          console.error(
+            "Quiz data error:",
+            error
+          );
+
+        }
+
+      }
+
+    }
+
+
+    // ==================================
+    // ACCURACY
+    // ==================================
+
+    const winRate =
+      puzzlesPlayed === 0
+        ? 0
+        : Math.round(
+            (gamesWon / puzzlesPlayed) * 100
+          );
+
+
+    // ==================================
+    // SHOW ON HOME
+    // ==================================
 
     score.textContent =
-      progress.score ?? 0;
-
+      totalScore;
 
     streak.textContent =
-      progress.streak ?? 0;
-
+      currentStreak;
 
     accuracy.textContent =
-      (progress.accuracy ?? 0) + "%";
+      winRate + "%";
 
+
+    // ==================================
+    // DEBUG
+    // ==================================
 
     console.log(
-      "HOME PROFILE PROGRESS:",
-      progress
+      "HOME SCORE:",
+      totalScore
+    );
+
+    console.log(
+      "HOME STREAK:",
+      currentStreak
+    );
+
+    console.log(
+      "HOME PLAYED:",
+      puzzlesPlayed
+    );
+
+    console.log(
+      "HOME WON:",
+      gamesWon
+    );
+
+    console.log(
+      "HOME ACCURACY:",
+      winRate + "%"
     );
 
 
   } catch (error) {
 
     console.error(
-      "PROFILE PROGRESS ERROR:",
+      "HOME PROGRESS ERROR:",
       error
     );
 
@@ -96,7 +195,7 @@ function loadProfileProgress() {
 
 onAuthStateChanged(
   auth,
-  (user) => {
+  async (user) => {
 
     if (!user) {
 
@@ -108,11 +207,7 @@ onAuthStateChanged(
 
     }
 
-
-    // Load exactly the values
-    // saved by Profile
-
-    loadProfileProgress();
+    await loadProgress(user);
 
   }
 );
@@ -124,28 +219,14 @@ onAuthStateChanged(
 
 window.addEventListener(
   "pageshow",
-  () => {
+  async () => {
 
-    loadProfileProgress();
+    const user =
+      auth.currentUser;
 
-  }
-);
+    if (user) {
 
-
-// ======================================
-// ALSO REFRESH WHEN TAB BECOMES ACTIVE
-// ======================================
-
-document.addEventListener(
-  "visibilitychange",
-  () => {
-
-    if (
-      document.visibilityState ===
-      "visible"
-    ) {
-
-      loadProfileProgress();
+      await loadProgress(user);
 
     }
 
