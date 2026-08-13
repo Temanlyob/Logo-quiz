@@ -189,22 +189,62 @@ onAuthStateChanged(
           data.totalScore ?? 0;
 
         const history =
-          data.history ?? {};
+  data.history ?? {};
 
-        puzzlesPlayed =
-          Object.keys(history).length;
+// =====================================
+// GAME COUNT
+// SAME DATA AS HOME PAGE
+// =====================================
 
-        gamesWon =
-          Object.values(history)
-            .filter(
-              item =>
-                item.correct === true
-            )
-            .length;
+puzzlesPlayed = 0;
+gamesWon = 0;
+gamesLost = 0;
 
-        gamesLost =
-          puzzlesPlayed -
-          gamesWon;
+// Read all played puzzles from localStorage
+for (let key in localStorage) {
+
+  if (key.startsWith("quiz_")) {
+
+    try {
+
+      const quiz =
+        JSON.parse(
+          localStorage.getItem(key)
+        );
+
+      if (quiz && quiz.attempted === true) {
+
+        // Total played
+        puzzlesPlayed++;
+
+        // Correct
+        if (quiz.correct === true) {
+
+          gamesWon++;
+
+        }
+
+        // Wrong
+        else if (quiz.correct === false) {
+
+          gamesLost++;
+
+        }
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Result quiz data error:",
+        error
+      );
+
+    }
+
+  }
+
+}
 
         currentStreak =
           data.currentStreak ?? 0;
