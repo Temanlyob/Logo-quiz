@@ -118,6 +118,20 @@ data.photoURL ||
 user.photoURL ||
 "default-avatar.png";
 
+// Current profile data for Edit Profile
+selectedPhotoURL =
+data.photoURL ||
+user.photoURL ||
+"default-avatar.png";
+
+editUsername.value =
+data.username ||
+user.displayName ||
+"User";
+
+editPhotoPreview.src =
+selectedPhotoURL;
+  
 function getCalendarStats() {
 
   let played = 0;
@@ -452,13 +466,17 @@ applyTheme("default");
 
 editProfileBtn.addEventListener("click", () => {
 
-    editProfileModal.style.display = "flex";
-
     editUsername.value =
         username.textContent;
 
     editPhotoPreview.src =
         avatar.src;
+
+    selectedPhotoURL =
+        avatar.src;
+
+    editProfileModal.style.display =
+        "flex";
 
 });
 
@@ -558,16 +576,25 @@ saveProfileBtn.addEventListener(
                 "Saving...";
 
             await updateDoc(
-                doc(
-                    db,
-                    "users",
-                    currentUser.uid
-                ),
-                {
-                    username: newUsername,
-                    photoURL: selectedPhotoURL
-                }
-            );
+    doc(
+        db,
+        "users",
+        currentUser.uid
+    ),
+    {
+        username: newUsername,
+        photoURL: selectedPhotoURL
+    }
+);
+
+          username.textContent =
+    newUsername;
+
+avatar.src =
+    selectedPhotoURL;
+
+editPhotoPreview.src =
+    selectedPhotoURL;
 
             username.textContent =
                 newUsername;
