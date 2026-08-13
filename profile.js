@@ -7,10 +7,11 @@ signOut
 
 import {
 doc,
-getDoc
+getDoc,
+updateDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
 // =============================
+
 // Elements
 // =============================
 
@@ -45,6 +46,34 @@ const achievementSection =
 document.querySelector(".achievement-section");
 
 // =============================
+// EDIT PROFILE ELEMENTS
+// =============================
+
+const editProfileBtn =
+document.getElementById("editProfileBtn");
+
+const editProfileModal =
+document.getElementById("editProfileModal");
+
+const editUsername =
+document.getElementById("editUsername");
+
+const editPhotoPreview =
+document.getElementById("editPhotoPreview");
+
+const profilePhotoInput =
+document.getElementById("profilePhotoInput");
+
+const saveProfileBtn =
+document.getElementById("saveProfileBtn");
+
+const cancelProfileBtn =
+document.getElementById("cancelProfileBtn");
+
+let selectedPhotoURL = null;
+let currentUser = null;
+
+// =============================
 // Firebase
 // =============================
 
@@ -56,6 +85,8 @@ window.location.replace("login.html");
 return;
 
 }
+
+currentUser = user;
 
 const snap =
 await getDoc(
