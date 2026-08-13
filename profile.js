@@ -446,3 +446,160 @@ applyTheme("default");
 }
 
 });
+// =============================
+// EDIT PROFILE
+// =============================
+
+editProfileBtn.addEventListener("click", () => {
+
+    editProfileModal.style.display = "flex";
+
+    editUsername.value =
+        username.textContent;
+
+    editPhotoPreview.src =
+        avatar.src;
+
+});
+
+
+// =============================
+// CHANGE PHOTO PREVIEW
+// =============================
+
+profilePhotoInput.addEventListener(
+    "change",
+    () => {
+
+        const file =
+            profilePhotoInput.files[0];
+
+        if(!file) return;
+
+        const reader =
+            new FileReader();
+
+        reader.onload = (e) => {
+
+            selectedPhotoURL =
+                e.target.result;
+
+            editPhotoPreview.src =
+                e.target.result;
+
+        };
+
+        reader.readAsDataURL(file);
+
+    }
+);
+
+
+// =============================
+// CANCEL
+// =============================
+
+cancelProfileBtn.addEventListener(
+    "click",
+    () => {
+
+        editProfileModal.style.display =
+            "none";
+
+    }
+);
+
+
+// =============================
+// CLOSE OUTSIDE
+// =============================
+
+editProfileModal.addEventListener(
+    "click",
+    (e) => {
+
+        if(e.target === editProfileModal){
+
+            editProfileModal.style.display =
+                "none";
+
+        }
+
+    }
+);
+
+
+// =============================
+// SAVE PROFILE
+// =============================
+
+saveProfileBtn.addEventListener(
+    "click",
+    async () => {
+
+        if(!currentUser) return;
+
+        const newUsername =
+            editUsername.value.trim();
+
+        if(!newUsername){
+
+            alert("Please enter username.");
+
+            return;
+
+        }
+
+        try{
+
+            saveProfileBtn.disabled = true;
+
+            saveProfileBtn.textContent =
+                "Saving...";
+
+            await updateDoc(
+                doc(
+                    db,
+                    "users",
+                    currentUser.uid
+                ),
+                {
+                    username: newUsername,
+                    photoURL: selectedPhotoURL
+                }
+            );
+
+            username.textContent =
+                newUsername;
+
+            avatar.src =
+                selectedPhotoURL;
+
+            editProfileModal.style.display =
+                "none";
+
+            alert("Profile updated successfully!");
+
+        }catch(error){
+
+            console.error(
+                "PROFILE UPDATE ERROR:",
+                error
+            );
+
+            alert(
+                "Failed to update profile."
+            );
+
+        }finally{
+
+            saveProfileBtn.disabled =
+                false;
+
+            saveProfileBtn.textContent =
+                "Save Changes";
+
+        }
+
+    }
+);
