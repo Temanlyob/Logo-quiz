@@ -56,6 +56,55 @@ Loading...
 
 </div>
 
+<button id="editProfileBtn" class="edit-profile-btn">
+    ✏️ Edit Profile
+</button>
+  <div id="editProfileModal" class="edit-profile-modal">
+
+    <div class="edit-profile-box">
+
+        <h2>Edit Profile</h2>
+
+        <div class="edit-photo-area">
+
+            <img
+                id="editPhotoPreview"
+                src="default-avatar.png"
+                class="edit-photo-preview"
+            >
+
+            <label for="profilePhotoInput" class="change-photo-btn">
+                📷 Change Photo
+            </label>
+
+            <input
+                type="file"
+                id="profilePhotoInput"
+                accept="image/*"
+                hidden
+            >
+
+        </div>
+
+        <input
+            type="text"
+            id="editUsername"
+            placeholder="Username"
+            maxlength="30"
+        >
+
+        <button id="saveProfileBtn" class="save-profile-btn">
+            Save Changes
+        </button>
+
+        <button id="cancelProfileBtn" class="cancel-profile-btn">
+            Cancel
+        </button>
+
+    </div>
+
+  </div>
+
 </section>
 
 <section class="stats-grid">
