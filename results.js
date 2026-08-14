@@ -261,68 +261,105 @@ for (let key in localStorage) {
       // UPDATE STATS
       // =====================================
 
-      if (!processed) {
+      // =====================================
+// UPDATE STREAK
+// =====================================
 
-        const puzzle =
-          puzzleDate.split("-");
+if (!processed) {
 
-        const puzzleDateObj =
-          new Date(
-            Number("20" + puzzle[2]),
-            Number(puzzle[1]) - 1,
-            Number(puzzle[0])
-          );
+  const puzzle =
+    puzzleDate.split("-");
 
-        if (isCorrect) {
+  const puzzleDateObj =
+    new Date(
+      Number("20" + puzzle[2]),
+      Number(puzzle[1]) - 1,
+      Number(puzzle[0])
+    );
 
-          totalScore += score;
+  // Remove time from date
+  puzzleDateObj.setHours(0, 0, 0, 0);
 
-          if (!lastPlayed) {
+  if (!lastPlayed) {
 
-            currentStreak = 1;
+    // First played puzzle
+    currentStreak = 1;
 
-          } else {
+  } else {
 
-            const lastDate =
-              new Date(lastPlayed);
+    const lastDate =
+      new Date(lastPlayed);
 
-            const diffDays =
-              Math.floor(
-                (
-                  puzzleDateObj -
-                  lastDate
-                ) /
-                (1000 * 60 * 60 * 24)
-              );
+    lastDate.setHours(0, 0, 0, 0);
 
-            if (diffDays === 1) {
+    const diffDays =
+      Math.round(
+        (puzzleDateObj - lastDate) /
+        (1000 * 60 * 60 * 24)
+      );
 
-              currentStreak++;
+    if (diffDays === 1) {
 
-            } else if (diffDays > 1) {
+      // Played yesterday + today
+      currentStreak++;
 
-              currentStreak = 1;
+    } else if (diffDays === 0) {
 
-            }
+      // Same day — don't increase
+      currentStreak =
+        currentStreak || 1;
 
-          }
+    } else {
 
-          if (
-            currentStreak >
-            bestStreak
-          ) {
+      // One or more days missed
+      currentStreak = 1;
 
-            bestStreak =
-              currentStreak;
+    }
 
-          }
+  }
 
-        } else {
+  // Best streak
+  if (currentStreak > bestStreak) {
 
-          currentStreak = 0;
+    bestStreak =
+      currentStreak;
 
-        }
+  }
 
+  // Add score only if answer is correct
+  if (isCorrect) {
+
+    totalScore += score;
+
+  }
+
+  // Save latest played date
+  lastPlayed =
+    puzzleDateObj.toISOString();
+
+  // =====================================
+  // SAVE FIRESTORE
+  // =====================================
+
+  await setDoc(
+    userRef,
+    {
+      totalScore,
+      currentStreak,
+      bestStreak,
+      lastPlayed
+    },
+    {
+      merge: true
+    }
+  );
+
+  localStorage.setItem(
+    processedKey,
+    "true"
+  );
+
+}
         // =====================================
         // SAVE FIRESTORE
         // =====================================
