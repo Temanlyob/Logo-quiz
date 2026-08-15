@@ -6,11 +6,11 @@ import {
 
 import {
   doc,
-  getDoc,
-  setDoc
+  getDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 console.log("RESULTS PAGE LOADED");
+
 
 // =====================================
 // THEME
@@ -55,12 +55,14 @@ function applyTheme(theme) {
 
 
 // Initial theme
+
 applyTheme(
   localStorage.getItem("theme") || "default"
 );
 
 
-// Follow phone theme changes
+// Follow phone theme
+
 const systemTheme =
   window.matchMedia(
     "(prefers-color-scheme: dark)"
@@ -109,7 +111,7 @@ const scoreValue =
 
 
 // =====================================
-// PUZZLE RESULT
+// LAST PUZZLE RESULT
 // =====================================
 
 const result =
@@ -136,6 +138,9 @@ const params =
 let puzzleDate =
   params.get("date");
 
+
+// If date is not in URL,
+// use today's date
 
 if (!puzzleDate) {
 
@@ -164,29 +169,26 @@ if (!puzzleDate) {
 
 
 // =====================================
-// PROCESS FLAG
-// =====================================
-
-const processedKey =
-  "resultProcessed_" +
-  puzzleDate;
-
-const processed =
-  localStorage.getItem(
-    processedKey
-  ) === "true";
-
-
-// =====================================
-// DATE HELPER
+// DATE PARSER
+// DD-MM-YY
 // =====================================
 
 function parsePuzzleDate(dateKey) {
 
+  if (
+    typeof dateKey !== "string"
+  ) {
+
+    return null;
+
+  }
+
   const parts =
     dateKey.split("-");
 
-  if (parts.length !== 3) {
+  if (
+    parts.length !== 3
+  ) {
 
     return null;
 
@@ -201,12 +203,25 @@ function parsePuzzleDate(dateKey) {
   const year =
     Number("20" + parts[2]);
 
+
+  if (
+    !day ||
+    !month ||
+    !year
+  ) {
+
+    return null;
+
+  }
+
+
   const date =
     new Date(
       year,
       month - 1,
       day
     );
+
 
   date.setHours(
     0,
@@ -215,6 +230,7 @@ function parsePuzzleDate(dateKey) {
     0
   );
 
+
   return date;
 
 }
@@ -222,12 +238,13 @@ function parsePuzzleDate(dateKey) {
 
 // =====================================
 // GET PLAYED DATES
-// FIRESTORE HISTORY
 // =====================================
 
 function getPlayedDates(history) {
 
-  const dates = [];
+  const dateMap =
+    new Map();
+
 
   for (
     const key in history
@@ -236,53 +253,59 @@ function getPlayedDates(history) {
     const item =
       history[key];
 
+
     if (
-      item &&
-      item.played === true
+      !item ||
+      item.played !== true
     ) {
 
-      const date =
-        parsePuzzleDate(key);
-
-      if (date) {
-
-        dates.push(date);
-
-      }
+      continue;
 
     }
 
-  }
 
-  // Remove duplicate dates
-  const uniqueDates =
-    dates.filter(
-      (date, index, array) => {
+    const date =
+      parsePuzzleDate(key);
 
-        return index ===
-          array.findIndex(
-            other =>
-              other.getTime() ===
-              date.getTime()
-          );
 
-      }
+    if (!date) {
+
+      continue;
+
+    }
+
+
+    // Use timestamp as unique key
+    dateMap.set(
+      date.getTime(),
+      date
     );
 
+  }
+
+
+  const dates =
+    Array.from(
+      dateMap.values()
+    );
+
+
   // Old → New
-  uniqueDates.sort(
+
+  dates.sort(
     (a, b) =>
       a.getTime() -
       b.getTime()
   );
 
-  return uniqueDates;
+
+  return dates;
 
 }
 
 
 // =====================================
-// CALCULATE CURRENT STREAK
+// CURRENT STREAK
 // =====================================
 
 function calculateCurrentStreak(
@@ -298,13 +321,17 @@ function calculateCurrentStreak(
   }
 
 
-  // Start from latest played date
   let streak = 1;
+
+
+  // Start from latest played day
 
   for (
     let i =
       playedDates.length - 1;
+
     i > 0;
+
     i--
   ) {
 
@@ -313,6 +340,7 @@ function calculateCurrentStreak(
 
     const previous =
       playedDates[i - 1];
+
 
     const diffDays =
       Math.round(
@@ -329,11 +357,17 @@ function calculateCurrentStreak(
       );
 
 
-    if (diffDays === 1) {
+    // Consecutive day
+
+    if (
+      diffDays === 1
+    ) {
 
       streak++;
 
     } else {
+
+      // Any gap = streak broken
 
       break;
 
@@ -341,13 +375,14 @@ function calculateCurrentStreak(
 
   }
 
+
   return streak;
 
 }
 
 
 // =====================================
-// CALCULATE BEST STREAK
+// BEST STREAK
 // =====================================
 
 function calculateBestStreak(
@@ -364,12 +399,15 @@ function calculateBestStreak(
 
 
   let best = 1;
+
   let current = 1;
 
 
   for (
     let i = 1;
+
     i < playedDates.length;
+
     i++
   ) {
 
@@ -388,7 +426,9 @@ function calculateBestStreak(
       );
 
 
-    if (diffDays === 1) {
+    if (
+      diffDays === 1
+    ) {
 
       current++;
 
@@ -409,13 +449,14 @@ function calculateBestStreak(
 
   }
 
+
   return best;
 
 }
 
 
 // =====================================
-// FIREBASE LOGIN
+// FIREBASE AUTH
 // =====================================
 
 onAuthStateChanged(
@@ -435,6 +476,16 @@ onAuthStateChanged(
 
     try {
 
+      console.log(
+        "Logged in:",
+        user.uid
+      );
+
+
+      // =====================================
+      // USER DOCUMENT
+      // =====================================
+
       const userRef =
         doc(
           db,
@@ -443,36 +494,26 @@ onAuthStateChanged(
         );
 
 
+      const snap =
+        await getDoc(userRef);
+
+
       // =====================================
-      // DEFAULT VALUES
+      // DEFAULT DATA
       // =====================================
 
       let totalScore = 0;
-
-      let puzzlesPlayed = 0;
-
-      let gamesWon = 0;
-
-      let gamesLost = 0;
-
-      let currentStreak = 0;
-
-      let bestStreak = 0;
-
-      let lastPlayed = null;
 
       let history = {};
 
 
       // =====================================
-      // READ FIRESTORE
+      // FIRESTORE DATA
       // =====================================
 
-      const snap =
-        await getDoc(userRef);
-
-
-      if (snap.exists()) {
+      if (
+        snap.exists()
+      ) {
 
         const data =
           snap.data();
@@ -487,15 +528,11 @@ onAuthStateChanged(
         history =
           data.history ?? {};
 
-
-        lastPlayed =
-          data.lastPlayed ?? null;
-
       }
 
 
       // =====================================
-      // COUNT GAMES
+      // PLAYED GAMES
       // =====================================
 
       const playedGames =
@@ -507,15 +544,19 @@ onAuthStateChanged(
           );
 
 
-      puzzlesPlayed =
+      // =====================================
+      // TOTAL GAMES
+      // =====================================
+
+      const puzzlesPlayed =
         playedGames.length;
 
 
       // =====================================
-      // WON
+      // GAMES WON
       // =====================================
 
-      gamesWon =
+      const gamesWon =
         playedGames.filter(
           item =>
             item.correct === true
@@ -523,10 +564,10 @@ onAuthStateChanged(
 
 
       // =====================================
-      // LOST
+      // GAMES LOST
       // =====================================
 
-      gamesLost =
+      const gamesLost =
         playedGames.filter(
           item =>
             item.correct === false
@@ -545,7 +586,7 @@ onAuthStateChanged(
       // CURRENT STREAK
       // =====================================
 
-      currentStreak =
+      const currentStreak =
         calculateCurrentStreak(
           playedDates
         );
@@ -555,49 +596,10 @@ onAuthStateChanged(
       // BEST STREAK
       // =====================================
 
-      bestStreak =
+      const bestStreak =
         calculateBestStreak(
           playedDates
         );
-
-
-      // =====================================
-      // SAVE CORRECT CURRENT STREAK
-      // =====================================
-
-      /*
-        Only save when we have played data.
-        Streak is based ONLY on consecutive
-        played dates.
-      */
-
-      if (
-        playedDates.length > 0
-      ) {
-
-        const latestPlayed =
-          playedDates[
-            playedDates.length - 1
-          ];
-
-
-        lastPlayed =
-          latestPlayed.toISOString();
-
-
-        await setDoc(
-          userRef,
-          {
-            currentStreak,
-            bestStreak,
-            lastPlayed
-          },
-          {
-            merge: true
-          }
-        );
-
-      }
 
 
       // =====================================
@@ -615,8 +617,39 @@ onAuthStateChanged(
             );
 
 
+      console.log(
+        "Total Games:",
+        puzzlesPlayed
+      );
+
+      console.log(
+        "Games Won:",
+        gamesWon
+      );
+
+      console.log(
+        "Games Lost:",
+        gamesLost
+      );
+
+      console.log(
+        "Current Streak:",
+        currentStreak
+      );
+
+      console.log(
+        "Best Streak:",
+        bestStreak
+      );
+
+      console.log(
+        "Win Rate:",
+        winRate
+      );
+
+
       // =====================================
-      // UPDATE UI
+      // UPDATE RESULT STATS
       // =====================================
 
       const totalGamesElement =
@@ -650,7 +683,9 @@ onAuthStateChanged(
         );
 
 
-      if (totalGamesElement) {
+      if (
+        totalGamesElement
+      ) {
 
         totalGamesElement.textContent =
           puzzlesPlayed;
@@ -658,7 +693,9 @@ onAuthStateChanged(
       }
 
 
-      if (gamesWonElement) {
+      if (
+        gamesWonElement
+      ) {
 
         gamesWonElement.textContent =
           gamesWon;
@@ -666,7 +703,9 @@ onAuthStateChanged(
       }
 
 
-      if (gamesLostElement) {
+      if (
+        gamesLostElement
+      ) {
 
         gamesLostElement.textContent =
           gamesLost;
@@ -674,61 +713,78 @@ onAuthStateChanged(
       }
 
 
-      if (currentStreakElement) {
+      if (
+        currentStreakElement
+      ) {
 
         currentStreakElement.textContent =
-          currentStreak + " Days";
+          currentStreak +
+          " Days";
 
       }
 
 
-      if (bestStreakElement) {
+      if (
+        bestStreakElement
+      ) {
 
         bestStreakElement.textContent =
-          bestStreak + " Days";
+          bestStreak +
+          " Days";
 
       }
 
 
-      if (winRateElement) {
+      if (
+        winRateElement
+      ) {
 
         winRateElement.textContent =
-          winRate + "%";
+          winRate +
+          "%";
 
       }
 
 
       // =====================================
-      // RESULT UI
+      // TODAY'S RESULT
       // =====================================
 
-      if (isCorrect) {
+      if (
+        resultIcon &&
+        resultTitle &&
+        scoreValue
+      ) {
 
-        resultIcon.innerHTML =
-          "🏆";
+        if (isCorrect) {
 
-        resultTitle.innerHTML =
-          "Today's Result";
+          resultIcon.innerHTML =
+            "🏆";
 
-        scoreValue.innerHTML =
-          "+" + score;
+          resultTitle.innerHTML =
+            "Today's Result";
 
-        scoreValue.style.color =
-          "#22c55e";
+          scoreValue.innerHTML =
+            "+" + score;
 
-      } else {
+          scoreValue.style.color =
+            "#22c55e";
 
-        resultIcon.innerHTML =
-          "❌";
+        } else {
 
-        resultTitle.innerHTML =
-          "Better Luck Tomorrow";
+          resultIcon.innerHTML =
+            "❌";
 
-        scoreValue.innerHTML =
-          "0";
+          resultTitle.innerHTML =
+            "Better Luck Tomorrow";
 
-        scoreValue.style.color =
-          "#ef4444";
+          scoreValue.innerHTML =
+            "0";
+
+          scoreValue.style.color =
+            "#ef4444";
+
+        }
 
       }
 
@@ -747,7 +803,7 @@ onAuthStateChanged(
 
 
 // =====================================
-// BUTTONS
+// HOME BUTTON
 // =====================================
 
 if (homeBtn) {
@@ -764,6 +820,10 @@ if (homeBtn) {
 
 }
 
+
+// =====================================
+// CALENDAR BUTTON
+// =====================================
 
 if (calendarBtn) {
 
