@@ -33,7 +33,7 @@ function applyTheme(theme) {
 
   } else {
 
-    // Default = follow phone system theme
+    // DEFAULT = FOLLOW PHONE THEME
 
     if (
       window.matchMedia(
@@ -43,31 +43,45 @@ function applyTheme(theme) {
 
       document.body.classList.add("theme-dark");
 
+    } else {
+
+      document.body.classList.add("theme-light");
+
     }
 
   }
 
 }
 
+
+// Initial theme
 applyTheme(
   localStorage.getItem("theme") || "default"
 );
 
-// If phone system theme changes
-window.matchMedia(
-  "(prefers-color-scheme: dark)"
-).addEventListener("change", () => {
 
-  const currentTheme =
-    localStorage.getItem("theme") || "default";
+// Follow phone theme changes
+const systemTheme =
+  window.matchMedia(
+    "(prefers-color-scheme: dark)"
+  );
 
-  if (currentTheme === "default") {
+systemTheme.addEventListener(
+  "change",
+  () => {
 
-    applyTheme("default");
+    const currentTheme =
+      localStorage.getItem("theme") || "default";
+
+    if (currentTheme === "default") {
+
+      applyTheme("default");
+
+    }
 
   }
+);
 
-});
 
 // =====================================
 // BUTTONS
@@ -78,6 +92,7 @@ const homeBtn =
 
 const calendarBtn =
   document.getElementById("calendarBtn");
+
 
 // =====================================
 // RESULT UI
@@ -91,6 +106,7 @@ const resultTitle =
 
 const scoreValue =
   document.getElementById("scoreValue");
+
 
 // =====================================
 // PUZZLE RESULT
@@ -107,6 +123,7 @@ const score =
 const isCorrect =
   result === "correct";
 
+
 // =====================================
 // PUZZLE DATE
 // =====================================
@@ -116,23 +133,286 @@ const params =
     window.location.search
   );
 
-const puzzleDate =
-  params.get("date") ||
-  new Date()
-    .toLocaleDateString("en-GB")
-    .replace(/\//g, "-");
+let puzzleDate =
+  params.get("date");
+
+
+if (!puzzleDate) {
+
+  const now =
+    new Date();
+
+  const day =
+    String(
+      now.getDate()
+    ).padStart(2, "0");
+
+  const month =
+    String(
+      now.getMonth() + 1
+    ).padStart(2, "0");
+
+  const year =
+    String(
+      now.getFullYear()
+    ).slice(-2);
+
+  puzzleDate =
+    `${day}-${month}-${year}`;
+
+}
+
 
 // =====================================
 // PROCESS FLAG
 // =====================================
 
 const processedKey =
-  "resultProcessed_" + puzzleDate;
+  "resultProcessed_" +
+  puzzleDate;
 
 const processed =
   localStorage.getItem(
     processedKey
   ) === "true";
+
+
+// =====================================
+// DATE HELPER
+// =====================================
+
+function parsePuzzleDate(dateKey) {
+
+  const parts =
+    dateKey.split("-");
+
+  if (parts.length !== 3) {
+
+    return null;
+
+  }
+
+  const day =
+    Number(parts[0]);
+
+  const month =
+    Number(parts[1]);
+
+  const year =
+    Number("20" + parts[2]);
+
+  const date =
+    new Date(
+      year,
+      month - 1,
+      day
+    );
+
+  date.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+  return date;
+
+}
+
+
+// =====================================
+// GET PLAYED DATES
+// FIRESTORE HISTORY
+// =====================================
+
+function getPlayedDates(history) {
+
+  const dates = [];
+
+  for (
+    const key in history
+  ) {
+
+    const item =
+      history[key];
+
+    if (
+      item &&
+      item.played === true
+    ) {
+
+      const date =
+        parsePuzzleDate(key);
+
+      if (date) {
+
+        dates.push(date);
+
+      }
+
+    }
+
+  }
+
+  // Remove duplicate dates
+  const uniqueDates =
+    dates.filter(
+      (date, index, array) => {
+
+        return index ===
+          array.findIndex(
+            other =>
+              other.getTime() ===
+              date.getTime()
+          );
+
+      }
+    );
+
+  // Old → New
+  uniqueDates.sort(
+    (a, b) =>
+      a.getTime() -
+      b.getTime()
+  );
+
+  return uniqueDates;
+
+}
+
+
+// =====================================
+// CALCULATE CURRENT STREAK
+// =====================================
+
+function calculateCurrentStreak(
+  playedDates
+) {
+
+  if (
+    playedDates.length === 0
+  ) {
+
+    return 0;
+
+  }
+
+
+  // Start from latest played date
+  let streak = 1;
+
+  for (
+    let i =
+      playedDates.length - 1;
+    i > 0;
+    i--
+  ) {
+
+    const current =
+      playedDates[i];
+
+    const previous =
+      playedDates[i - 1];
+
+    const diffDays =
+      Math.round(
+        (
+          current.getTime() -
+          previous.getTime()
+        ) /
+        (
+          1000 *
+          60 *
+          60 *
+          24
+        )
+      );
+
+
+    if (diffDays === 1) {
+
+      streak++;
+
+    } else {
+
+      break;
+
+    }
+
+  }
+
+  return streak;
+
+}
+
+
+// =====================================
+// CALCULATE BEST STREAK
+// =====================================
+
+function calculateBestStreak(
+  playedDates
+) {
+
+  if (
+    playedDates.length === 0
+  ) {
+
+    return 0;
+
+  }
+
+
+  let best = 1;
+  let current = 1;
+
+
+  for (
+    let i = 1;
+    i < playedDates.length;
+    i++
+  ) {
+
+    const diffDays =
+      Math.round(
+        (
+          playedDates[i].getTime() -
+          playedDates[i - 1].getTime()
+        ) /
+        (
+          1000 *
+          60 *
+          60 *
+          24
+        )
+      );
+
+
+    if (diffDays === 1) {
+
+      current++;
+
+    } else {
+
+      current = 1;
+
+    }
+
+
+    if (
+      current > best
+    ) {
+
+      best = current;
+
+    }
+
+  }
+
+  return best;
+
+}
+
 
 // =====================================
 // FIREBASE LOGIN
@@ -152,6 +432,7 @@ onAuthStateChanged(
 
     }
 
+
     try {
 
       const userRef =
@@ -161,17 +442,27 @@ onAuthStateChanged(
           user.uid
         );
 
+
       // =====================================
       // DEFAULT VALUES
       // =====================================
 
       let totalScore = 0;
+
       let puzzlesPlayed = 0;
+
       let gamesWon = 0;
+
       let gamesLost = 0;
+
       let currentStreak = 0;
+
       let bestStreak = 0;
+
       let lastPlayed = null;
+
+      let history = {};
+
 
       // =====================================
       // READ FIRESTORE
@@ -180,257 +471,232 @@ onAuthStateChanged(
       const snap =
         await getDoc(userRef);
 
+
       if (snap.exists()) {
 
         const data =
           snap.data();
 
+
         totalScore =
-          data.totalScore ?? 0;
+          Number(
+            data.totalScore ?? 0
+          );
 
-        const history =
-  data.history ?? {};
 
-// =====================================
-// GAME COUNT
-// SAME DATA AS HOME PAGE
-// =====================================
+        history =
+          data.history ?? {};
 
-puzzlesPlayed = 0;
-gamesWon = 0;
-gamesLost = 0;
-
-// Read all played puzzles from localStorage
-for (let key in localStorage) {
-
-  if (key.startsWith("quiz_")) {
-
-    try {
-
-      const quiz =
-        JSON.parse(
-          localStorage.getItem(key)
-        );
-
-      if (quiz && quiz.attempted === true) {
-
-        // Total played
-        puzzlesPlayed++;
-
-        // Correct
-        if (quiz.correct === true) {
-
-          gamesWon++;
-
-        }
-
-        // Wrong
-        else if (quiz.correct === false) {
-
-          gamesLost++;
-
-        }
-
-      }
-
-    } catch (error) {
-
-      console.error(
-        "Result quiz data error:",
-        error
-      );
-
-    }
-
-  }
-
-}
-
-        currentStreak =
-          data.currentStreak ?? 0;
-
-        bestStreak =
-          data.bestStreak ?? 0;
 
         lastPlayed =
           data.lastPlayed ?? null;
 
       }
 
-      // =====================================
-      // UPDATE STATS
-      // =====================================
 
       // =====================================
-// UPDATE STREAK
-// =====================================
+      // COUNT GAMES
+      // =====================================
 
-if (!processed) {
+      const playedGames =
+        Object.values(history)
+          .filter(
+            item =>
+              item &&
+              item.played === true
+          );
 
-  const puzzle =
-    puzzleDate.split("-");
 
-  const puzzleDateObj =
-    new Date(
-      Number("20" + puzzle[2]),
-      Number(puzzle[1]) - 1,
-      Number(puzzle[0])
-    );
+      puzzlesPlayed =
+        playedGames.length;
 
-  // Remove time from date
-  puzzleDateObj.setHours(0, 0, 0, 0);
 
-  if (!lastPlayed) {
+      // =====================================
+      // WON
+      // =====================================
 
-    // First played puzzle
-    currentStreak = 1;
+      gamesWon =
+        playedGames.filter(
+          item =>
+            item.correct === true
+        ).length;
 
-  } else {
 
-    const lastDate =
-      new Date(lastPlayed);
+      // =====================================
+      // LOST
+      // =====================================
 
-    lastDate.setHours(0, 0, 0, 0);
+      gamesLost =
+        playedGames.filter(
+          item =>
+            item.correct === false
+        ).length;
 
-    const diffDays =
-      Math.round(
-        (puzzleDateObj - lastDate) /
-        (1000 * 60 * 60 * 24)
-      );
 
-    if (diffDays === 1) {
+      // =====================================
+      // PLAYED DATES
+      // =====================================
 
-      // Played yesterday + today
-      currentStreak++;
+      const playedDates =
+        getPlayedDates(history);
 
-    } else if (diffDays === 0) {
 
-      // Same day — don't increase
+      // =====================================
+      // CURRENT STREAK
+      // =====================================
+
       currentStreak =
-        currentStreak || 1;
+        calculateCurrentStreak(
+          playedDates
+        );
 
-    } else {
 
-      // One or more days missed
-      currentStreak = 1;
+      // =====================================
+      // BEST STREAK
+      // =====================================
 
-    }
+      bestStreak =
+        calculateBestStreak(
+          playedDates
+        );
 
-  }
 
-  // Best streak
-  if (currentStreak > bestStreak) {
+      // =====================================
+      // SAVE CORRECT CURRENT STREAK
+      // =====================================
 
-    bestStreak =
-      currentStreak;
+      /*
+        Only save when we have played data.
+        Streak is based ONLY on consecutive
+        played dates.
+      */
 
-  }
+      if (
+        playedDates.length > 0
+      ) {
 
-  // Add score only if answer is correct
-  if (isCorrect) {
+        const latestPlayed =
+          playedDates[
+            playedDates.length - 1
+          ];
 
-    totalScore += score;
 
-  }
+        lastPlayed =
+          latestPlayed.toISOString();
 
-  // Save latest played date
-  lastPlayed =
-    puzzleDateObj.toISOString();
-
-  // =====================================
-  // SAVE FIRESTORE
-  // =====================================
-
-  await setDoc(
-    userRef,
-    {
-      totalScore,
-      currentStreak,
-      bestStreak,
-      lastPlayed
-    },
-    {
-      merge: true
-    }
-  );
-
-  localStorage.setItem(
-    processedKey,
-    "true"
-  );
-
-}
-        // =====================================
-        // SAVE FIRESTORE
-        // =====================================
 
         await setDoc(
           userRef,
           {
-            totalScore,
             currentStreak,
             bestStreak,
-            lastPlayed:
-              puzzleDateObj.toISOString()
+            lastPlayed
           },
           {
             merge: true
           }
         );
 
-        localStorage.setItem(
-          processedKey,
-          "true"
-        );
-
       }
 
+
       // =====================================
-      // CALCULATE STATS
+      // WIN RATE
       // =====================================
 
       const winRate =
         puzzlesPlayed === 0
           ? 0
           : Math.round(
-              (gamesWon /
-                puzzlesPlayed) *
-              100
+              (
+                gamesWon /
+                puzzlesPlayed
+              ) * 100
             );
+
 
       // =====================================
       // UPDATE UI
       // =====================================
 
-      document.getElementById(
-        "totalGames"
-      ).textContent =
-        puzzlesPlayed;
+      const totalGamesElement =
+        document.getElementById(
+          "totalGames"
+        );
 
-      document.getElementById(
-        "gamesWon"
-      ).textContent =
-        gamesWon;
+      const gamesWonElement =
+        document.getElementById(
+          "gamesWon"
+        );
 
-      document.getElementById(
-        "gamesLost"
-      ).textContent =
-        gamesLost;
+      const gamesLostElement =
+        document.getElementById(
+          "gamesLost"
+        );
 
-      document.getElementById(
-        "currentStreak"
-      ).textContent =
-        currentStreak + " Days";
+      const currentStreakElement =
+        document.getElementById(
+          "currentStreak"
+        );
 
-      document.getElementById(
-        "bestStreak"
-      ).textContent =
-        bestStreak + " Days";
+      const bestStreakElement =
+        document.getElementById(
+          "bestStreak"
+        );
 
-      document.getElementById(
-        "winRate"
-      ).textContent =
-        winRate + "%";
+      const winRateElement =
+        document.getElementById(
+          "winRate"
+        );
+
+
+      if (totalGamesElement) {
+
+        totalGamesElement.textContent =
+          puzzlesPlayed;
+
+      }
+
+
+      if (gamesWonElement) {
+
+        gamesWonElement.textContent =
+          gamesWon;
+
+      }
+
+
+      if (gamesLostElement) {
+
+        gamesLostElement.textContent =
+          gamesLost;
+
+      }
+
+
+      if (currentStreakElement) {
+
+        currentStreakElement.textContent =
+          currentStreak + " Days";
+
+      }
+
+
+      if (bestStreakElement) {
+
+        bestStreakElement.textContent =
+          bestStreak + " Days";
+
+      }
+
+
+      if (winRateElement) {
+
+        winRateElement.textContent =
+          winRate + "%";
+
+      }
+
 
       // =====================================
       // RESULT UI
@@ -466,6 +732,7 @@ if (!processed) {
 
       }
 
+
     } catch (error) {
 
       console.error(
@@ -478,26 +745,36 @@ if (!processed) {
   }
 );
 
+
 // =====================================
 // BUTTONS
 // =====================================
 
-homeBtn.addEventListener(
-  "click",
-  () => {
+if (homeBtn) {
 
-    window.location.href =
-      "home.html";
+  homeBtn.addEventListener(
+    "click",
+    () => {
 
-  }
-);
+      window.location.href =
+        "home.html";
 
-calendarBtn.addEventListener(
-  "click",
-  () => {
+    }
+  );
 
-    window.location.href =
-      "calendar.html";
+}
 
-  }
-);
+
+if (calendarBtn) {
+
+  calendarBtn.addEventListener(
+    "click",
+    () => {
+
+      window.location.href =
+        "calendar.html";
+
+    }
+  );
+
+}
