@@ -779,3 +779,76 @@ body.theme-dark .info-card h3{
 body.theme-dark .info-card p{
     color:#bdbdbd;
 }
+
+/* ===========================
+   RESULT - CORRECT
+=========================== */
+
+.result-section.result-correct .result-circle{
+    background:#e8fff0;
+    color:#22c55e;
+}
+
+.result-section.result-correct h2{
+    color:#22c55e;
+}
+
+.result-section.result-correct .points-card{
+    background:#e8fff0;
+    color:#22c55e;
+}
+
+
+/* ===========================
+   RESULT - WRONG
+=========================== */
+
+.result-section.result-wrong .result-circle{
+    background:#ffe8e8;
+    color:#ef4444;
+}
+
+.result-section.result-wrong h2{
+    color:#ef4444;
+}
+
+.result-section.result-wrong .points-card{
+    background:#ffe8e8;
+    color:#ef4444;
+}
+
+
+/* ===========================
+   WRONG RESULT INFO
+=========================== */
+
+.result-section.result-wrong .info-card{
+    background:#fff1f1;
+}
+
+.result-section.result-wrong .info-card h3{
+    color:#ef4444;
+}
+
+
+/* ===========================
+   DARK THEME - WRONG RESULT
+=========================== */
+
+body.theme-dark .result-section.result-wrong .result-circle{
+    background:#3a2020;
+    color:#ef4444;
+}
+
+body.theme-dark .result-section.result-wrong .points-card{
+    background:#3a2020;
+    color:#ef4444;
+}
+
+body.theme-dark .result-section.result-wrong .info-card{
+    background:#302020;
+}
+
+body.theme-dark .result-section.result-wrong .info-card h3{
+    color:#ef4444;
+}
