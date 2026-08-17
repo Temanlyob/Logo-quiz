@@ -309,14 +309,24 @@ function restoreResult(data) {
 
   resetCards();
 
-  resultSection.style.display = "block";
+  // Remove previous result color
+  resultSection.classList.remove(
+    "result-correct",
+    "result-wrong"
+  );
 
+  resultSection.style.display = "block";
 
   if (data.correct) {
 
-    correctOption.classList.add(
-      "correct"
-    );
+  // Green result
+  resultSection.classList.add(
+    "result-correct"
+  );
+
+  correctOption.classList.add(
+    "correct"
+  );
 
 
     if (correctOption === option1) {
@@ -352,10 +362,15 @@ function restoreResult(data) {
 
   } else {
 
-    const wrongOption =
-      correctOption === option1
-        ? option2
-        : option1;
+  // Red result
+  resultSection.classList.add(
+    "result-wrong"
+  );
+
+  const wrongOption =
+    correctOption === option1
+      ? option2
+      : option1;
 
 
     wrongOption.classList.add(
