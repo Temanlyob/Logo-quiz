@@ -413,10 +413,10 @@ function restoreResult(data) {
       "0 Points";
 
     infoTitle.innerHTML =
-      "Correct Answer";
+  "Wrong Choice";
 
-    infoText.innerHTML =
-      "The highlighted logo was the original one.";
+infoText.innerHTML =
+  "You selected the wrong logo.";
 
   }
 
