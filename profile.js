@@ -119,8 +119,6 @@ function compressProfilePhoto(file) {
               img.height;
 
 
-            // Keep original aspect ratio
-
             if (width > height) {
 
               if (width > MAX_SIZE) {
@@ -234,9 +232,7 @@ function compressProfilePhoto(file) {
       };
 
 
-    reader.readAsDataURL(
-      file
-    );
+    reader.readAsDataURL(file);
 
   });
 
@@ -244,7 +240,7 @@ function compressProfilePhoto(file) {
 
 
 // =============================
-// FIREBASE AUTH
+// FIREBASE
 // =============================
 
 onAuthStateChanged(
@@ -710,24 +706,16 @@ onAuthStateChanged(
 // =============================
 
 const themesBtn =
-  document.getElementById(
-    "themesBtn"
-  );
+  document.getElementById("themesBtn");
 
 const themeModal =
-  document.getElementById(
-    "themeModal"
-  );
+  document.getElementById("themeModal");
 
 const closeTheme =
-  document.getElementById(
-    "closeTheme"
-  );
+  document.getElementById("closeTheme");
 
 const themeOptions =
-  document.querySelectorAll(
-    ".theme-option"
-  );
+  document.querySelectorAll(".theme-option");
 
 
 if (themesBtn) {
@@ -1148,19 +1136,75 @@ if (saveProfileBtn) {
       }
 
 
+      // =================================
+      // KEEP REFERENCES BEFORE
+      // BACKGROUND SAVE
+      // =================================
+
+      const fileToUpload =
+        selectedPhotoFile;
+
+
+      const usernameToSave =
+        newUsername;
+
+
+      // =================================
+      // IMMEDIATELY UPDATE UI
+      // =================================
+
+      username.textContent =
+        usernameToSave;
+
+
+      if (fileToUpload) {
+
+        const instantPreviewURL =
+          URL.createObjectURL(
+            fileToUpload
+          );
+
+
+        avatar.src =
+          instantPreviewURL;
+
+
+        editPhotoPreview.src =
+          instantPreviewURL;
+
+      } else {
+
+        avatar.src =
+          selectedPhotoURL;
+
+      }
+
+
+      // =================================
+      // CLOSE MODAL IMMEDIATELY
+      // =================================
+
+      editProfileModal.style.display =
+        "none";
+
+
+      saveProfileBtn.disabled =
+        true;
+
+
+      // =================================
+      // BACKGROUND FIREBASE SAVE
+      // =================================
+
       try {
 
-        saveProfileBtn.disabled =
-          true;
+        const userRef =
+          doc(
+            db,
+            "users",
+            currentUser.uid
+          );
 
-
-        saveProfileBtn.textContent =
-          "Saving...";
-
-
-        // =================================
-        // CURRENT SAVED PHOTO
-        // =================================
 
         let finalPhotoURL =
           selectedPhotoURL ||
@@ -1168,36 +1212,16 @@ if (saveProfileBtn) {
 
 
         // =================================
-        // UPLOAD NEW PHOTO
+        // UPLOAD PHOTO
         // =================================
 
-        if (
-          selectedPhotoFile
-        ) {
-
-          console.log(
-            "Compressing profile photo..."
-          );
-
+        if (fileToUpload) {
 
           const compressedPhoto =
             await compressProfilePhoto(
-              selectedPhotoFile
+              fileToUpload
             );
 
-
-          console.log(
-            "Compressed photo size:",
-            Math.round(
-              compressedPhoto.size /
-              1024
-            ) + " KB"
-          );
-
-
-          // =================================
-          // UNIQUE STORAGE PATH
-          // =================================
 
           const photoPath =
             "profilePhotos/" +
@@ -1205,10 +1229,6 @@ if (saveProfileBtn) {
             "/" +
             "profile_" +
             Date.now() +
-            "_" +
-            Math.random()
-              .toString(36)
-              .substring(2) +
             ".jpg";
 
 
@@ -1218,10 +1238,6 @@ if (saveProfileBtn) {
               photoPath
             );
 
-
-          // =================================
-          // UPLOAD
-          // =================================
 
           await uploadBytes(
             photoRef,
@@ -1233,25 +1249,10 @@ if (saveProfileBtn) {
           );
 
 
-          console.log(
-            "Photo upload complete."
-          );
-
-
-          // =================================
-          // GET FIREBASE URL
-          // =================================
-
           finalPhotoURL =
             await getDownloadURL(
               photoRef
             );
-
-
-          console.log(
-            "Photo URL obtained:",
-            finalPhotoURL
-          );
 
         }
 
@@ -1260,20 +1261,11 @@ if (saveProfileBtn) {
         // SAVE FIRESTORE
         // =================================
 
-        const userRef =
-          doc(
-            db,
-            "users",
-            currentUser.uid
-          );
-
-
         await setDoc(
           userRef,
           {
-
             username:
-              newUsername,
+              usernameToSave,
 
             photoURL:
               finalPhotoURL
@@ -1286,26 +1278,9 @@ if (saveProfileBtn) {
         );
 
 
-        console.log(
-          "Profile saved successfully."
-        );
-
-
         // =================================
-        // UPDATE UI
+        // UPDATE SAVED STATE
         // =================================
-
-        username.textContent =
-          newUsername;
-
-
-        avatar.src =
-          finalPhotoURL;
-
-
-        editPhotoPreview.src =
-          finalPhotoURL;
-
 
         selectedPhotoURL =
           finalPhotoURL;
@@ -1324,16 +1299,19 @@ if (saveProfileBtn) {
 
 
         // =================================
-        // CLOSE MODAL AFTER
-        // FIREBASE SAVE COMPLETES
+        // USE PERMANENT FIREBASE URL
         // =================================
 
-        editProfileModal.style.display =
-          "none";
+        avatar.src =
+          finalPhotoURL;
 
 
-        alert(
-          "Profile updated successfully!"
+        editPhotoPreview.src =
+          finalPhotoURL;
+
+
+        console.log(
+          "PROFILE SAVED SUCCESSFULLY"
         );
 
 
@@ -1345,17 +1323,30 @@ if (saveProfileBtn) {
         );
 
 
+        // If Firebase save fails,
+        // restore previous saved photo.
+
+        avatar.src =
+          selectedPhotoURL;
+
+
+        editPhotoPreview.src =
+          selectedPhotoURL;
+
+
+        username.textContent =
+          username.textContent;
+
+
         alert(
-          "Profile update failed: " +
+          "Failed to save profile: " +
           error.message
         );
-
 
       } finally {
 
         saveProfileBtn.disabled =
           false;
-
 
         saveProfileBtn.textContent =
           "Save Changes";
