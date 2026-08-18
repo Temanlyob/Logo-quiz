@@ -452,9 +452,11 @@ async function checkAnswer(selected) {
 
     score: correct ? 10 : 0,
 
-    attempted: true
+    attempted: true,
 
-  };
+    playedAt: new Date().toISOString()
+
+};
 
 
   // ====================================
