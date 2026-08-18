@@ -180,6 +180,7 @@ function parseDateKey(dateKey) {
 
   }
 
+
   const day =
     Number(parts[0]);
 
@@ -191,6 +192,7 @@ function parseDateKey(dateKey) {
       "20" + parts[2]
     );
 
+
   const date =
     new Date(
       year,
@@ -198,12 +200,14 @@ function parseDateKey(dateKey) {
       day
     );
 
+
   date.setHours(
     0,
     0,
     0,
     0
   );
+
 
   return date;
 
@@ -215,12 +219,14 @@ function getLocalDateOnly(date) {
   const result =
     new Date(date);
 
+
   result.setHours(
     0,
     0,
     0,
     0
   );
+
 
   return result;
 
@@ -242,10 +248,12 @@ function getActualPlayDate(item) {
 
   }
 
+
   const playedAt =
     new Date(
       item.playedAt
     );
+
 
   if (
     Number.isNaN(
@@ -256,6 +264,7 @@ function getActualPlayDate(item) {
     return null;
 
   }
+
 
   return getLocalDateOnly(
     playedAt
@@ -491,6 +500,7 @@ function calculateBestStreak(
 
 
   let best = 1;
+
   let current = 1;
 
 
@@ -532,7 +542,8 @@ function calculateBestStreak(
       current > best
     ) {
 
-      best = current;
+      best =
+        current;
 
     }
 
@@ -547,23 +558,10 @@ function calculateBestStreak(
 // =====================================
 // GET ALL GAMES
 //
-// IMPORTANT:
+// Firestore = main source
+// localStorage = backup
 //
-// Firestore history = main source
-//
-// localStorage quiz_* = backup
-//
-// Same puzzle date is counted ONLY ONCE.
-//
-// Therefore:
-//
-// 17 Aug puzzle completed on 18 Aug
-// => still ONE game.
-//
-// 18 Aug puzzle completed on 18 Aug
-// => another game.
-//
-// Total = 2.
+// Same puzzle date counted only once.
 // =====================================
 
 function getAllGames(
@@ -572,9 +570,10 @@ function getAllGames(
 
   const games = {};
 
-  // -----------------------------------
-  // 1. FIRESTORE HISTORY
-  // -----------------------------------
+
+  // ===================================
+  // FIRESTORE HISTORY
+  // ===================================
 
   for (
     const key in firestoreHistory
@@ -601,9 +600,9 @@ function getAllGames(
   }
 
 
-  // -----------------------------------
-  // 2. LOCAL STORAGE BACKUP
-  // -----------------------------------
+  // ===================================
+  // LOCAL STORAGE BACKUP
+  // ===================================
 
   for (
     let key in localStorage
@@ -643,10 +642,8 @@ function getAllGames(
       }
 
 
-      // If Firestore already has
-      // this puzzle, keep Firestore.
-      //
-      // Otherwise use localStorage.
+      // Firestore already has this
+      // puzzle → don't duplicate it.
 
       if (
         !games[dateKey]
@@ -671,6 +668,81 @@ function getAllGames(
 
 
   return games;
+
+}
+
+
+// =====================================
+// GET TODAY'S TOTAL SCORE
+//
+// Example:
+//
+// Previous puzzle completed today = +5
+// Today's puzzle completed today   = +10
+//
+// Today's Score = +15
+// =====================================
+
+function getTodayScore(
+  allGames
+) {
+
+  const today =
+    getLocalDateOnly(
+      new Date()
+    );
+
+
+  let todayScore = 0;
+
+
+  for (
+    const game of Object.values(allGames)
+  ) {
+
+    if (
+      !game ||
+      game.played !== true
+    ) {
+
+      continue;
+
+    }
+
+
+    if (
+      !game.playedAt
+    ) {
+
+      continue;
+
+    }
+
+
+    const playedDate =
+      getLocalDateOnly(
+        new Date(
+          game.playedAt
+        )
+      );
+
+
+    if (
+      playedDate.getTime() ===
+      today.getTime()
+    ) {
+
+      todayScore +=
+        Number(
+          game.score || 0
+        );
+
+    }
+
+  }
+
+
+  return todayScore;
 
 }
 
@@ -716,7 +788,6 @@ onAuthStateChanged(
 
       let history = {};
 
-
       let totalScore = 0;
 
 
@@ -750,44 +821,80 @@ onAuthStateChanged(
         );
 
 
-      const playedGames =
-        Object.values(
-          allGames
-        ).filter(
-          game =>
-            game &&
-            game.played === true
-        );
-
-
       // =================================
-      // TOTAL GAMES
+      // GAME COUNT
+      //
+      // COPIED FROM OLD RESULT LOGIC
+      //
+      // Every quiz_* attempted counts.
+      // Previous-day puzzles also count.
       // =================================
 
-      const puzzlesPlayed =
-        playedGames.length;
+      let puzzlesPlayed = 0;
+
+      let gamesWon = 0;
+
+      let gamesLost = 0;
 
 
-      // =================================
-      // GAMES WON
-      // =================================
+      for (
+        let key in localStorage
+      ) {
 
-      const gamesWon =
-        playedGames.filter(
-          game =>
-            game.correct === true
-        ).length;
+        if (
+          key.startsWith("quiz_")
+        ) {
+
+          try {
+
+            const quiz =
+              JSON.parse(
+                localStorage.getItem(key)
+              );
 
 
-      // =================================
-      // GAMES LOST
-      // =================================
+            if (
+              quiz &&
+              quiz.attempted === true
+            ) {
 
-      const gamesLost =
-        playedGames.filter(
-          game =>
-            game.correct === false
-        ).length;
+              // Total Games
+              puzzlesPlayed++;
+
+
+              // Games Won
+              if (
+                quiz.correct === true
+              ) {
+
+                gamesWon++;
+
+              }
+
+
+              // Games Lost
+              else if (
+                quiz.correct === false
+              ) {
+
+                gamesLost++;
+
+              }
+
+            }
+
+          } catch (error) {
+
+            console.error(
+              "Result quiz data error:",
+              error
+            );
+
+          }
+
+        }
+
+      }
 
 
       // =================================
@@ -813,73 +920,85 @@ onAuthStateChanged(
         allGames[puzzleDate];
 
 
+      // =================================
+      // TODAY'S TOTAL SCORE
+      // =================================
+
+      const todayScore =
+        getTodayScore(
+          allGames
+        );
+
+
+      // =================================
+      // RESULT UI
+      // =================================
+
       if (
         currentResult
       ) {
 
-        const actualScore =
-          Number(
-            currentResult.score || 0
-          );
+        // -------------------------------
+        // RESULT TITLE ALWAYS
+        // -------------------------------
 
-        let todayScore = 0;
+        resultTitle.innerHTML =
+          "Today's Result";
 
-for (const game of Object.values(allGames)) {
 
-  if (!game || game.played !== true) continue;
-  if (!game.playedAt) continue;
-
-  const playedDate = new Date(game.playedAt);
-  const today = new Date();
-
-  playedDate.setHours(0, 0, 0, 0);
-  today.setHours(0, 0, 0, 0);
-
-  if (playedDate.getTime() === today.getTime()) {
-    todayScore += Number(game.score || 0);
-  }
-
-}
+        // -------------------------------
+        // CURRENT PUZZLE RESULT
+        // -------------------------------
 
         if (
           currentResult.correct === true
         ) {
 
-          scoreValue.textContent =
-            "+" + actualScore;
+          resultIcon.innerHTML =
+            "🏆";
+
+          resultIcon.style.color =
+            "#22c55e";
+
 
           scoreValue.style.color =
             "#22c55e";
 
-
-          resultIcon.innerHTML =
-            "🏆";
-
-          resultTitle.innerHTML = "Today's Result";
-
         } else {
-
-          scoreValue.textContent =
-            "0";
-
-          scoreValue.style.color =
-            "#ef4444";
-
 
           resultIcon.innerHTML =
             "❌";
 
-          resultTitle.innerHTML = "Today's Result";
+          resultIcon.style.color =
+            "#ef4444";
+
+
+          scoreValue.style.color =
+            "#ef4444";
 
         }
 
+
+        // -------------------------------
+        // TODAY'S COMBINED SCORE
+        // -------------------------------
+
+        scoreValue.textContent =
+          "+" +
+          todayScore;
+
       }
+
 
       else {
 
-        // --------------------------------
+        // =================================
         // FALLBACK
-        // --------------------------------
+        // =================================
+
+        resultTitle.innerHTML =
+          "Today's Result";
+
 
         const lastResult =
           localStorage.getItem(
@@ -887,49 +1006,36 @@ for (const game of Object.values(allGames)) {
           );
 
 
-        const lastScore =
-          Number(
-            localStorage.getItem(
-              "lastScore"
-            )
-          ) || 0;
-
-
         if (
           lastResult === "correct"
         ) {
 
+          resultIcon.innerHTML =
+            "🏆";
+
+          resultIcon.style.color =
+            "#22c55e";
+
           scoreValue.textContent =
-            "+" + lastScore;
+            "+" +
+            todayScore;
 
           scoreValue.style.color =
             "#22c55e";
 
+        } else {
 
           resultIcon.innerHTML =
-            "🏆";
+            "❌";
 
-
-          resultTitle.innerHTML =
-            "Correct!";
-
-        }
-
-        else {
+          resultIcon.style.color =
+            "#ef4444";
 
           scoreValue.textContent =
             "0";
 
           scoreValue.style.color =
             "#ef4444";
-
-
-          resultIcon.innerHTML =
-            "❌";
-
-
-          resultTitle.innerHTML =
-            "Incorrect!";
 
         }
 
@@ -972,7 +1078,8 @@ for (const game of Object.values(allGames)) {
             bestStreak
         },
         {
-          merge: true
+          merge:
+            true
         }
       );
 
@@ -1018,7 +1125,7 @@ for (const game of Object.values(allGames)) {
 
 
       // =================================
-      // SHOW TOTAL
+      // SHOW TOTAL GAMES
       // =================================
 
       if (
@@ -1032,7 +1139,7 @@ for (const game of Object.values(allGames)) {
 
 
       // =================================
-      // SHOW WON
+      // SHOW GAMES WON
       // =================================
 
       if (
@@ -1046,7 +1153,7 @@ for (const game of Object.values(allGames)) {
 
 
       // =================================
-      // SHOW LOST
+      // SHOW GAMES LOST
       // =================================
 
       if (
@@ -1130,6 +1237,11 @@ for (const game of Object.values(allGames)) {
       console.log(
         "WIN RATE:",
         winRate + "%"
+      );
+
+      console.log(
+        "TODAY'S SCORE:",
+        todayScore
       );
 
       console.log(
