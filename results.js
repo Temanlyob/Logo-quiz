@@ -303,45 +303,69 @@ function getPlayedDates() {
 // CALCULATE CURRENT STREAK
 // =====================================
 
+// =====================================
+// CALCULATE CURRENT STREAK
+// =====================================
+
 function calculateCurrentStreak(playedDates) {
 
   if (playedDates.length === 0) {
+
     return 0;
+
   }
 
-  // Today — without time
-  const today = new Date();
 
-  today.setHours(0, 0, 0, 0);
+  // Today — without time
+  const today =
+    new Date();
+
+  today.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
 
   // Latest played date
   const latestPlayed =
-    playedDates[playedDates.length - 1];
+    playedDates[
+      playedDates.length - 1
+    ].date;
 
-  // If the user has NOT played today,
-  // current streak is already broken.
+
+  // If user did NOT play today,
+  // current streak is broken.
   if (
     latestPlayed.getTime() !==
     today.getTime()
   ) {
+
     return 0;
+
   }
 
-  // Today is played
+
+  // Today was played
   let streak = 1;
 
-  // Check backwards day-by-day
+
+  // Go backwards and check
+  // every consecutive day
   for (
-    let i = playedDates.length - 1;
+    let i =
+      playedDates.length - 1;
     i > 0;
     i--
   ) {
 
     const current =
-      playedDates[i];
+      playedDates[i].date;
 
     const previous =
-      playedDates[i - 1];
+      playedDates[i - 1].date;
+
 
     const diffDays =
       Math.round(
@@ -349,27 +373,36 @@ function calculateCurrentStreak(playedDates) {
           current.getTime() -
           previous.getTime()
         ) /
-        (1000 * 60 * 60 * 24)
+        (
+          1000 *
+          60 *
+          60 *
+          24
+        )
       );
 
-    // Consecutive day
-    if (diffDays === 1) {
+
+    // Previous day was also played
+    if (
+      diffDays === 1
+    ) {
 
       streak++;
 
     } else {
 
-      // One day or more was missed.
-      // STOP — old streak must NOT be counted.
+      // A day was missed.
+      // Stop counting the old streak.
       break;
 
     }
 
   }
 
-  return streak;
-}
 
+  return streak;
+
+}
 // =====================================
 // CALCULATE BEST STREAK
 // =====================================
