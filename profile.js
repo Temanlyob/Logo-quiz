@@ -828,11 +828,6 @@ if (editProfileModal) {
 
 }
 
-
-// =============================
-// SAVE PROFILE
-// =============================
-
 // =============================
 // SAVE PROFILE
 // =============================
@@ -843,65 +838,100 @@ if (saveProfileBtn) {
     "click",
     async () => {
 
-      if (!currentUser) return;
+      if (!currentUser) {
+        return;
+      }
+
 
       const newUsername =
         editUsername.value.trim();
 
+
       if (!newUsername) {
 
-        alert("Please enter username.");
+        alert(
+          "Please enter username."
+        );
+
         return;
 
       }
 
 
       // =================================
-      // INSTANT UI CHANGE
+      // SAVE CURRENT VALUES LOCALLY FIRST
+      // =================================
+
+      const photoFile =
+        selectedPhotoFile;
+
+      const oldPhotoURL =
+        selectedPhotoURL;
+
+
+      // =================================
+      // INSTANT USERNAME CHANGE
       // =================================
 
       username.textContent =
         newUsername;
 
-      editProfileModal.style.display =
-        "none";
-
-      saveProfileBtn.disabled =
-        false;
-
-      saveProfileBtn.textContent =
-        "Save Changes";
-
 
       // =================================
-      // PHOTO PREVIEW INSTANTLY
+      // INSTANT PHOTO CHANGE
       // =================================
 
-      let photoFile =
-        selectedPhotoFile;
+      let instantPhotoURL =
+        oldPhotoURL;
 
 
       if (photoFile) {
 
-        const localPhotoURL =
+        instantPhotoURL =
           URL.createObjectURL(
             photoFile
           );
 
+
         avatar.src =
-          localPhotoURL;
+          instantPhotoURL;
+
+
+        editPhotoPreview.src =
+          instantPhotoURL;
 
       }
 
 
       // =================================
-      // BACKGROUND SAVE
+      // CLOSE MODAL IMMEDIATELY
+      // =================================
+
+      editProfileModal.style.display =
+        "none";
+
+
+      selectedPhotoFile =
+        null;
+
+
+      if (profilePhotoInput) {
+
+        profilePhotoInput.value =
+          "";
+
+      }
+
+
+      // =================================
+      // FIREBASE SAVE
+      // BACKGROUND PROCESS
       // =================================
 
       try {
 
         let finalPhotoURL =
-          selectedPhotoURL;
+          oldPhotoURL;
 
 
         // =================================
@@ -930,20 +960,27 @@ if (saveProfileBtn) {
             );
 
 
-          // Replace temporary preview
-          // with Firebase URL
+          // =================================
+          // REPLACE TEMPORARY URL
+          // WITH FIREBASE URL
+          // =================================
 
           avatar.src =
             finalPhotoURL;
 
+
           editPhotoPreview.src =
+            finalPhotoURL;
+
+
+          selectedPhotoURL =
             finalPhotoURL;
 
         }
 
 
         // =================================
-        // SAVE FIRESTORE
+        // SAVE USERNAME + PHOTO
         // =================================
 
         await updateDoc(
@@ -953,32 +990,35 @@ if (saveProfileBtn) {
             currentUser.uid
           ),
           {
+
             username:
               newUsername,
 
             photoURL:
               finalPhotoURL
+
           }
         );
 
 
         // =================================
-        // UPDATE SAVED STATE
+        // FINAL SAVED STATE
         // =================================
 
         selectedPhotoURL =
           finalPhotoURL;
 
-        selectedPhotoFile =
-          null;
+
+        username.textContent =
+          newUsername;
 
 
-        if (profilePhotoInput) {
+        avatar.src =
+          finalPhotoURL;
 
-          profilePhotoInput.value =
-            "";
 
-        }
+        editPhotoPreview.src =
+          finalPhotoURL;
 
 
         console.log(
@@ -993,8 +1033,29 @@ if (saveProfileBtn) {
           error
         );
 
+
+        // =================================
+        // FIREBASE SAVE FAILED
+        // RESTORE OLD PHOTO
+        // =================================
+
+        if (photoFile) {
+
+          avatar.src =
+            oldPhotoURL;
+
+          editPhotoPreview.src =
+            oldPhotoURL;
+
+          selectedPhotoURL =
+            oldPhotoURL;
+
+        }
+
+
         alert(
-          "Profile save failed. Please try again."
+          "Profile save failed: " +
+          error.message
         );
 
       }
