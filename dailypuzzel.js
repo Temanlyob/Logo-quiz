@@ -13,7 +13,7 @@ import {
 console.log("DAILY PUZZLE JS LOADED");
 
 // ======================================
-// THEME SYSTEM
+// THEME
 // ======================================
 
 function applyTheme(theme) {
@@ -33,8 +33,6 @@ function applyTheme(theme) {
 
   } else {
 
-    // DEFAULT = PHONE SYSTEM THEME
-
     if (
       window.matchMedia(
         "(prefers-color-scheme: dark)"
@@ -43,39 +41,42 @@ function applyTheme(theme) {
 
       document.body.classList.add("theme-dark");
 
+    } else {
+
+      document.body.classList.add("theme-light");
+
     }
 
   }
 
-  console.log("Theme applied:", theme);
 }
 
-
-// Load saved Profile setting
-const savedTheme =
-  localStorage.getItem("theme") || "default";
-
-applyTheme(savedTheme);
+applyTheme(
+  localStorage.getItem("theme") || "default"
+);
 
 
-// Follow phone theme if Default is selected
+// Follow phone theme
 const systemTheme =
   window.matchMedia(
     "(prefers-color-scheme: dark)"
   );
 
-systemTheme.addEventListener("change", () => {
+systemTheme.addEventListener(
+  "change",
+  () => {
 
-  const currentTheme =
-    localStorage.getItem("theme") || "default";
+    const currentTheme =
+      localStorage.getItem("theme") || "default";
 
-  if (currentTheme === "default") {
+    if (currentTheme === "default") {
 
-    applyTheme("default");
+      applyTheme("default");
+
+    }
 
   }
-
-});
+);
 
 
 // ======================================
@@ -147,27 +148,146 @@ let todayKey =
 
 if (!todayKey) {
 
-  const now = new Date();
+  const now =
+    new Date();
 
   const day =
-    String(now.getDate()).padStart(2, "0");
+    String(
+      now.getDate()
+    ).padStart(2, "0");
 
   const month =
-    String(now.getMonth() + 1).padStart(2, "0");
+    String(
+      now.getMonth() + 1
+    ).padStart(2, "0");
 
   const year =
-    String(now.getFullYear()).slice(-2);
+    String(
+      now.getFullYear()
+    ).slice(-2);
 
   todayKey =
     `${day}-${month}-${year}`;
 
 }
 
-
 console.log(
   "Puzzle Date:",
   todayKey
 );
+
+
+// ======================================
+// DATE HELPERS
+// ======================================
+
+function parseDateKey(dateKey) {
+
+  const parts =
+    dateKey.split("-");
+
+  if (parts.length !== 3) {
+
+    return null;
+
+  }
+
+  const day =
+    Number(parts[0]);
+
+  const month =
+    Number(parts[1]) - 1;
+
+  const year =
+    Number("20" + parts[2]);
+
+  const date =
+    new Date(
+      year,
+      month,
+      day
+    );
+
+  date.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+  return date;
+
+}
+
+
+function getTodayDateOnly() {
+
+  const date =
+    new Date();
+
+  date.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+  return date;
+
+}
+
+
+// ======================================
+// IS THIS TODAY'S PUZZLE?
+// ======================================
+
+function isTodaysPuzzle() {
+
+  const puzzleDate =
+    parseDateKey(todayKey);
+
+  const today =
+    getTodayDateOnly();
+
+  if (!puzzleDate) {
+
+    return false;
+
+  }
+
+  return (
+    puzzleDate.getTime() ===
+    today.getTime()
+  );
+
+}
+
+
+// ======================================
+// SCORE RULE
+//
+// Today's puzzle  = +10
+// Previous puzzle = +5
+// Wrong            = 0
+// ======================================
+
+function getPuzzleScore(correct) {
+
+  if (!correct) {
+
+    return 0;
+
+  }
+
+  if (isTodaysPuzzle()) {
+
+    return 10;
+
+  }
+
+  return 5;
+
+}
 
 
 // ======================================
@@ -193,7 +313,7 @@ console.log(
 
 
 // ======================================
-// IMAGE ERROR CHECK
+// IMAGE ERROR
 // ======================================
 
 img1.onerror = () => {
@@ -245,17 +365,25 @@ let correctOption;
 
 if (randomPosition === "left") {
 
-  img1.src = rightImage;
-  img2.src = wrongImage;
+  img1.src =
+    rightImage;
 
-  correctOption = option1;
+  img2.src =
+    wrongImage;
+
+  correctOption =
+    option1;
 
 } else {
 
-  img1.src = wrongImage;
-  img2.src = rightImage;
+  img1.src =
+    wrongImage;
 
-  correctOption = option2;
+  img2.src =
+    rightImage;
+
+  correctOption =
+    option2;
 
 }
 
@@ -280,7 +408,7 @@ const savedQuiz =
 
 
 // ======================================
-// RESET CARD STYLES
+// RESET CARDS
 // ======================================
 
 function resetCards() {
@@ -295,8 +423,11 @@ function resetCards() {
     "wrong"
   );
 
-  badge1.style.display = "none";
-  badge2.style.display = "none";
+  badge1.style.display =
+    "none";
+
+  badge2.style.display =
+    "none";
 
 }
 
@@ -309,40 +440,51 @@ function restoreResult(data) {
 
   resetCards();
 
-  // Remove previous result color
   resultSection.classList.remove(
     "result-correct",
     "result-wrong"
   );
 
-  resultSection.style.display = "block";
+  resultSection.style.display =
+    "block";
+
 
   if (data.correct) {
 
-  // Green result
-  resultSection.classList.add(
-    "result-correct"
-  );
+    // ==================================
+    // CORRECT
+    // ==================================
 
-  correctOption.classList.add(
-    "correct"
-  );
+    resultSection.classList.add(
+      "result-correct"
+    );
+
+    correctOption.classList.add(
+      "correct"
+    );
 
 
     if (correctOption === option1) {
 
-      badge1.style.display = "flex";
-      badge1.innerHTML = "✓";
+      badge1.style.display =
+        "flex";
+
+      badge1.innerHTML =
+        "✓";
 
     } else {
 
-      badge2.style.display = "flex";
-      badge2.innerHTML = "✓";
+      badge2.style.display =
+        "flex";
+
+      badge2.innerHTML =
+        "✓";
 
     }
 
 
-    resultCircle.innerHTML = "✅";
+    resultCircle.innerHTML =
+      "✅";
 
     resultTitle.innerHTML =
       "Correct!";
@@ -350,8 +492,16 @@ function restoreResult(data) {
     resultText.innerHTML =
       "You selected the real logo.";
 
+
+    const earnedScore =
+      Number(data.score) || 0;
+
+
     pointsCard.innerHTML =
-      "+10 Points ⭐";
+      "+" +
+      earnedScore +
+      " Points ⭐";
+
 
     infoTitle.innerHTML =
       "Great Job!";
@@ -362,15 +512,19 @@ function restoreResult(data) {
 
   } else {
 
-  // Red result
-  resultSection.classList.add(
-    "result-wrong"
-  );
+    // ==================================
+    // WRONG
+    // ==================================
 
-  const wrongOption =
-    correctOption === option1
-      ? option2
-      : option1;
+    resultSection.classList.add(
+      "result-wrong"
+    );
+
+
+    const wrongOption =
+      correctOption === option1
+        ? option2
+        : option1;
 
 
     wrongOption.classList.add(
@@ -384,24 +538,39 @@ function restoreResult(data) {
 
     if (correctOption === option1) {
 
-      badge1.style.display = "flex";
-      badge1.innerHTML = "✓";
+      badge1.style.display =
+        "flex";
 
-      badge2.style.display = "flex";
-      badge2.innerHTML = "✕";
+      badge1.innerHTML =
+        "✓";
+
+
+      badge2.style.display =
+        "flex";
+
+      badge2.innerHTML =
+        "✕";
 
     } else {
 
-      badge2.style.display = "flex";
-      badge2.innerHTML = "✓";
+      badge2.style.display =
+        "flex";
 
-      badge1.style.display = "flex";
-      badge1.innerHTML = "✕";
+      badge2.innerHTML =
+        "✓";
+
+
+      badge1.style.display =
+        "flex";
+
+      badge1.innerHTML =
+        "✕";
 
     }
 
 
-    resultCircle.innerHTML = "❌";
+    resultCircle.innerHTML =
+      "❌";
 
     resultTitle.innerHTML =
       "Incorrect!";
@@ -413,10 +582,10 @@ function restoreResult(data) {
       "0 Points";
 
     infoTitle.innerHTML =
-  "Wrong Choice";
+      "Wrong Choice";
 
-infoText.innerHTML =
-  "You selected the wrong logo.";
+    infoText.innerHTML =
+      "You selected the wrong logo.";
 
   }
 
@@ -435,7 +604,11 @@ infoText.innerHTML =
 
 async function checkAnswer(selected) {
 
-  if (answered) return;
+  if (answered) {
+
+    return;
+
+  }
 
   answered = true;
 
@@ -444,19 +617,60 @@ async function checkAnswer(selected) {
     selected === correctOption;
 
 
+  // ====================================
+  // SCORE
+  // ====================================
+
+  const earnedScore =
+    getPuzzleScore(correct);
+
+
+  // ====================================
+  // REAL PLAY TIME
+  // ====================================
+
+  const playedAt =
+    new Date().toISOString();
+
+
+  // ====================================
+  // STREAK ELIGIBILITY
+  //
+  // Only today's puzzle can create
+  // a current streak day.
+  //
+  // Previous-day puzzle completed today
+  // DOES NOT create a streak day.
+  // ====================================
+
+  const streakEligible =
+    isTodaysPuzzle();
+
+
   const data = {
 
-    date: todayKey,
+    date:
+      todayKey,
 
-    correct: correct,
+    correct:
+      correct,
 
-    score: correct ? 10 : 0,
+    score:
+      earnedScore,
 
-    attempted: true,
+    attempted:
+      true,
 
-    playedAt: new Date().toISOString()
+    played:
+      true,
 
-};
+    playedAt:
+      playedAt,
+
+    streakEligible:
+      streakEligible
+
+  };
 
 
   // ====================================
@@ -479,20 +693,12 @@ async function checkAnswer(selected) {
 
   localStorage.setItem(
     "lastScore",
-    correct
-      ? "10"
-      : "0"
-  );
-
-
-  localStorage.setItem(
-    "resultProcessed_" + todayKey,
-    "false"
+    String(earnedScore)
   );
 
 
   // ====================================
-  // SAVE FIRESTORE
+  // FIRESTORE
   // ====================================
 
   if (currentUser) {
@@ -508,7 +714,9 @@ async function checkAnswer(selected) {
 
 
       const snap =
-        await getDoc(userRef);
+        await getDoc(
+          userRef
+        );
 
 
       let history = {};
@@ -524,14 +732,23 @@ async function checkAnswer(selected) {
 
       history[todayKey] = {
 
-        played: true,
+        played:
+          true,
 
-        correct: correct,
+        attempted:
+          true,
 
-        score: correct ? 10 : 0,
+        correct:
+          correct,
+
+        score:
+          earnedScore,
 
         playedAt:
-          new Date().toISOString()
+          playedAt,
+
+        streakEligible:
+          streakEligible
 
       };
 
@@ -539,11 +756,29 @@ async function checkAnswer(selected) {
       await setDoc(
         userRef,
         {
-          history: history
+          history:
+            history
         },
         {
-          merge: true
+          merge:
+            true
         }
+      );
+
+
+      console.log(
+        "Saved puzzle:",
+        todayKey
+      );
+
+      console.log(
+        "Score:",
+        earnedScore
+      );
+
+      console.log(
+        "Streak eligible:",
+        streakEligible
       );
 
 
@@ -563,7 +798,9 @@ async function checkAnswer(selected) {
   // SHOW RESULT
   // ====================================
 
-  restoreResult(data);
+  restoreResult(
+    data
+  );
 
 
   option1.style.pointerEvents =
@@ -581,14 +818,18 @@ async function checkAnswer(selected) {
 
 option1.onclick = () => {
 
-  checkAnswer(option1);
+  checkAnswer(
+    option1
+  );
 
 };
 
 
 option2.onclick = () => {
 
-  checkAnswer(option2);
+  checkAnswer(
+    option2
+  );
 
 };
 
@@ -599,7 +840,11 @@ option2.onclick = () => {
 
 async function syncFirestoreHistory() {
 
-  if (!currentUser) return;
+  if (!currentUser) {
+
+    return;
+
+  }
 
 
   try {
@@ -613,10 +858,16 @@ async function syncFirestoreHistory() {
 
 
     const snap =
-      await getDoc(userRef);
+      await getDoc(
+        userRef
+      );
 
 
-    if (!snap.exists()) return;
+    if (!snap.exists()) {
+
+      return;
+
+    }
 
 
     const history =
@@ -625,7 +876,8 @@ async function syncFirestoreHistory() {
 
     if (history[todayKey]) {
 
-      answered = true;
+      answered =
+        true;
 
 
       restoreResult(
@@ -673,26 +925,36 @@ onAuthStateChanged(
     }
 
 
-    currentUser = user;
+    currentUser =
+      user;
 
 
-    // Check local result first
+    // Local result
     if (savedQuiz) {
 
       try {
 
         const data =
-          JSON.parse(savedQuiz);
+          JSON.parse(
+            savedQuiz
+          );
 
-        answered = true;
 
-        restoreResult(data);
+        answered =
+          true;
+
+
+        restoreResult(
+          data
+        );
+
 
         option1.style.pointerEvents =
           "none";
 
         option2.style.pointerEvents =
           "none";
+
 
       } catch (error) {
 
@@ -706,7 +968,7 @@ onAuthStateChanged(
     }
 
 
-    // Then sync Firestore
+    // Firestore result
     await syncFirestoreHistory();
 
   }
@@ -714,7 +976,7 @@ onAuthStateChanged(
 
 
 // ======================================
-// SHOW RESULTS BUTTON
+// SHOW RESULTS
 // ======================================
 
 showResultsBtn.onclick = () => {
@@ -747,8 +1009,11 @@ preloadWrong.src =
 // DISABLE IMAGE DRAG
 // ======================================
 
-img1.draggable = false;
-img2.draggable = false;
+img1.draggable =
+  false;
+
+img2.draggable =
+  false;
 
 img1.oncontextmenu =
   () => false;
@@ -769,7 +1034,7 @@ document.body.style.webkitUserSelect =
 
 
 // ======================================
-// DAILY PROCESS FLAG
+// PAGESHOW
 // ======================================
 
 window.addEventListener(
@@ -797,21 +1062,7 @@ window.addEventListener(
 
 
 // ======================================
-// BROWSER BACK SUPPORT
-// ======================================
-
-window.addEventListener(
-  "popstate",
-  () => {
-
-    location.reload();
-
-  }
-);
-
-
-// ======================================
-// VISIBILITY CHANGE
+// VISIBILITY
 // ======================================
 
 document.addEventListener(
@@ -835,26 +1086,38 @@ document.addEventListener(
 
 
 // ======================================
-// KEYBOARD SUPPORT
+// KEYBOARD
 // ======================================
 
 document.addEventListener(
   "keydown",
   (e) => {
 
-    if (answered) return;
+    if (answered) {
 
-
-    if (e.key === "ArrowLeft") {
-
-      checkAnswer(option1);
+      return;
 
     }
 
 
-    if (e.key === "ArrowRight") {
+    if (
+      e.key === "ArrowLeft"
+    ) {
 
-      checkAnswer(option2);
+      checkAnswer(
+        option1
+      );
+
+    }
+
+
+    if (
+      e.key === "ArrowRight"
+    ) {
+
+      checkAnswer(
+        option2
+      );
 
     }
 
