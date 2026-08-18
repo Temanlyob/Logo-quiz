@@ -82,6 +82,7 @@ document.getElementById("cancelProfileBtn");
 
 let selectedPhotoURL = null;
 let currentUser = null;
+let selectedPhotoFile = null;
 
 // =============================
 // Firebase
@@ -496,30 +497,29 @@ editProfileBtn.addEventListener("click", () => {
 // =============================
 
 profilePhotoInput.addEventListener(
-    "change",
-    () => {
+  "change",
+  () => {
 
-        const file =
-            profilePhotoInput.files[0];
+    const file =
+      profilePhotoInput.files[0];
 
-        if(!file) return;
+    if (!file) return;
 
-        const reader =
-            new FileReader();
+    selectedPhotoFile = file;
 
-        reader.onload = (e) => {
+    const reader =
+      new FileReader();
 
-            selectedPhotoURL =
-                e.target.result;
+    reader.onload = (e) => {
 
-            editPhotoPreview.src =
-                e.target.result;
+      editPhotoPreview.src =
+        e.target.result;
 
-        };
+    };
 
-        reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
 
-    }
+  }
 );
 
 
@@ -562,39 +562,134 @@ editProfileModal.addEventListener(
 // =============================
 
 saveProfileBtn.addEventListener(
-    "click",
-    async () => {
+  "click",
+  async () => {
 
-        if(!currentUser) return;
+    if (!currentUser) return;
 
-        const newUsername =
-            editUsername.value.trim();
+    const newUsername =
+      editUsername.value.trim();
 
-        if(!newUsername){
+    if (!newUsername) {
 
-            alert("Please enter username.");
+      alert("Please enter username.");
 
-            return;
+      return;
 
-        }
-
-        try{
-
-            saveProfileBtn.disabled = true;
-
-            saveProfileBtn.textContent =
-                "Saving...";
-
-            await updateDoc(
-    doc(
-        db,
-        "users",
-        currentUser.uid
-    ),
-    {
-        username: newUsername,
-        photoURL: selectedPhotoURL
     }
+
+    try {
+
+      saveProfileBtn.disabled = true;
+
+      saveProfileBtn.textContent =
+        "Saving...";
+
+
+      let finalPhotoURL =
+        selectedPhotoURL;
+
+
+      // =================================
+      // UPLOAD NEW PROFILE PHOTO
+      // =================================
+
+      if (selectedPhotoFile) {
+
+        const photoRef =
+          ref(
+            storage,
+            `profilePhotos/${currentUser.uid}/${Date.now()}_${selectedPhotoFile.name}`
+          );
+
+
+        const uploadResult =
+          await uploadBytes(
+            photoRef,
+            selectedPhotoFile
+          );
+
+
+        finalPhotoURL =
+          await getDownloadURL(
+            uploadResult.ref
+          );
+
+      }
+
+
+      // =================================
+      // SAVE FIRESTORE
+      // =================================
+
+      await updateDoc(
+        doc(
+          db,
+          "users",
+          currentUser.uid
+        ),
+        {
+          username:
+            newUsername,
+
+          photoURL:
+            finalPhotoURL
+        }
+      );
+
+
+      // =================================
+      // UPDATE UI
+      // =================================
+
+      username.textContent =
+        newUsername;
+
+      avatar.src =
+        finalPhotoURL;
+
+      editPhotoPreview.src =
+        finalPhotoURL;
+
+      selectedPhotoURL =
+        finalPhotoURL;
+
+      selectedPhotoFile =
+        null;
+
+
+      editProfileModal.style.display =
+        "none";
+
+
+      alert(
+        "Profile updated successfully!"
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "PROFILE UPDATE ERROR:",
+        error
+      );
+
+      alert(
+        "Failed to update profile: " +
+        error.message
+      );
+
+    } finally {
+
+      saveProfileBtn.disabled =
+        false;
+
+      saveProfileBtn.textContent =
+        "Save Changes";
+
+    }
+
+  }
 );
 
           username.textContent =
