@@ -11,255 +11,345 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-storage.js";
 
 import {
-onAuthStateChanged,
-signOut
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 import {
-doc,
-getDoc,
-updateDoc
+  doc,
+  getDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-// =============================
 
+console.log("PROFILE PAGE LOADED");
+
+// =============================
 // Elements
 // =============================
 
 const avatar =
-document.getElementById("profilePhoto");
+  document.getElementById("profilePhoto");
 
 const username =
-document.getElementById("username");
+  document.getElementById("username");
 
 const email =
-document.getElementById("profileEmail");
+  document.getElementById("profileEmail");
 
 const score =
-document.getElementById("score");
+  document.getElementById("score");
 
 const streak =
-document.getElementById("streak");
+  document.getElementById("streak");
 
 const accuracy =
-document.getElementById("accuracy");
+  document.getElementById("accuracy");
 
 const played =
-document.getElementById("played");
+  document.getElementById("played");
 
 const level =
-document.querySelector(".level");
+  document.querySelector(".level");
 
 const logoutBtn =
-document.querySelector(".logout-btn");
+  document.querySelector(".logout-btn");
 
 const achievementSection =
-document.querySelector(".achievement-section");
+  document.querySelector(".achievement-section");
 
 // =============================
 // EDIT PROFILE ELEMENTS
 // =============================
 
 const editProfileBtn =
-document.getElementById("editProfileBtn");
+  document.getElementById("editProfileBtn");
 
 const editProfileModal =
-document.getElementById("editProfileModal");
+  document.getElementById("editProfileModal");
 
 const editUsername =
-document.getElementById("editUsername");
+  document.getElementById("editUsername");
 
 const editPhotoPreview =
-document.getElementById("editPhotoPreview");
+  document.getElementById("editPhotoPreview");
 
 const profilePhotoInput =
-document.getElementById("profilePhotoInput");
+  document.getElementById("profilePhotoInput");
 
 const saveProfileBtn =
-document.getElementById("saveProfileBtn");
+  document.getElementById("saveProfileBtn");
 
 const cancelProfileBtn =
-document.getElementById("cancelProfileBtn");
+  document.getElementById("cancelProfileBtn");
 
 let selectedPhotoURL = null;
+
 let currentUser = null;
+
 let selectedPhotoFile = null;
+
 
 // =============================
 // Firebase
 // =============================
 
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(
+  auth,
+  async (user) => {
 
-if(!user){
+    if (!user) {
 
-window.location.replace("login.html");
-return;
+      window.location.replace(
+        "login.html"
+      );
 
-}
+      return;
 
-currentUser = user;
+    }
 
-const snap =
-await getDoc(
-doc(db,"users",user.uid)
-);
+    currentUser = user;
 
-if(!snap.exists()){
 
-username.textContent="User";
-email.textContent="";
-return;
+    const snap =
+      await getDoc(
+        doc(
+          db,
+          "users",
+          user.uid
+        )
+      );
 
-}
 
-const data =
-snap.data();
-username.textContent =
-data.username ||
-user.displayName ||
-"User";
+    if (!snap.exists()) {
 
-email.textContent =
-data.email ||
-user.email ||
-"";
+      username.textContent =
+        "User";
 
-avatar.src =
-data.photoURL ||
-user.photoURL ||
-"default-avatar.png";
+      email.textContent =
+        "";
 
-// Current profile data for Edit Profile
-selectedPhotoURL =
-data.photoURL ||
-user.photoURL ||
-"default-avatar.png";
+      return;
 
-editUsername.value =
-data.username ||
-user.displayName ||
-"User";
+    }
 
-editPhotoPreview.src =
-selectedPhotoURL;
-  
-function getCalendarStats() {
 
-  let played = 0;
-  let won = 0;
+    const data =
+      snap.data();
 
-  for (let key in localStorage) {
 
-    if (key.startsWith("quiz_")) {
+    username.textContent =
+      data.username ||
+      user.displayName ||
+      "User";
 
-      const quiz = JSON.parse(localStorage.getItem(key));
 
-      if (quiz) {
+    email.textContent =
+      data.email ||
+      user.email ||
+      "";
 
-        played++;
 
-        if (quiz.correct) {
+    avatar.src =
+      data.photoURL ||
+      user.photoURL ||
+      "default-avatar.png";
 
-          won++;
+
+    // Current profile data for Edit Profile
+
+    selectedPhotoURL =
+      data.photoURL ||
+      user.photoURL ||
+      "default-avatar.png";
+
+
+    if (editUsername) {
+
+      editUsername.value =
+        data.username ||
+        user.displayName ||
+        "User";
+
+    }
+
+
+    if (editPhotoPreview) {
+
+      editPhotoPreview.src =
+        selectedPhotoURL;
+
+    }
+
+
+    // =============================
+    // CALENDAR STATS
+    // =============================
+
+    function getCalendarStats() {
+
+      let played = 0;
+
+      let won = 0;
+
+
+      for (
+        let key in localStorage
+      ) {
+
+        if (
+          key.startsWith("quiz_")
+        ) {
+
+          try {
+
+            const quiz =
+              JSON.parse(
+                localStorage.getItem(key)
+              );
+
+
+            if (quiz) {
+
+              played++;
+
+
+              if (quiz.correct) {
+
+                won++;
+
+              }
+
+            }
+
+          } catch (error) {
+
+            console.error(
+              "PROFILE QUIZ DATA ERROR:",
+              error
+            );
+
+          }
 
         }
 
       }
 
+
+      return {
+
+        played,
+
+        won,
+
+        lost:
+          played - won
+
+      };
+
     }
 
-  }
 
-  return {
-    played,
-    won,
-    lost: played - won
-  };
+    const totalScore =
+      data.totalScore ?? 0;
 
-}
 
-const totalScore =
-data.totalScore ?? 0;
+    const currentStreak =
+      data.currentStreak ?? 0;
 
-const currentStreak =
-data.currentStreak ?? 0;
 
-const stats = getCalendarStats();
+    const stats =
+      getCalendarStats();
 
-const puzzlesPlayed = stats.played;
 
-const gamesWon = stats.won;
+    const puzzlesPlayed =
+      stats.played;
 
-const gamesLost = stats.lost;
-  
-const winRate =
-puzzlesPlayed === 0
-? 0
-: Math.round(
-(gamesWon / puzzlesPlayed) * 100
-);
 
-score.textContent =
-totalScore;
+    const gamesWon =
+      stats.won;
 
-streak.textContent =
-currentStreak;
 
-accuracy.textContent =
-winRate + "%";
+    const gamesLost =
+      stats.lost;
 
-played.textContent =
-puzzlesPlayed;
 
-// =============================
-// SAVE PROFILE PROGRESS
-// Home page will use these exact values
-// =============================
+    const winRate =
+      puzzlesPlayed === 0
+        ? 0
+        : Math.round(
+            (
+              gamesWon /
+              puzzlesPlayed
+            ) * 100
+          );
 
-localStorage.setItem(
-  "profileProgress",
-  JSON.stringify({
-    score: totalScore,
-    streak: currentStreak,
-    accuracy: winRate
-  })
-);
 
-// =============================
-// Level
-// =============================
+    score.textContent =
+      totalScore;
 
-let levelText = "⭐ Level 1";
 
-if(totalScore >= 1000){
+    streak.textContent =
+      currentStreak;
 
-levelText = "👑 Level 5";
 
-}else if(totalScore >= 500){
+    accuracy.textContent =
+      winRate + "%";
 
-levelText = "💎 Level 4";
 
-}else if(totalScore >= 250){
+    played.textContent =
+      puzzlesPlayed;
 
-levelText = "🥇 Level 3";
 
-}else if(totalScore >= 100){
+    // =============================
+    // SAVE PROFILE PROGRESS
+    // Home page will use these exact values
+    // =============================
 
-levelText = "🥈 Level 2";
+    localStorage.setItem(
+      "profileProgress",
+      JSON.stringify({
 
-}
+        score:
+          totalScore,
 
-level.textContent = levelText;
+        streak:
+          currentStreak,
 
-// =============================
-// Achievements
-// =============================
+        accuracy:
+          winRate
 
-let html = "";
+      })
+    );
 
-if(puzzlesPlayed >= 1){
 
-html += `
+    // =============================
+    // LEVEL
+    // INFINITE LEVEL
+    // =============================
+
+    const calculatedLevel =
+      Math.floor(
+        Number(totalScore) / 100
+      ) + 1;
+
+
+    level.textContent =
+      "⭐ Level " +
+      calculatedLevel;
+
+
+    // =============================
+    // ACHIEVEMENTS
+    // =============================
+
+    let html = "";
+
+
+    if (
+      puzzlesPlayed >= 1
+    ) {
+
+      html += `
 <div class="achievement-item">
 <span>🥇</span>
 <div>
@@ -268,11 +358,14 @@ html += `
 </div>
 </div>`;
 
-}
+    }
 
-if(currentStreak >= 7){
 
-html += `
+    if (
+      currentStreak >= 7
+    ) {
+
+      html += `
 <div class="achievement-item">
 <span>🔥</span>
 <div>
@@ -281,11 +374,14 @@ html += `
 </div>
 </div>`;
 
-}
+    }
 
-if(totalScore >= 100){
 
-html += `
+    if (
+      totalScore >= 100
+    ) {
+
+      html += `
 <div class="achievement-item">
 <span>⭐</span>
 <div>
@@ -294,11 +390,14 @@ html += `
 </div>
 </div>`;
 
-}
+    }
 
-if(puzzlesPlayed >= 30){
 
-html += `
+    if (
+      puzzlesPlayed >= 30
+    ) {
+
+      html += `
 <div class="achievement-item">
 <span>🎮</span>
 <div>
@@ -307,11 +406,15 @@ html += `
 </div>
 </div>`;
 
-}
+    }
 
-if(winRate === 100 && puzzlesPlayed >= 10){
 
-html += `
+    if (
+      winRate === 100 &&
+      puzzlesPlayed >= 10
+    ) {
+
+      html += `
 <div class="achievement-item">
 <span>🎯</span>
 <div>
@@ -320,11 +423,14 @@ html += `
 </div>
 </div>`;
 
-}
+    }
 
-if(html === ""){
 
-html = `
+    if (
+      html === ""
+    ) {
+
+      html = `
 <div class="achievement-item">
 <span>🔒</span>
 <div>
@@ -333,405 +439,565 @@ html = `
 </div>
 </div>`;
 
-}
+    }
 
-achievementSection.innerHTML =
-"<h2>Achievements</h2>" + html;
 
-// =============================
-// Logout
-// =============================
+    achievementSection.innerHTML =
+      "<h2>Achievements</h2>" +
+      html;
 
-logoutBtn.onclick = async () => {
 
-await signOut(auth);
+    // =============================
+    // Logout
+    // =============================
 
-window.location.replace("login.html");
+    logoutBtn.onclick =
+      async () => {
 
-};
+        await signOut(auth);
 
-});           
+        window.location.replace(
+          "login.html"
+        );
+
+      };
+
+  }
+);
+
 
 // =============================
 // Theme Popup
 // =============================
 
-const themesBtn = document.getElementById("themesBtn");
-const themeModal = document.getElementById("themeModal");
-const closeTheme = document.getElementById("closeTheme");
-const themeOptions = document.querySelectorAll(".theme-option");
+const themesBtn =
+  document.getElementById(
+    "themesBtn"
+  );
 
-themesBtn.addEventListener("click", (e) => {
+const themeModal =
+  document.getElementById(
+    "themeModal"
+  );
+
+const closeTheme =
+  document.getElementById(
+    "closeTheme"
+  );
+
+const themeOptions =
+  document.querySelectorAll(
+    ".theme-option"
+  );
+
+
+themesBtn.addEventListener(
+  "click",
+  (e) => {
 
     e.preventDefault();
 
-    themeModal.style.display = "flex";
+    themeModal.style.display =
+      "flex";
 
-});
+  }
+);
 
-closeTheme.addEventListener("click", () => {
 
-    themeModal.style.display = "none";
+closeTheme.addEventListener(
+  "click",
+  () => {
 
-});
+    themeModal.style.display =
+      "none";
 
-themeModal.addEventListener("click", (e) => {
+  }
+);
 
-    if (e.target === themeModal) {
 
-        themeModal.style.display = "none";
+themeModal.addEventListener(
+  "click",
+  (e) => {
+
+    if (
+      e.target === themeModal
+    ) {
+
+      themeModal.style.display =
+        "none";
 
     }
 
-});
+  }
+);
+
 
 function updateThemeSelection() {
 
-    const currentTheme =
-        localStorage.getItem("theme") || "default";
+  const currentTheme =
+    localStorage.getItem(
+      "theme"
+    ) || "default";
 
-    themeOptions.forEach(option => {
 
-        option.classList.remove("active");
+  themeOptions.forEach(
+    option => {
 
-        option.querySelector(".tick").textContent = "";
+      option.classList.remove(
+        "active"
+      );
 
-        if(option.dataset.theme === currentTheme){
 
-            option.classList.add("active");
-            option.querySelector(".tick").textContent = "✓";
+      option.querySelector(
+        ".tick"
+      ).textContent =
+        "";
 
-        }
 
-    });
+      if (
+        option.dataset.theme ===
+        currentTheme
+      ) {
 
-}
-
-function applyTheme(theme){
-
-document.body.classList.remove(
-"theme-light",
-"theme-dark"
-);
-
-if(theme==="light"){
-
-document.body.classList.add("theme-light");
-
-}else if(theme==="dark"){
-
-document.body.classList.add("theme-dark");
-
-}else{
-
-if(window.matchMedia("(prefers-color-scheme: dark)").matches){
-
-document.body.classList.add("theme-dark");
-
-}
-
-}
-
-}
-
-themeOptions.forEach(option => {
-
-    option.addEventListener("click", () => {
-
-        const selectedTheme = option.dataset.theme;
-
-        localStorage.setItem(
-            "theme",
-            selectedTheme
+        option.classList.add(
+          "active"
         );
 
-      applyTheme(selectedTheme);
 
-      updateThemeSelection();
+        option.querySelector(
+          ".tick"
+        ).textContent =
+          "✓";
 
-    });
+      }
 
-});
-
-updateThemeSelection();
-applyTheme(
-localStorage.getItem("theme") || "default"
-);
-
-window.matchMedia("(prefers-color-scheme: dark)")
-.addEventListener("change",()=>{
-
-const theme =
-localStorage.getItem("theme") || "default";
-
-if(theme==="default"){
-
-applyTheme("default");
+    }
+  );
 
 }
 
-});
+
+function applyTheme(theme) {
+
+  document.body.classList.remove(
+    "theme-light",
+    "theme-dark"
+  );
+
+
+  if (
+    theme === "light"
+  ) {
+
+    document.body.classList.add(
+      "theme-light"
+    );
+
+  } else if (
+    theme === "dark"
+  ) {
+
+    document.body.classList.add(
+      "theme-dark"
+    );
+
+  } else {
+
+    if (
+      window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches
+    ) {
+
+      document.body.classList.add(
+        "theme-dark"
+      );
+
+    }
+
+  }
+
+}
+
+
+themeOptions.forEach(
+  option => {
+
+    option.addEventListener(
+      "click",
+      () => {
+
+        const selectedTheme =
+          option.dataset.theme;
+
+
+        localStorage.setItem(
+          "theme",
+          selectedTheme
+        );
+
+
+        applyTheme(
+          selectedTheme
+        );
+
+
+        updateThemeSelection();
+
+      }
+    );
+
+  }
+);
+
+
+updateThemeSelection();
+
+
+applyTheme(
+  localStorage.getItem(
+    "theme"
+  ) || "default"
+);
+
+
+window.matchMedia(
+  "(prefers-color-scheme: dark)"
+).addEventListener(
+  "change",
+  () => {
+
+    const theme =
+      localStorage.getItem(
+        "theme"
+      ) || "default";
+
+
+    if (
+      theme === "default"
+    ) {
+
+      applyTheme(
+        "default"
+      );
+
+    }
+
+  }
+);
+
+
 // =============================
 // EDIT PROFILE
 // =============================
 
-editProfileBtn.addEventListener("click", () => {
+if (editProfileBtn) {
 
-    editUsername.value =
+  editProfileBtn.addEventListener(
+    "click",
+    () => {
+
+      editUsername.value =
         username.textContent;
 
-    editPhotoPreview.src =
+
+      editPhotoPreview.src =
         avatar.src;
 
-    selectedPhotoURL =
+
+      selectedPhotoURL =
         avatar.src;
 
-    editProfileModal.style.display =
+
+      selectedPhotoFile =
+        null;
+
+
+      if (profilePhotoInput) {
+
+        profilePhotoInput.value =
+          "";
+
+      }
+
+
+      editProfileModal.style.display =
         "flex";
 
-});
+    }
+  );
+
+}
 
 
 // =============================
 // CHANGE PHOTO PREVIEW
 // =============================
 
-profilePhotoInput.addEventListener(
-  "change",
-  () => {
+if (profilePhotoInput) {
 
-    const file =
-      profilePhotoInput.files[0];
+  profilePhotoInput.addEventListener(
+    "change",
+    () => {
 
-    if (!file) return;
+      const file =
+        profilePhotoInput.files[0];
 
-    selectedPhotoFile = file;
 
-    const reader =
-      new FileReader();
+      if (!file) {
 
-    reader.onload = (e) => {
+        return;
 
-      editPhotoPreview.src =
-        e.target.result;
+      }
 
-    };
 
-    reader.readAsDataURL(file);
+      selectedPhotoFile =
+        file;
 
-  }
-);
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        (e) => {
+
+          editPhotoPreview.src =
+            e.target.result;
+
+        };
+
+
+      reader.readAsDataURL(
+        file
+      );
+
+    }
+  );
+
+}
 
 
 // =============================
 // CANCEL
 // =============================
 
-cancelProfileBtn.addEventListener(
+if (cancelProfileBtn) {
+
+  cancelProfileBtn.addEventListener(
     "click",
     () => {
 
-        editProfileModal.style.display =
-            "none";
+      editProfileModal.style.display =
+        "none";
+
+      selectedPhotoFile =
+        null;
 
     }
-);
+  );
+
+}
 
 
 // =============================
 // CLOSE OUTSIDE
 // =============================
 
-editProfileModal.addEventListener(
+if (editProfileModal) {
+
+  editProfileModal.addEventListener(
     "click",
     (e) => {
 
-        if(e.target === editProfileModal){
+      if (
+        e.target ===
+        editProfileModal
+      ) {
 
-            editProfileModal.style.display =
-                "none";
+        editProfileModal.style.display =
+          "none";
 
-        }
+        selectedPhotoFile =
+          null;
+
+      }
 
     }
-);
+  );
+
+}
 
 
 // =============================
 // SAVE PROFILE
 // =============================
 
-saveProfileBtn.addEventListener(
-  "click",
-  async () => {
+if (saveProfileBtn) {
 
-    if (!currentUser) return;
+  saveProfileBtn.addEventListener(
+    "click",
+    async () => {
 
-    const newUsername =
-      editUsername.value.trim();
+      if (!currentUser) {
 
-    if (!newUsername) {
-
-      alert("Please enter username.");
-
-      return;
-
-    }
-
-    try {
-
-      saveProfileBtn.disabled = true;
-
-      saveProfileBtn.textContent =
-        "Saving...";
-
-
-      let finalPhotoURL =
-        selectedPhotoURL;
-
-
-      // =================================
-      // UPLOAD NEW PROFILE PHOTO
-      // =================================
-
-      if (selectedPhotoFile) {
-
-        const photoRef =
-          ref(
-            storage,
-            `profilePhotos/${currentUser.uid}/${Date.now()}_${selectedPhotoFile.name}`
-          );
-
-
-        const uploadResult =
-          await uploadBytes(
-            photoRef,
-            selectedPhotoFile
-          );
-
-
-        finalPhotoURL =
-          await getDownloadURL(
-            uploadResult.ref
-          );
+        return;
 
       }
 
 
-      // =================================
-      // SAVE FIRESTORE
-      // =================================
-
-      await updateDoc(
-        doc(
-          db,
-          "users",
-          currentUser.uid
-        ),
-        {
-          username:
-            newUsername,
-
-          photoURL:
-            finalPhotoURL
-        }
-      );
+      const newUsername =
+        editUsername.value.trim();
 
 
-      // =================================
-      // UPDATE UI
-      // =================================
+      if (!newUsername) {
 
-      username.textContent =
-        newUsername;
+        alert(
+          "Please enter username."
+        );
 
-      avatar.src =
-        finalPhotoURL;
+        return;
 
-      editPhotoPreview.src =
-        finalPhotoURL;
-
-      selectedPhotoURL =
-        finalPhotoURL;
-
-      selectedPhotoFile =
-        null;
+      }
 
 
-      editProfileModal.style.display =
-        "none";
+      try {
+
+        saveProfileBtn.disabled =
+          true;
 
 
-      alert(
-        "Profile updated successfully!"
-      );
+        saveProfileBtn.textContent =
+          "Saving...";
 
 
-    } catch (error) {
+        // =================================
+        // PHOTO URL
+        // =================================
 
-      console.error(
-        "PROFILE UPDATE ERROR:",
-        error
-      );
+        let finalPhotoURL =
+          selectedPhotoURL;
 
-      alert(
-        "Failed to update profile: " +
-        error.message
-      );
 
-    } finally {
+        // =================================
+        // UPLOAD NEW PHOTO
+        // =================================
 
-      saveProfileBtn.disabled =
-        false;
+        if (
+          selectedPhotoFile
+        ) {
 
-      saveProfileBtn.textContent =
-        "Save Changes";
-
-    }
-
-  }
-);
-
-          username.textContent =
-    newUsername;
-
-avatar.src =
-    selectedPhotoURL;
-
-editPhotoPreview.src =
-    selectedPhotoURL;
-
-            username.textContent =
-                newUsername;
-
-            avatar.src =
-                selectedPhotoURL;
-
-            editProfileModal.style.display =
-                "none";
-
-            alert("Profile updated successfully!");
-
-        }catch(error){
-
-            console.error(
-                "PROFILE UPDATE ERROR:",
-                error
+          const photoRef =
+            ref(
+              storage,
+              `profilePhotos/${currentUser.uid}/${Date.now()}_${selectedPhotoFile.name}`
             );
 
-            alert(
-                "Failed to update profile."
+
+          const uploadResult =
+            await uploadBytes(
+              photoRef,
+              selectedPhotoFile
             );
 
-        }finally{
 
-            saveProfileBtn.disabled =
-                false;
-
-            saveProfileBtn.textContent =
-                "Save Changes";
+          finalPhotoURL =
+            await getDownloadURL(
+              uploadResult.ref
+            );
 
         }
 
+
+        // =================================
+        // SAVE FIRESTORE
+        // =================================
+
+        await updateDoc(
+          doc(
+            db,
+            "users",
+            currentUser.uid
+          ),
+          {
+
+            username:
+              newUsername,
+
+            photoURL:
+              finalPhotoURL
+
+          }
+        );
+
+
+        // =================================
+        // UPDATE UI
+        // =================================
+
+        username.textContent =
+          newUsername;
+
+
+        avatar.src =
+          finalPhotoURL;
+
+
+        editPhotoPreview.src =
+          finalPhotoURL;
+
+
+        selectedPhotoURL =
+          finalPhotoURL;
+
+
+        selectedPhotoFile =
+          null;
+
+
+        if (profilePhotoInput) {
+
+          profilePhotoInput.value =
+            "";
+
+        }
+
+
+        editProfileModal.style.display =
+          "none";
+
+
+        alert(
+          "Profile updated successfully!"
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "PROFILE UPDATE ERROR:",
+          error
+        );
+
+
+        alert(
+          "Failed to update profile: " +
+          error.message
+        );
+
+
+      } finally {
+
+        saveProfileBtn.disabled =
+          false;
+
+
+        saveProfileBtn.textContent =
+          "Save Changes";
+
+      }
+
     }
-);
+  );
+
+}
