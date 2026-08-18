@@ -358,9 +358,9 @@ background:#22c55e;
 
 }
 
-.dot.today{
+.dot.wrong{
 
-background:#3b82f6;
+background:#ef4444;
 
 }
 
@@ -368,6 +368,10 @@ background:#3b82f6;
 
 background:#d1d5db;
 
+}
+
+.dot.wrong{
+    background:#ef4444;
 }
 
 /* ==========================
