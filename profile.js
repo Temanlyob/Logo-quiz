@@ -892,7 +892,7 @@ if (saveProfileBtn) {
         // =================================
 
         let finalPhotoURL =
-          selectedPhotoURL;
+          selectedPhotoURL || avatar.src;
 
 
         // =================================
