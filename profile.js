@@ -539,50 +539,26 @@ function updateAchievements(
 function updateLevel(totalScore) {
 
   if (!level) {
-
     return;
-
   }
 
+  const levelNumber =
+    Math.floor(totalScore / 100) + 1;
 
-  let levelText =
-    "⭐ Level 1";
+  let icon = "⭐";
 
-
-  if (
-    totalScore >= 1000
-  ) {
-
-    levelText =
-      "👑 Level 5";
-
-  } else if (
-    totalScore >= 500
-  ) {
-
-    levelText =
-      "💎 Level 4";
-
-  } else if (
-    totalScore >= 250
-  ) {
-
-    levelText =
-      "🥇 Level 3";
-
-  } else if (
-    totalScore >= 100
-  ) {
-
-    levelText =
-      "🥈 Level 2";
-
+  if (levelNumber >= 10) {
+    icon = "👑";
+  } else if (levelNumber >= 5) {
+    icon = "💎";
+  } else if (levelNumber >= 3) {
+    icon = "🥇";
+  } else if (levelNumber >= 2) {
+    icon = "🥈";
   }
-
 
   level.textContent =
-    levelText;
-
+    icon + " Level " + levelNumber;
 }
 
 
@@ -1401,43 +1377,37 @@ if (saveProfileBtn) {
 
         if (fileToUpload) {
 
-          const compressedPhoto =
-            await compressProfilePhoto(
-              fileToUpload
-            );
+  const compressedPhoto =
+    await compressProfilePhoto(
+      fileToUpload
+    );
 
+  const photoPath =
+    "profilePhotos/" +
+    currentUser.uid +
+    "/profile_" +
+    Date.now() +
+    ".jpg";
 
-          const photoPath =
-            "profilePhotos/" +
-            currentUser.uid +
-            "/profile_" +
-            Date.now() +
-            ".jpg";
+  const photoRef =
+    ref(
+      storage,
+      photoPath
+    );
 
+  await uploadBytes(
+    photoRef,
+    compressedPhoto,
+    {
+      contentType: "image/jpeg"
+    }
+  );
 
-          const photoRef =
-            ref(
-              storage,
-              photoPath
-            );
-
-
-          await uploadBytes(
-            photoRef,
-            compressedPhoto,
-            {
-              contentType:
-                "image/jpeg"
-            }
-          );
-
-
-          finalPhotoURL =
-            await getDownloadURL(
-              photoRef
-            );
-
-        }
+  finalPhotoURL =
+    await getDownloadURL(
+      photoRef
+    );
+}
 
 
         // =========================
