@@ -303,34 +303,45 @@ function getPlayedDates() {
 // CALCULATE CURRENT STREAK
 // =====================================
 
-function calculateCurrentStreak(
-  playedDates
-) {
+function calculateCurrentStreak(playedDates) {
 
-  if (
-    playedDates.length === 0
-  ) {
-
+  if (playedDates.length === 0) {
     return 0;
-
   }
 
+  // Today — without time
+  const today = new Date();
 
+  today.setHours(0, 0, 0, 0);
+
+  // Latest played date
+  const latestPlayed =
+    playedDates[playedDates.length - 1];
+
+  // If the user has NOT played today,
+  // current streak is already broken.
+  if (
+    latestPlayed.getTime() !==
+    today.getTime()
+  ) {
+    return 0;
+  }
+
+  // Today is played
   let streak = 1;
 
-
+  // Check backwards day-by-day
   for (
-    let i =
-      playedDates.length - 1;
+    let i = playedDates.length - 1;
     i > 0;
     i--
   ) {
 
     const current =
-      playedDates[i].date;
+      playedDates[i];
 
     const previous =
-      playedDates[i - 1].date;
+      playedDates[i - 1];
 
     const diffDays =
       Math.round(
@@ -338,21 +349,18 @@ function calculateCurrentStreak(
           current.getTime() -
           previous.getTime()
         ) /
-        (
-          1000 *
-          60 *
-          60 *
-          24
-        )
+        (1000 * 60 * 60 * 24)
       );
 
-
+    // Consecutive day
     if (diffDays === 1) {
 
       streak++;
 
     } else {
 
+      // One day or more was missed.
+      // STOP — old streak must NOT be counted.
       break;
 
     }
@@ -360,9 +368,7 @@ function calculateCurrentStreak(
   }
 
   return streak;
-
 }
-
 
 // =====================================
 // CALCULATE BEST STREAK
