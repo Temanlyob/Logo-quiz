@@ -838,9 +838,7 @@ if (saveProfileBtn) {
     "click",
     async () => {
 
-      if (!currentUser) {
-        return;
-      }
+      if (!currentUser) return;
 
 
       const newUsername =
@@ -849,93 +847,56 @@ if (saveProfileBtn) {
 
       if (!newUsername) {
 
-        alert(
-          "Please enter username."
-        );
+        alert("Please enter username.");
 
         return;
 
       }
 
 
-      // =================================
-      // SAVE CURRENT VALUES LOCALLY FIRST
-      // =================================
-
       const photoFile =
         selectedPhotoFile;
 
-      const oldPhotoURL =
-        selectedPhotoURL;
-
-
-      // =================================
-      // INSTANT USERNAME CHANGE
-      // =================================
-
-      username.textContent =
-        newUsername;
-
-
-      // =================================
-      // INSTANT PHOTO CHANGE
-      // =================================
-
-      let instantPhotoURL =
-        oldPhotoURL;
-
-
-      if (photoFile) {
-
-        instantPhotoURL =
-          URL.createObjectURL(
-            photoFile
-          );
-
-
-        avatar.src =
-          instantPhotoURL;
-
-
-        editPhotoPreview.src =
-          instantPhotoURL;
-
-      }
-
-
-      // =================================
-      // CLOSE MODAL IMMEDIATELY
-      // =================================
-
-      editProfileModal.style.display =
-        "none";
-
-
-      selectedPhotoFile =
-        null;
-
-
-      if (profilePhotoInput) {
-
-        profilePhotoInput.value =
-          "";
-
-      }
-
-
-      // =================================
-      // FIREBASE SAVE
-      // BACKGROUND PROCESS
-      // =================================
 
       try {
 
-        let finalPhotoURL =
-          oldPhotoURL;
+        saveProfileBtn.disabled = true;
+
+        saveProfileBtn.textContent =
+          "Saving...";
 
 
         // =================================
-        // UPLOAD PHOTO
+        // INSTANT PHOTO PREVIEW
+        // =================================
+
+        if (photoFile) {
+
+          const previewURL =
+            URL.createObjectURL(
+              photoFile
+            );
+
+          avatar.src =
+            previewURL;
+
+          editPhotoPreview.src =
+            previewURL;
+
+        }
+
+
+        // =================================
+        // KEEP OLD PHOTO IF
+        // NO NEW PHOTO SELECTED
+        // =================================
+
+        let finalPhotoURL =
+          selectedPhotoURL;
+
+
+        // =================================
+        // UPLOAD NEW PHOTO
         // =================================
 
         if (photoFile) {
@@ -943,7 +904,12 @@ if (saveProfileBtn) {
           const photoRef =
             ref(
               storage,
-              `profilePhotos/${currentUser.uid}/${Date.now()}_${photoFile.name}`
+              "profilePhotos/" +
+              currentUser.uid +
+              "/" +
+              Date.now() +
+              "_" +
+              photoFile.name
             );
 
 
@@ -960,27 +926,16 @@ if (saveProfileBtn) {
             );
 
 
-          // =================================
-          // REPLACE TEMPORARY URL
-          // WITH FIREBASE URL
-          // =================================
-
-          avatar.src =
-            finalPhotoURL;
-
-
-          editPhotoPreview.src =
-            finalPhotoURL;
-
-
-          selectedPhotoURL =
-            finalPhotoURL;
+          console.log(
+            "PHOTO UPLOAD SUCCESS:",
+            finalPhotoURL
+          );
 
         }
 
 
         // =================================
-        // SAVE USERNAME + PHOTO
+        // SAVE FIRESTORE
         // =================================
 
         await updateDoc(
@@ -1001,28 +956,50 @@ if (saveProfileBtn) {
         );
 
 
+        console.log(
+          "PROFILE FIRESTORE SAVE SUCCESS"
+        );
+
+
         // =================================
-        // FINAL SAVED STATE
+        // UPDATE SAVED STATE
         // =================================
 
         selectedPhotoURL =
           finalPhotoURL;
 
+        selectedPhotoFile =
+          null;
+
 
         username.textContent =
           newUsername;
 
-
         avatar.src =
           finalPhotoURL;
-
 
         editPhotoPreview.src =
           finalPhotoURL;
 
 
-        console.log(
-          "PROFILE SAVED SUCCESSFULLY"
+        if (profilePhotoInput) {
+
+          profilePhotoInput.value =
+            "";
+
+        }
+
+
+        // =================================
+        // NOW CLOSE MODAL
+        // =================================
+
+        editProfileModal.style.display =
+          "none";
+
+
+        alert(
+          "Profile updated successfully!"
         );
 
 
@@ -1034,29 +1011,19 @@ if (saveProfileBtn) {
         );
 
 
-        // =================================
-        // FIREBASE SAVE FAILED
-        // RESTORE OLD PHOTO
-        // =================================
-
-        if (photoFile) {
-
-          avatar.src =
-            oldPhotoURL;
-
-          editPhotoPreview.src =
-            oldPhotoURL;
-
-          selectedPhotoURL =
-            oldPhotoURL;
-
-        }
-
-
         alert(
           "Profile save failed: " +
           error.message
         );
+
+
+      } finally {
+
+        saveProfileBtn.disabled =
+          false;
+
+        saveProfileBtn.textContent =
+          "Save Changes";
 
       }
 
