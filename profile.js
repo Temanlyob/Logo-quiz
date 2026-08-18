@@ -833,71 +833,94 @@ if (editProfileModal) {
 // SAVE PROFILE
 // =============================
 
+// =============================
+// SAVE PROFILE
+// =============================
+
 if (saveProfileBtn) {
 
   saveProfileBtn.addEventListener(
     "click",
     async () => {
 
-      if (!currentUser) {
-
-        return;
-
-      }
-
+      if (!currentUser) return;
 
       const newUsername =
         editUsername.value.trim();
 
-
       if (!newUsername) {
 
-        alert(
-          "Please enter username."
-        );
-
+        alert("Please enter username.");
         return;
 
       }
 
 
+      // =================================
+      // INSTANT UI CHANGE
+      // =================================
+
+      username.textContent =
+        newUsername;
+
+      editProfileModal.style.display =
+        "none";
+
+      saveProfileBtn.disabled =
+        false;
+
+      saveProfileBtn.textContent =
+        "Save Changes";
+
+
+      // =================================
+      // PHOTO PREVIEW INSTANTLY
+      // =================================
+
+      let photoFile =
+        selectedPhotoFile;
+
+
+      if (photoFile) {
+
+        const localPhotoURL =
+          URL.createObjectURL(
+            photoFile
+          );
+
+        avatar.src =
+          localPhotoURL;
+
+      }
+
+
+      // =================================
+      // BACKGROUND SAVE
+      // =================================
+
       try {
-
-        saveProfileBtn.disabled =
-          true;
-
-
-        saveProfileBtn.textContent =
-          "Saving...";
-
-
-        // =================================
-        // PHOTO URL
-        // =================================
 
         let finalPhotoURL =
           selectedPhotoURL;
 
 
         // =================================
-        // UPLOAD NEW PHOTO
+        // UPLOAD PHOTO
         // =================================
 
-        if (
-          selectedPhotoFile
-        ) {
+        if (photoFile) {
 
           const photoRef =
             ref(
               storage,
-              `profilePhotos/${currentUser.uid}/${Date.now()}_${selectedPhotoFile.name}`
+              `profilePhotos/${currentUser.uid}/${Date.now()}_${photoFile.name}`
             );
 
 
           const uploadResult =
             await uploadBytes(
               photoRef,
-              selectedPhotoFile
+              photoFile
             );
 
 
@@ -905,6 +928,16 @@ if (saveProfileBtn) {
             await getDownloadURL(
               uploadResult.ref
             );
+
+
+          // Replace temporary preview
+          // with Firebase URL
+
+          avatar.src =
+            finalPhotoURL;
+
+          editPhotoPreview.src =
+            finalPhotoURL;
 
         }
 
@@ -920,36 +953,21 @@ if (saveProfileBtn) {
             currentUser.uid
           ),
           {
-
             username:
               newUsername,
 
             photoURL:
               finalPhotoURL
-
           }
         );
 
 
         // =================================
-        // UPDATE UI
+        // UPDATE SAVED STATE
         // =================================
-
-        username.textContent =
-          newUsername;
-
-
-        avatar.src =
-          finalPhotoURL;
-
-
-        editPhotoPreview.src =
-          finalPhotoURL;
-
 
         selectedPhotoURL =
           finalPhotoURL;
-
 
         selectedPhotoFile =
           null;
@@ -963,37 +981,21 @@ if (saveProfileBtn) {
         }
 
 
-        editProfileModal.style.display =
-          "none";
-
-
-        alert(
-          "Profile updated successfully!"
+        console.log(
+          "PROFILE SAVED SUCCESSFULLY"
         );
 
 
       } catch (error) {
 
         console.error(
-          "PROFILE UPDATE ERROR:",
+          "PROFILE SAVE ERROR:",
           error
         );
 
-
         alert(
-          "Failed to update profile: " +
-          error.message
+          "Profile save failed. Please try again."
         );
-
-
-      } finally {
-
-        saveProfileBtn.disabled =
-          false;
-
-
-        saveProfileBtn.textContent =
-          "Save Changes";
 
       }
 
