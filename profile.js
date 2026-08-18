@@ -49,6 +49,12 @@ document.getElementById("played");
 const level =
 document.querySelector(".level");
 
+const levelProgressFill =
+document.getElementById("levelProgressFill");
+
+const levelProgressText =
+document.getElementById("levelProgressText");
+
 const logoutBtn =
 document.querySelector(".logout-btn");
 
@@ -82,6 +88,85 @@ document.getElementById("cancelProfileBtn");
 
 let selectedPhotoURL = null;
 let currentUser = null;
+
+// =============================
+// LEVEL SYSTEM
+// =============================
+// Har level ke liye required XP (totalScore) aur badge define kiya gaya hai.
+// Level 6+ ke liye har 1000 XP par ek naya level milta rehta hai (endless growth).
+
+const LEVELS = [
+  { level: 1, title: "Rookie",     emoji: "⭐", min: 0 },
+  { level: 2, title: "Explorer",   emoji: "🥈", min: 100 },
+  { level: 3, title: "Achiever",   emoji: "🥇", min: 250 },
+  { level: 4, title: "Expert",     emoji: "💎", min: 500 },
+  { level: 5, title: "Master",     emoji: "👑", min: 1000 },
+  { level: 6, title: "Champion",   emoji: "🏆", min: 2000 },
+  { level: 7, title: "Legend",     emoji: "🔥", min: 3500 },
+  { level: 8, title: "Mythic",     emoji: "🌟", min: 5000 }
+];
+
+function getLevelInfo(totalScore){
+
+  let current = LEVELS[0];
+  let next = LEVELS[1] || null;
+
+  for(let i = 0; i < LEVELS.length; i++){
+
+    if(totalScore >= LEVELS[i].min){
+
+      current = LEVELS[i];
+      next = LEVELS[i + 1] || null;
+
+    }
+
+  }
+
+  // Level 8 ke baad (max defined level), har 2000 XP par endless level badhta hai
+  if(!next && totalScore >= LEVELS[LEVELS.length - 1].min){
+
+    const base = LEVELS[LEVELS.length - 1];
+    const extraLevels = Math.floor((totalScore - base.min) / 2000);
+
+    current = {
+      level: base.level + extraLevels,
+      title: base.title,
+      emoji: base.emoji,
+      min: base.min + (extraLevels * 2000)
+    };
+
+    next = {
+      min: current.min + 2000
+    };
+
+  }
+
+  const rangeStart = current.min;
+  const rangeEnd = next ? next.min : rangeStart + 100;
+  const rangeSize = rangeEnd - rangeStart;
+  const progressInRange = Math.min(
+    Math.max(totalScore - rangeStart, 0),
+    rangeSize
+  );
+
+  const progressPercent = rangeSize === 0
+    ? 100
+    : Math.round((progressInRange / rangeSize) * 100);
+
+  return {
+    level: current.level,
+    title: current.title,
+    emoji: current.emoji,
+    text: `${current.emoji} Level ${current.level}`,
+    currentXP: totalScore,
+    rangeStart,
+    rangeEnd,
+    progressInRange,
+    rangeSize,
+    progressPercent
+  };
+
+}
 
 // =============================
 // Firebase
@@ -228,27 +313,23 @@ localStorage.setItem(
 // Level
 // =============================
 
-let levelText = "⭐ Level 1";
+const levelInfo = getLevelInfo(totalScore);
 
-if(totalScore >= 1000){
+level.textContent = levelInfo.text;
 
-levelText = "👑 Level 5";
+if(levelProgressFill){
 
-}else if(totalScore >= 500){
-
-levelText = "💎 Level 4";
-
-}else if(totalScore >= 250){
-
-levelText = "🥇 Level 3";
-
-}else if(totalScore >= 100){
-
-levelText = "🥈 Level 2";
+  levelProgressFill.style.width =
+    levelInfo.progressPercent + "%";
 
 }
 
-level.textContent = levelText;
+if(levelProgressText){
+
+  levelProgressText.textContent =
+    levelInfo.progressInRange + " / " + levelInfo.rangeSize + " XP to Level " + (levelInfo.level + 1);
+
+}
 
 // =============================
 // Achievements
@@ -477,7 +558,7 @@ applyTheme("default");
 editProfileBtn.addEventListener("click", () => {
 
     editUsername.value =
-        username.textContent;
+        username.textContent.trim();
 
     editPhotoPreview.src =
         avatar.src;
@@ -565,7 +646,12 @@ saveProfileBtn.addEventListener(
     "click",
     async () => {
 
-        if(!currentUser) return;
+        if(!currentUser){
+
+            alert("You must be logged in to update your profile.");
+            return;
+
+        }
 
         const newUsername =
             editUsername.value.trim();
@@ -585,32 +671,54 @@ saveProfileBtn.addEventListener(
             saveProfileBtn.textContent =
                 "Saving...";
 
+            let finalPhotoURL = selectedPhotoURL;
+
+            // Agar user ne nayi photo choose ki hai (base64 data URL),
+            // to usse Firebase Storage par upload karke asli download URL lete hain
+            // taaki Firestore mein pura base64 string na save ho.
+            const isDataURL =
+                typeof selectedPhotoURL === "string" &&
+                selectedPhotoURL.startsWith("data:");
+
+            if(isDataURL){
+
+                const fileRef = ref(
+                    storage,
+                    `profilePhotos/${currentUser.uid}.jpg`
+                );
+
+                const res = await fetch(selectedPhotoURL);
+                const blob = await res.blob();
+
+                await uploadBytes(fileRef, blob);
+
+                finalPhotoURL = await getDownloadURL(fileRef);
+
+            }
+
             await updateDoc(
-    doc(
-        db,
-        "users",
-        currentUser.uid
-    ),
-    {
-        username: newUsername,
-        photoURL: selectedPhotoURL
-    }
-);
-
-          username.textContent =
-    newUsername;
-
-avatar.src =
-    selectedPhotoURL;
-
-editPhotoPreview.src =
-    selectedPhotoURL;
+                doc(
+                    db,
+                    "users",
+                    currentUser.uid
+                ),
+                {
+                    username: newUsername,
+                    photoURL: finalPhotoURL
+                }
+            );
 
             username.textContent =
                 newUsername;
 
             avatar.src =
-                selectedPhotoURL;
+                finalPhotoURL;
+
+            editPhotoPreview.src =
+                finalPhotoURL;
+
+            selectedPhotoURL =
+                finalPhotoURL;
 
             editProfileModal.style.display =
                 "none";
@@ -625,7 +733,7 @@ editPhotoPreview.src =
             );
 
             alert(
-                "Failed to update profile."
+                "Failed to update profile. Please try again."
             );
 
         }finally{
