@@ -273,20 +273,18 @@ function isTodaysPuzzle() {
 
 function getPuzzleScore(correct) {
 
+  // Wrong answer = 0
   if (!correct) {
-
     return 0;
-
   }
 
+  // Today's puzzle = +10
   if (isTodaysPuzzle()) {
-
     return 10;
-
   }
 
+  // Any previous-day puzzle completed today = +5
   return 5;
-
 }
 
 
