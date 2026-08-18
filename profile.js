@@ -18,10 +18,9 @@ import {
 import {
   doc,
   getDoc,
-  updateDoc
+  setDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-console.log("PROFILE PAGE LOADED");
 
 // =============================
 // Elements
@@ -57,6 +56,7 @@ const logoutBtn =
 const achievementSection =
   document.querySelector(".achievement-section");
 
+
 // =============================
 // EDIT PROFILE ELEMENTS
 // =============================
@@ -82,15 +82,14 @@ const saveProfileBtn =
 const cancelProfileBtn =
   document.getElementById("cancelProfileBtn");
 
+
 let selectedPhotoURL = null;
-
 let currentUser = null;
-
 let selectedPhotoFile = null;
 
 
 // =============================
-// Firebase
+// FIREBASE AUTH
 // =============================
 
 onAuthStateChanged(
@@ -107,98 +106,122 @@ onAuthStateChanged(
 
     }
 
+
     currentUser = user;
 
 
-    const snap =
-      await getDoc(
+    try {
+
+      const userRef =
         doc(
           db,
           "users",
           user.uid
-        )
-      );
+        );
 
 
-    if (!snap.exists()) {
+      const snap =
+        await getDoc(
+          userRef
+        );
+
+
+      if (!snap.exists()) {
+
+        username.textContent =
+          user.displayName ||
+          "User";
+
+        email.textContent =
+          user.email || "";
+
+        avatar.src =
+          user.photoURL ||
+          "default-avatar.png";
+
+        selectedPhotoURL =
+          user.photoURL ||
+          "default-avatar.png";
+
+        editUsername.value =
+          user.displayName ||
+          "User";
+
+        editPhotoPreview.src =
+          selectedPhotoURL;
+
+        return;
+
+      }
+
+
+      const data =
+        snap.data();
+
+
+      // =============================
+      // PROFILE DATA
+      // =============================
 
       username.textContent =
+        data.username ||
+        user.displayName ||
         "User";
 
+
       email.textContent =
+        data.email ||
+        user.email ||
         "";
 
-      return;
 
-    }
-
-
-    const data =
-      snap.data();
+      const savedPhotoURL =
+        data.photoURL ||
+        user.photoURL ||
+        "default-avatar.png";
 
 
-    username.textContent =
-      data.username ||
-      user.displayName ||
-      "User";
+      avatar.src =
+        savedPhotoURL;
 
 
-    email.textContent =
-      data.email ||
-      user.email ||
-      "";
+      selectedPhotoURL =
+        savedPhotoURL;
 
-
-    avatar.src =
-      data.photoURL ||
-      user.photoURL ||
-      "default-avatar.png";
-
-
-    // Current profile data for Edit Profile
-
-    selectedPhotoURL =
-      data.photoURL ||
-      user.photoURL ||
-      "default-avatar.png";
-
-
-    if (editUsername) {
 
       editUsername.value =
         data.username ||
         user.displayName ||
         "User";
 
-    }
-
-
-    if (editPhotoPreview) {
 
       editPhotoPreview.src =
-        selectedPhotoURL;
-
-    }
+        savedPhotoURL;
 
 
-    // =============================
-    // CALENDAR STATS
-    // =============================
+      // =============================
+      // CALENDAR STATS
+      // =============================
 
-    function getCalendarStats() {
+      function getCalendarStats() {
 
-      let played = 0;
+        let playedCount = 0;
 
-      let won = 0;
+        let won = 0;
 
 
-      for (
-        let key in localStorage
-      ) {
-
-        if (
-          key.startsWith("quiz_")
+        for (
+          let key in localStorage
         ) {
+
+          if (
+            !key.startsWith("quiz_")
+          ) {
+
+            continue;
+
+          }
+
 
           try {
 
@@ -208,12 +231,24 @@ onAuthStateChanged(
               );
 
 
-            if (quiz) {
+            if (!quiz) {
 
-              played++;
+              continue;
+
+            }
 
 
-              if (quiz.correct) {
+            if (
+              quiz.attempted === true ||
+              quiz.played === true
+            ) {
+
+              playedCount++;
+
+
+              if (
+                quiz.correct === true
+              ) {
 
                 won++;
 
@@ -224,7 +259,7 @@ onAuthStateChanged(
           } catch (error) {
 
             console.error(
-              "PROFILE QUIZ DATA ERROR:",
+              "CALENDAR STAT ERROR:",
               error
             );
 
@@ -232,258 +267,295 @@ onAuthStateChanged(
 
         }
 
+
+        return {
+
+          played:
+            playedCount,
+
+          won:
+            won,
+
+          lost:
+            playedCount - won
+
+        };
+
       }
 
 
-      return {
-
-        played,
-
-        won,
-
-        lost:
-          played - won
-
-      };
-
-    }
-
-
-    const totalScore =
-      data.totalScore ?? 0;
-
-
-    const currentStreak =
-      data.currentStreak ?? 0;
-
-
-    const stats =
-      getCalendarStats();
-
-
-    const puzzlesPlayed =
-      stats.played;
-
-
-    const gamesWon =
-      stats.won;
-
-
-    const gamesLost =
-      stats.lost;
-
-
-    const winRate =
-      puzzlesPlayed === 0
-        ? 0
-        : Math.round(
-            (
-              gamesWon /
-              puzzlesPlayed
-            ) * 100
-          );
-
-
-    score.textContent =
-      totalScore;
-
-
-    streak.textContent =
-      currentStreak;
-
-
-    accuracy.textContent =
-      winRate + "%";
-
-
-    played.textContent =
-      puzzlesPlayed;
-
-
-    // =============================
-    // SAVE PROFILE PROGRESS
-    // Home page will use these exact values
-    // =============================
-
-    localStorage.setItem(
-      "profileProgress",
-      JSON.stringify({
-
-        score:
-          totalScore,
-
-        streak:
-          currentStreak,
-
-        accuracy:
-          winRate
-
-      })
-    );
-
-
-    // =============================
-    // LEVEL
-    // INFINITE LEVEL
-    // =============================
-
-    const calculatedLevel =
-      Math.floor(
-        Number(totalScore) / 100
-      ) + 1;
-
-
-    level.textContent =
-      "⭐ Level " +
-      calculatedLevel;
-
-
-    // =============================
-    // ACHIEVEMENTS
-    // =============================
-
-    let html = "";
-
-
-    if (
-      puzzlesPlayed >= 1
-    ) {
-
-      html += `
-<div class="achievement-item">
-<span>🥇</span>
-<div>
-<h3>Logo Rookie</h3>
-<p>Completed your first puzzle.</p>
-</div>
-</div>`;
-
-    }
-
-
-    if (
-      currentStreak >= 7
-    ) {
-
-      html += `
-<div class="achievement-item">
-<span>🔥</span>
-<div>
-<h3>7 Day Streak</h3>
-<p>Solved puzzles for 7 consecutive days.</p>
-</div>
-</div>`;
-
-    }
-
-
-    if (
-      totalScore >= 100
-    ) {
-
-      html += `
-<div class="achievement-item">
-<span>⭐</span>
-<div>
-<h3>100 Points Club</h3>
-<p>Earned 100+ points.</p>
-</div>
-</div>`;
-
-    }
-
-
-    if (
-      puzzlesPlayed >= 30
-    ) {
-
-      html += `
-<div class="achievement-item">
-<span>🎮</span>
-<div>
-<h3>Puzzle Master</h3>
-<p>Played 30 puzzles.</p>
-</div>
-</div>`;
-
-    }
-
-
-    if (
-      winRate === 100 &&
-      puzzlesPlayed >= 10
-    ) {
-
-      html += `
-<div class="achievement-item">
-<span>🎯</span>
-<div>
-<h3>Accuracy Master</h3>
-<p>100% accuracy in 10 puzzles.</p>
-</div>
-</div>`;
-
-    }
-
-
-    if (
-      html === ""
-    ) {
-
-      html = `
-<div class="achievement-item">
-<span>🔒</span>
-<div>
-<h3>No Achievements Yet</h3>
-<p>Keep playing to unlock achievements.</p>
-</div>
-</div>`;
-
-    }
-
-
-    achievementSection.innerHTML =
-      "<h2>Achievements</h2>" +
-      html;
-
-
-    // =============================
-    // Logout
-    // =============================
-
-    logoutBtn.onclick =
-      async () => {
-
-        await signOut(auth);
-
-        window.location.replace(
-          "login.html"
+      const totalScore =
+        Number(
+          data.totalScore ?? 0
         );
 
-      };
+
+      const currentStreak =
+        Number(
+          data.currentStreak ?? 0
+        );
+
+
+      const stats =
+        getCalendarStats();
+
+
+      const puzzlesPlayed =
+        stats.played;
+
+
+      const gamesWon =
+        stats.won;
+
+
+      const gamesLost =
+        stats.lost;
+
+
+      const winRate =
+        puzzlesPlayed === 0
+          ? 0
+          : Math.round(
+              (
+                gamesWon /
+                puzzlesPlayed
+              ) * 100
+            );
+
+
+      score.textContent =
+        totalScore;
+
+
+      streak.textContent =
+        currentStreak;
+
+
+      accuracy.textContent =
+        winRate + "%";
+
+
+      played.textContent =
+        puzzlesPlayed;
+
+
+      // =============================
+      // SAVE PROFILE PROGRESS
+      // =============================
+
+      localStorage.setItem(
+        "profileProgress",
+        JSON.stringify({
+
+          score:
+            totalScore,
+
+          streak:
+            currentStreak,
+
+          accuracy:
+            winRate
+
+        })
+      );
+
+
+      // =============================
+      // LEVEL
+      // =============================
+
+      let levelText =
+        "⭐ Level 1";
+
+
+      if (
+        totalScore >= 1000
+      ) {
+
+        levelText =
+          "👑 Level 5";
+
+      } else if (
+        totalScore >= 500
+      ) {
+
+        levelText =
+          "💎 Level 4";
+
+      } else if (
+        totalScore >= 250
+      ) {
+
+        levelText =
+          "🥇 Level 3";
+
+      } else if (
+        totalScore >= 100
+      ) {
+
+        levelText =
+          "🥈 Level 2";
+
+      }
+
+
+      level.textContent =
+        levelText;
+
+
+      // =============================
+      // ACHIEVEMENTS
+      // =============================
+
+      let html = "";
+
+
+      if (
+        puzzlesPlayed >= 1
+      ) {
+
+        html += `
+        <div class="achievement-item">
+          <span>🥇</span>
+          <div>
+            <h3>Logo Rookie</h3>
+            <p>Completed your first puzzle.</p>
+          </div>
+        </div>`;
+
+      }
+
+
+      if (
+        currentStreak >= 7
+      ) {
+
+        html += `
+        <div class="achievement-item">
+          <span>🔥</span>
+          <div>
+            <h3>7 Day Streak</h3>
+            <p>Solved puzzles for 7 consecutive days.</p>
+          </div>
+        </div>`;
+
+      }
+
+
+      if (
+        totalScore >= 100
+      ) {
+
+        html += `
+        <div class="achievement-item">
+          <span>⭐</span>
+          <div>
+            <h3>100 Points Club</h3>
+            <p>Earned 100+ points.</p>
+          </div>
+        </div>`;
+
+      }
+
+
+      if (
+        puzzlesPlayed >= 30
+      ) {
+
+        html += `
+        <div class="achievement-item">
+          <span>🎮</span>
+          <div>
+            <h3>Puzzle Master</h3>
+            <p>Played 30 puzzles.</p>
+          </div>
+        </div>`;
+
+      }
+
+
+      if (
+        winRate === 100 &&
+        puzzlesPlayed >= 10
+      ) {
+
+        html += `
+        <div class="achievement-item">
+          <span>🎯</span>
+          <div>
+            <h3>Accuracy Master</h3>
+            <p>100% accuracy in 10 puzzles.</p>
+          </div>
+        </div>`;
+
+      }
+
+
+      if (
+        html === ""
+      ) {
+
+        html = `
+        <div class="achievement-item">
+          <span>🔒</span>
+          <div>
+            <h3>No Achievements Yet</h3>
+            <p>Keep playing to unlock achievements.</p>
+          </div>
+        </div>`;
+
+      }
+
+
+      achievementSection.innerHTML =
+        "<h2>Achievements</h2>" +
+        html;
+
+
+      // =============================
+      // LOGOUT
+      // =============================
+
+      if (logoutBtn) {
+
+        logoutBtn.onclick =
+          async () => {
+
+            await signOut(auth);
+
+            window.location.replace(
+              "login.html"
+            );
+
+          };
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "PROFILE LOAD ERROR:",
+        error
+      );
+
+    }
 
   }
 );
 
 
 // =============================
-// Theme Popup
+// THEME POPUP
 // =============================
 
 const themesBtn =
-  document.getElementById(
-    "themesBtn"
-  );
+  document.getElementById("themesBtn");
 
 const themeModal =
-  document.getElementById(
-    "themeModal"
-  );
+  document.getElementById("themeModal");
 
 const closeTheme =
-  document.getElementById(
-    "closeTheme"
-  );
+  document.getElementById("closeTheme");
 
 const themeOptions =
   document.querySelectorAll(
@@ -491,67 +563,85 @@ const themeOptions =
   );
 
 
-themesBtn.addEventListener(
-  "click",
-  (e) => {
+if (themesBtn) {
 
-    e.preventDefault();
+  themesBtn.addEventListener(
+    "click",
+    (e) => {
 
-    themeModal.style.display =
-      "flex";
+      e.preventDefault();
 
-  }
-);
+      themeModal.style.display =
+        "flex";
 
+    }
+  );
 
-closeTheme.addEventListener(
-  "click",
-  () => {
-
-    themeModal.style.display =
-      "none";
-
-  }
-);
+}
 
 
-themeModal.addEventListener(
-  "click",
-  (e) => {
+if (closeTheme) {
 
-    if (
-      e.target === themeModal
-    ) {
+  closeTheme.addEventListener(
+    "click",
+    () => {
 
       themeModal.style.display =
         "none";
 
     }
+  );
 
-  }
-);
+}
+
+
+if (themeModal) {
+
+  themeModal.addEventListener(
+    "click",
+    (e) => {
+
+      if (
+        e.target === themeModal
+      ) {
+
+        themeModal.style.display =
+          "none";
+
+      }
+
+    }
+  );
+
+}
 
 
 function updateThemeSelection() {
 
   const currentTheme =
-    localStorage.getItem(
-      "theme"
-    ) || "default";
+    localStorage.getItem("theme") ||
+    "default";
 
 
   themeOptions.forEach(
-    option => {
+    (option) => {
 
       option.classList.remove(
         "active"
       );
 
 
-      option.querySelector(
-        ".tick"
-      ).textContent =
-        "";
+      const tick =
+        option.querySelector(
+          ".tick"
+        );
+
+
+      if (tick) {
+
+        tick.textContent = "";
+
+      }
 
 
       if (
@@ -564,10 +654,12 @@ function updateThemeSelection() {
         );
 
 
-        option.querySelector(
-          ".tick"
-        ).textContent =
-          "✓";
+        if (tick) {
+
+          tick.textContent =
+            "✓";
+
+        }
 
       }
 
@@ -613,6 +705,12 @@ function applyTheme(theme) {
         "theme-dark"
       );
 
+    } else {
+
+      document.body.classList.add(
+        "theme-light"
+      );
+
     }
 
   }
@@ -621,7 +719,7 @@ function applyTheme(theme) {
 
 
 themeOptions.forEach(
-  option => {
+  (option) => {
 
     option.addEventListener(
       "click",
@@ -661,30 +759,32 @@ applyTheme(
 );
 
 
-window.matchMedia(
-  "(prefers-color-scheme: dark)"
-).addEventListener(
-  "change",
-  () => {
+window
+  .matchMedia(
+    "(prefers-color-scheme: dark)"
+  )
+  .addEventListener(
+    "change",
+    () => {
 
-    const theme =
-      localStorage.getItem(
-        "theme"
-      ) || "default";
+      const theme =
+        localStorage.getItem(
+          "theme"
+        ) || "default";
 
 
-    if (
-      theme === "default"
-    ) {
+      if (
+        theme === "default"
+      ) {
 
-      applyTheme(
-        "default"
-      );
+        applyTheme(
+          "default"
+        );
+
+      }
 
     }
-
-  }
-);
+  );
 
 
 // =============================
@@ -708,6 +808,9 @@ if (editProfileBtn) {
       selectedPhotoURL =
         avatar.src;
 
+
+      // Very important:
+      // New selection starts fresh.
 
       selectedPhotoFile =
         null;
@@ -788,11 +891,20 @@ if (cancelProfileBtn) {
     "click",
     () => {
 
-      editProfileModal.style.display =
-        "none";
-
       selectedPhotoFile =
         null;
+
+
+      if (profilePhotoInput) {
+
+        profilePhotoInput.value =
+          "";
+
+      }
+
+
+      editProfileModal.style.display =
+        "none";
 
     }
   );
@@ -815,11 +927,20 @@ if (editProfileModal) {
         editProfileModal
       ) {
 
-        editProfileModal.style.display =
-          "none";
-
         selectedPhotoFile =
           null;
+
+
+        if (profilePhotoInput) {
+
+          profilePhotoInput.value =
+            "";
+
+        }
+
+
+        editProfileModal.style.display =
+          "none";
 
       }
 
@@ -827,6 +948,7 @@ if (editProfileModal) {
   );
 
 }
+
 
 // =============================
 // SAVE PROFILE
@@ -838,7 +960,11 @@ if (saveProfileBtn) {
     "click",
     async () => {
 
-      if (!currentUser) return;
+      if (!currentUser) {
+
+        return;
+
+      }
 
 
       const newUsername =
@@ -847,87 +973,110 @@ if (saveProfileBtn) {
 
       if (!newUsername) {
 
-        alert("Please enter username.");
+        alert(
+          "Please enter username."
+        );
 
         return;
 
       }
 
 
-      const photoFile =
-        selectedPhotoFile;
-
-
       try {
 
-        saveProfileBtn.disabled = true;
+        saveProfileBtn.disabled =
+          true;
+
 
         saveProfileBtn.textContent =
           "Saving...";
 
 
         // =================================
-        // INSTANT PHOTO PREVIEW
-        // =================================
-
-        if (photoFile) {
-
-          const previewURL =
-            URL.createObjectURL(
-              photoFile
-            );
-
-          avatar.src =
-            previewURL;
-
-          editPhotoPreview.src =
-            previewURL;
-
-        }
-
-
-        // =================================
-        // KEEP OLD PHOTO IF
-        // NO NEW PHOTO SELECTED
+        // CURRENT SAVED PHOTO
         // =================================
 
         let finalPhotoURL =
-          selectedPhotoURL || avatar.src;
+          selectedPhotoURL ||
+          "default-avatar.png";
 
 
         // =================================
         // UPLOAD NEW PHOTO
         // =================================
 
-        if (photoFile) {
+        if (
+          selectedPhotoFile
+        ) {
+
+          const file =
+            selectedPhotoFile;
+
+
+          const fileExtension =
+            file.name.includes(".")
+              ? file.name.substring(
+                  file.name.lastIndexOf(".")
+                )
+              : "";
+
+
+          const uniqueFileName =
+            "profile_" +
+            Date.now() +
+            "_" +
+            Math.random()
+              .toString(36)
+              .substring(2) +
+            fileExtension;
+
+
+          const photoPath =
+            "profilePhotos/" +
+            currentUser.uid +
+            "/" +
+            uniqueFileName;
+
+
+          console.log(
+            "Uploading photo:",
+            photoPath
+          );
+
 
           const photoRef =
             ref(
               storage,
-              "profilePhotos/" +
-              currentUser.uid +
-              "/" +
-              Date.now() +
-              "_" +
-              photoFile.name
+              photoPath
             );
 
 
-          const uploadResult =
-            await uploadBytes(
-              photoRef,
-              photoFile
-            );
+          // Firebase Storage save
+          await uploadBytes(
+            photoRef,
+            file,
+            {
+              contentType:
+                file.type ||
+                "image/jpeg"
+            }
+          );
 
 
+          console.log(
+            "Photo uploaded successfully."
+          );
+
+
+          // Get permanent Firebase URL
           finalPhotoURL =
             await getDownloadURL(
-              uploadResult.ref
+              photoRef
             );
 
 
           console.log(
-            "PHOTO UPLOAD SUCCESS:",
+            "Download URL:",
             finalPhotoURL
           );
 
@@ -935,15 +1084,19 @@ if (saveProfileBtn) {
 
 
         // =================================
-        // SAVE FIRESTORE
+        // SAVE USER PROFILE TO FIRESTORE
         // =================================
 
-        await updateDoc(
+        const userRef =
           doc(
             db,
             "users",
             currentUser.uid
-          ),
+          );
+
+
+        await setDoc(
+          userRef,
           {
 
             username:
@@ -952,34 +1105,41 @@ if (saveProfileBtn) {
             photoURL:
               finalPhotoURL
 
+          },
+          {
+            merge: true
           }
         );
 
 
         console.log(
-          "PROFILE FIRESTORE SAVE SUCCESS"
+          "PROFILE SAVED TO FIRESTORE"
         );
 
 
         // =================================
-        // UPDATE SAVED STATE
+        // UPDATE UI ONLY AFTER
+        // FIREBASE SAVE IS COMPLETE
         // =================================
-
-        selectedPhotoURL =
-          finalPhotoURL;
-
-        selectedPhotoFile =
-          null;
-
 
         username.textContent =
           newUsername;
 
+
         avatar.src =
           finalPhotoURL;
 
+
         editPhotoPreview.src =
           finalPhotoURL;
+
+
+        selectedPhotoURL =
+          finalPhotoURL;
+
+
+        selectedPhotoFile =
+          null;
 
 
         if (profilePhotoInput) {
@@ -991,12 +1151,16 @@ if (saveProfileBtn) {
 
 
         // =================================
-        // NOW CLOSE MODAL
+        // CLOSE MODAL
         // =================================
 
         editProfileModal.style.display =
           "none";
 
+
+        // =================================
+        // SUCCESS MESSAGE
+        // =================================
 
         alert(
           "Profile updated successfully!"
@@ -1006,13 +1170,15 @@ if (saveProfileBtn) {
       } catch (error) {
 
         console.error(
-          "PROFILE SAVE ERROR:",
+          "PROFILE UPDATE ERROR:",
           error
         );
 
 
+        // Do NOT close modal if save failed.
+
         alert(
-          "Profile save failed: " +
+          "Profile update failed: " +
           error.message
         );
 
@@ -1021,6 +1187,7 @@ if (saveProfileBtn) {
 
         saveProfileBtn.disabled =
           false;
+
 
         saveProfileBtn.textContent =
           "Save Changes";
