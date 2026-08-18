@@ -89,6 +89,161 @@ let selectedPhotoFile = null;
 
 
 // =============================
+// COMPRESS PROFILE PHOTO
+// =============================
+
+function compressProfilePhoto(file) {
+
+  return new Promise((resolve, reject) => {
+
+    const reader =
+      new FileReader();
+
+
+    reader.onload =
+      (event) => {
+
+        const img =
+          new Image();
+
+
+        img.onload =
+          () => {
+
+            const MAX_SIZE = 600;
+
+            let width =
+              img.width;
+
+            let height =
+              img.height;
+
+
+            // Keep original aspect ratio
+
+            if (width > height) {
+
+              if (width > MAX_SIZE) {
+
+                height =
+                  height *
+                  (MAX_SIZE / width);
+
+                width =
+                  MAX_SIZE;
+
+              }
+
+            } else {
+
+              if (height > MAX_SIZE) {
+
+                width =
+                  width *
+                  (MAX_SIZE / height);
+
+                height =
+                  MAX_SIZE;
+
+              }
+
+            }
+
+
+            const canvas =
+              document.createElement(
+                "canvas"
+              );
+
+
+            canvas.width =
+              Math.round(width);
+
+            canvas.height =
+              Math.round(height);
+
+
+            const ctx =
+              canvas.getContext(
+                "2d"
+              );
+
+
+            ctx.drawImage(
+              img,
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
+
+
+            canvas.toBlob(
+              (blob) => {
+
+                if (!blob) {
+
+                  reject(
+                    new Error(
+                      "Photo compression failed."
+                    )
+                  );
+
+                  return;
+
+                }
+
+
+                resolve(blob);
+
+              },
+              "image/jpeg",
+              0.80
+            );
+
+          };
+
+
+        img.onerror =
+          () => {
+
+            reject(
+              new Error(
+                "Invalid image."
+              )
+            );
+
+          };
+
+
+        img.src =
+          event.target.result;
+
+      };
+
+
+    reader.onerror =
+      () => {
+
+        reject(
+          new Error(
+            "Unable to read image."
+          )
+        );
+
+      };
+
+
+    reader.readAsDataURL(
+      file
+    );
+
+  });
+
+}
+
+
+// =============================
 // FIREBASE AUTH
 // =============================
 
@@ -107,7 +262,8 @@ onAuthStateChanged(
     }
 
 
-    currentUser = user;
+    currentUser =
+      user;
 
 
     try {
@@ -133,22 +289,27 @@ onAuthStateChanged(
           "User";
 
         email.textContent =
-          user.email || "";
+          user.email ||
+          "";
 
         avatar.src =
           user.photoURL ||
           "default-avatar.png";
 
+
         selectedPhotoURL =
           user.photoURL ||
           "default-avatar.png";
+
 
         editUsername.value =
           user.displayName ||
           "User";
 
+
         editPhotoPreview.src =
           selectedPhotoURL;
+
 
         return;
 
@@ -549,13 +710,19 @@ onAuthStateChanged(
 // =============================
 
 const themesBtn =
-  document.getElementById("themesBtn");
+  document.getElementById(
+    "themesBtn"
+  );
 
 const themeModal =
-  document.getElementById("themeModal");
+  document.getElementById(
+    "themeModal"
+  );
 
 const closeTheme =
-  document.getElementById("closeTheme");
+  document.getElementById(
+    "closeTheme"
+  );
 
 const themeOptions =
   document.querySelectorAll(
@@ -619,8 +786,9 @@ if (themeModal) {
 function updateThemeSelection() {
 
   const currentTheme =
-    localStorage.getItem("theme") ||
-    "default";
+    localStorage.getItem(
+      "theme"
+    ) || "default";
 
 
   themeOptions.forEach(
@@ -639,7 +807,8 @@ function updateThemeSelection() {
 
       if (tick) {
 
-        tick.textContent = "";
+        tick.textContent =
+          "";
 
       }
 
@@ -808,9 +977,6 @@ if (editProfileBtn) {
       selectedPhotoURL =
         avatar.src;
 
-
-      // Very important:
-      // New selection starts fresh.
 
       selectedPhotoFile =
         null;
@@ -1009,39 +1175,41 @@ if (saveProfileBtn) {
           selectedPhotoFile
         ) {
 
-          const file =
-            selectedPhotoFile;
+          console.log(
+            "Compressing profile photo..."
+          );
 
 
-          const fileExtension =
-            file.name.includes(".")
-              ? file.name.substring(
-                  file.name.lastIndexOf(".")
-                )
-              : "";
+          const compressedPhoto =
+            await compressProfilePhoto(
+              selectedPhotoFile
+            );
 
 
-          const uniqueFileName =
+          console.log(
+            "Compressed photo size:",
+            Math.round(
+              compressedPhoto.size /
+              1024
+            ) + " KB"
+          );
+
+
+          // =================================
+          // UNIQUE STORAGE PATH
+          // =================================
+
+          const photoPath =
+            "profilePhotos/" +
+            currentUser.uid +
+            "/" +
             "profile_" +
             Date.now() +
             "_" +
             Math.random()
               .toString(36)
               .substring(2) +
-            fileExtension;
-
-
-          const photoPath =
-            "profilePhotos/" +
-            currentUser.uid +
-            "/" +
-            uniqueFileName;
-
-
-          console.log(
-            "Uploading photo:",
-            photoPath
-          );
+            ".jpg";
 
 
           const photoRef =
@@ -1051,24 +1219,29 @@ if (saveProfileBtn) {
             );
 
 
-          // Firebase Storage save
+          // =================================
+          // UPLOAD
+          // =================================
+
           await uploadBytes(
             photoRef,
-            file,
+            compressedPhoto,
             {
               contentType:
-                file.type ||
                 "image/jpeg"
             }
           );
 
 
           console.log(
-            "Photo uploaded successfully."
+            "Photo upload complete."
           );
 
 
-          // Get permanent Firebase URL
+          // =================================
+          // GET FIREBASE URL
+          // =================================
+
           finalPhotoURL =
             await getDownloadURL(
               photoRef
@@ -1076,7 +1249,7 @@ if (saveProfileBtn) {
 
 
           console.log(
-            "Download URL:",
+            "Photo URL obtained:",
             finalPhotoURL
           );
 
@@ -1084,7 +1257,7 @@ if (saveProfileBtn) {
 
 
         // =================================
-        // SAVE USER PROFILE TO FIRESTORE
+        // SAVE FIRESTORE
         // =================================
 
         const userRef =
@@ -1107,19 +1280,19 @@ if (saveProfileBtn) {
 
           },
           {
-            merge: true
+            merge:
+              true
           }
         );
 
 
         console.log(
-          "PROFILE SAVED TO FIRESTORE"
+          "Profile saved successfully."
         );
 
 
         // =================================
-        // UPDATE UI ONLY AFTER
-        // FIREBASE SAVE IS COMPLETE
+        // UPDATE UI
         // =================================
 
         username.textContent =
@@ -1151,16 +1324,13 @@ if (saveProfileBtn) {
 
 
         // =================================
-        // CLOSE MODAL
+        // CLOSE MODAL AFTER
+        // FIREBASE SAVE COMPLETES
         // =================================
 
         editProfileModal.style.display =
           "none";
 
-
-        // =================================
-        // SUCCESS MESSAGE
-        // =================================
 
         alert(
           "Profile updated successfully!"
@@ -1174,8 +1344,6 @@ if (saveProfileBtn) {
           error
         );
 
-
-        // Do NOT close modal if save failed.
 
         alert(
           "Profile update failed: " +
