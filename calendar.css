@@ -731,3 +731,99 @@ body.theme-dark .day.wrong-day{
     color:#ffffff !important;
     opacity:1 !important;
 }
+
+/* ==========================
+   CURRENT STREAK FIRE GLOW
+========================== */
+
+.day.streak-day{
+
+    position:relative;
+
+    z-index:2;
+
+    border-color:#ff8a3d !important;
+
+    box-shadow:
+        0 0 8px rgba(255,140,50,.70),
+        0 0 18px rgba(255,90,50,.55),
+        0 0 30px rgba(255,70,40,.30);
+
+    animation:
+        streakFire 1.4s ease-in-out infinite;
+
+}
+
+
+/* Keep GREEN color */
+
+.day.correct-day.streak-day{
+
+    background:#22c55e !important;
+
+    color:#ffffff !important;
+
+}
+
+
+/* Keep RED color */
+
+.day.wrong-day.streak-day{
+
+    background:#ef4444 !important;
+
+    color:#ffffff !important;
+
+}
+
+
+/* Fire animation */
+
+@keyframes streakFire{
+
+    0%{
+
+        box-shadow:
+            0 0 7px rgba(255,140,50,.55),
+            0 0 15px rgba(255,90,50,.35);
+
+        transform:scale(1);
+
+    }
+
+    50%{
+
+        box-shadow:
+            0 0 15px rgba(255,170,50,.95),
+            0 0 28px rgba(255,80,40,.70),
+            0 0 40px rgba(255,60,30,.35);
+
+        transform:scale(1.035);
+
+    }
+
+    100%{
+
+        box-shadow:
+            0 0 7px rgba(255,140,50,.55),
+            0 0 15px rgba(255,90,50,.35);
+
+        transform:scale(1);
+
+    }
+
+}
+
+
+/* Dark theme streak */
+
+body.theme-dark .day.streak-day{
+
+    border-color:#ff9f43 !important;
+
+    box-shadow:
+        0 0 10px rgba(255,140,50,.85),
+        0 0 22px rgba(255,80,40,.60),
+        0 0 35px rgba(255,60,30,.40);
+
+}
