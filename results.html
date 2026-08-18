@@ -21,6 +21,47 @@
 
 <body>
 
+<button id="editProfileBtn">
+    ✏️ Edit Profile
+</button>
+
+<div id="editProfileModal" class="edit-profile-modal">
+
+    <div class="edit-profile-box">
+
+        <h2>Edit Profile</h2>
+
+        <img
+            id="editPhotoPreview"
+            src="default-avatar.png"
+            class="edit-photo-preview"
+        >
+
+        <input
+            type="file"
+            id="profilePhotoInput"
+            accept="image/*"
+        >
+
+        <input
+            type="text"
+            id="editUsername"
+            placeholder="Username"
+            maxlength="30"
+        >
+
+        <button id="saveProfileBtn">
+            Save Changes
+        </button>
+
+        <button id="cancelProfileBtn">
+            Cancel
+        </button>
+
+    </div>
+
+</div>
+
 <div class="container">
 
     <div class="result-card">
