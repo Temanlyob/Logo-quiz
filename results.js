@@ -822,6 +822,24 @@ onAuthStateChanged(
             currentResult.score || 0
           );
 
+        let todayScore = 0;
+
+for (const game of Object.values(allGames)) {
+
+  if (!game || game.played !== true) continue;
+  if (!game.playedAt) continue;
+
+  const playedDate = new Date(game.playedAt);
+  const today = new Date();
+
+  playedDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+
+  if (playedDate.getTime() === today.getTime()) {
+    todayScore += Number(game.score || 0);
+  }
+
+}
 
         if (
           currentResult.correct === true
@@ -837,9 +855,7 @@ onAuthStateChanged(
           resultIcon.innerHTML =
             "🏆";
 
-
-          resultTitle.innerHTML =
-            "Correct!";
+          resultTitle.innerHTML = "Today's Result";
 
         } else {
 
@@ -853,9 +869,7 @@ onAuthStateChanged(
           resultIcon.innerHTML =
             "❌";
 
-
-          resultTitle.innerHTML =
-            "Incorrect!";
+          resultTitle.innerHTML = "Today's Result";
 
         }
 
