@@ -99,13 +99,11 @@ function compressProfilePhoto(file) {
     const reader =
       new FileReader();
 
-
     reader.onload =
       (event) => {
 
         const img =
           new Image();
-
 
         img.onload =
           () => {
@@ -190,7 +188,6 @@ function compressProfilePhoto(file) {
                   return;
 
                 }
-
 
                 resolve(blob);
 
@@ -957,18 +954,14 @@ if (editProfileBtn) {
       editUsername.value =
         username.textContent;
 
-
       editPhotoPreview.src =
         avatar.src;
-
 
       selectedPhotoURL =
         avatar.src;
 
-
       selectedPhotoFile =
         null;
-
 
       if (profilePhotoInput) {
 
@@ -976,7 +969,6 @@ if (editProfileBtn) {
           "";
 
       }
-
 
       editProfileModal.style.display =
         "flex";
@@ -1000,30 +992,28 @@ if (profilePhotoInput) {
       const file =
         profilePhotoInput.files[0];
 
-
       if (!file) {
 
         return;
 
       }
 
-
       selectedPhotoFile =
         file;
-
 
       const reader =
         new FileReader();
 
-
       reader.onload =
         (e) => {
+
+          selectedPhotoURL =
+            e.target.result;
 
           editPhotoPreview.src =
             e.target.result;
 
         };
-
 
       reader.readAsDataURL(
         file
@@ -1048,14 +1038,12 @@ if (cancelProfileBtn) {
       selectedPhotoFile =
         null;
 
-
       if (profilePhotoInput) {
 
         profilePhotoInput.value =
           "";
 
       }
-
 
       editProfileModal.style.display =
         "none";
@@ -1084,14 +1072,12 @@ if (editProfileModal) {
         selectedPhotoFile =
           null;
 
-
         if (profilePhotoInput) {
 
           profilePhotoInput.value =
             "";
 
         }
-
 
         editProfileModal.style.display =
           "none";
@@ -1120,10 +1106,8 @@ if (saveProfileBtn) {
 
       }
 
-
       const newUsername =
         editUsername.value.trim();
-
 
       if (!newUsername) {
 
@@ -1136,38 +1120,33 @@ if (saveProfileBtn) {
       }
 
 
-      // =================================
-      // KEEP REFERENCES BEFORE
-      // BACKGROUND SAVE
-      // =================================
-
       const fileToUpload =
         selectedPhotoFile;
-
 
       const usernameToSave =
         newUsername;
 
 
       // =================================
-      // IMMEDIATELY UPDATE UI
+      // IMMEDIATE UI CHANGE
       // =================================
 
       username.textContent =
         usernameToSave;
 
 
+      let instantPreviewURL = null;
+
+
       if (fileToUpload) {
 
-        const instantPreviewURL =
+        instantPreviewURL =
           URL.createObjectURL(
             fileToUpload
           );
 
-
         avatar.src =
           instantPreviewURL;
-
 
         editPhotoPreview.src =
           instantPreviewURL;
@@ -1181,7 +1160,7 @@ if (saveProfileBtn) {
 
 
       // =================================
-      // CLOSE MODAL IMMEDIATELY
+      // CLOSE MODAL
       // =================================
 
       editProfileModal.style.display =
@@ -1191,10 +1170,6 @@ if (saveProfileBtn) {
       saveProfileBtn.disabled =
         true;
 
-
-      // =================================
-      // BACKGROUND FIREBASE SAVE
-      // =================================
 
       try {
 
@@ -1223,35 +1198,29 @@ if (saveProfileBtn) {
             );
 
 
-          const photoPath =
-            "profilePhotos/" +
-            currentUser.uid +
-            "/" +
-            "profile_" +
-            Date.now() +
-            ".jpg";
-
-
           const photoRef =
             ref(
               storage,
-              photoPath
+              "profilePhotos/" +
+              currentUser.uid +
+              "/profile.jpg"
             );
 
 
-          await uploadBytes(
-            photoRef,
-            compressedPhoto,
-            {
-              contentType:
-                "image/jpeg"
-            }
-          );
+          const uploadResult =
+            await uploadBytes(
+              photoRef,
+              compressedPhoto,
+              {
+                contentType:
+                  "image/jpeg"
+              }
+            );
 
 
           finalPhotoURL =
             await getDownloadURL(
-              photoRef
+              uploadResult.ref
             );
 
         }
@@ -1279,12 +1248,11 @@ if (saveProfileBtn) {
 
 
         // =================================
-        // UPDATE SAVED STATE
+        // FINAL SAVED STATE
         // =================================
 
         selectedPhotoURL =
           finalPhotoURL;
-
 
         selectedPhotoFile =
           null;
@@ -1298,20 +1266,24 @@ if (saveProfileBtn) {
         }
 
 
-        // =================================
-        // USE PERMANENT FIREBASE URL
-        // =================================
-
         avatar.src =
           finalPhotoURL;
-
 
         editPhotoPreview.src =
           finalPhotoURL;
 
 
-        console.log(
-          "PROFILE SAVED SUCCESSFULLY"
+        if (instantPreviewURL) {
+
+          URL.revokeObjectURL(
+            instantPreviewURL
+          );
+
+        }
+
+
+        alert(
+          "Profile updated successfully!"
         );
 
 
@@ -1323,25 +1295,19 @@ if (saveProfileBtn) {
         );
 
 
-        // If Firebase save fails,
-        // restore previous saved photo.
-
+        // Restore old saved profile
         avatar.src =
           selectedPhotoURL;
 
-
         editPhotoPreview.src =
           selectedPhotoURL;
-
-
-        username.textContent =
-          username.textContent;
 
 
         alert(
           "Failed to save profile: " +
           error.message
         );
+
 
       } finally {
 
@@ -1356,4 +1322,4 @@ if (saveProfileBtn) {
     }
   );
 
-}
+}0
