@@ -33,13 +33,10 @@
 
 <section class="profile-card">
 
-<div class="avatar-wrap">
 <img
 id="profilePhoto"
 src="default-avatar.png"
 class="avatar">
-<button id="editProfileBtn" class="edit-avatar-btn" title="Edit Profile">✏️</button>
-</div>
 
 <h2 id="username">
 
@@ -57,13 +54,6 @@ Loading...
 
 ⭐ Level 1
 
-</div>
-
-<div class="level-progress-wrap">
-<div class="level-progress-bar">
-<div id="levelProgressFill" class="level-progress-fill"></div>
-</div>
-<p id="levelProgressText" class="level-progress-text">0 / 100 XP</p>
 </div>
 
 </section>
@@ -228,31 +218,7 @@ class="logout-btn">
 </div>
 
   </div>
-
-  <div id="editProfileModal" class="theme-modal">
-
-<div class="theme-box">
-
-<h2>Edit Profile</h2>
-
-<div class="edit-photo-row">
-<img id="editPhotoPreview" src="default-avatar.png" class="edit-avatar-preview">
-<label for="profilePhotoInput" class="change-photo-label">Change Photo</label>
-<input type="file" id="profilePhotoInput" accept="image/*" hidden>
-</div>
-
-<label class="edit-field-label" for="editUsername">Username</label>
-<input type="text" id="editUsername" class="edit-input" placeholder="Enter username">
-
-<div class="edit-modal-actions">
-<button id="cancelProfileBtn" class="cancel-btn">Cancel</button>
-<button id="saveProfileBtn" class="save-btn">Save Changes</button>
-</div>
-
-</div>
-
-  </div>
-
+  
 <script type="module" src="profile.js"></script>
 
 </body>
