@@ -644,145 +644,87 @@ function getPlayedPuzzleDates() {
 // Correct/wrong doesn't matter.
 // =====================================
 
-function getCurrentStreakDates(
-    playedDates
-) {
+function getCurrentStreakDates(playedDates) {
 
-    const result = [];
+    const streakDates = [];
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    if (
-        playedDates.length === 0
-    ) {
-
-        return result;
-
-    }
-
-
-    const today =
-        getToday();
-
-
-    const yesterday =
-        new Date(
-            today
-        );
-
-
+    const yesterday = new Date(today);
     yesterday.setDate(
         yesterday.getDate() - 1
     );
 
-
-    // =====================================
-    // FIND LATEST PLAYED DATE
-    // =====================================
-
+    // Latest played date
     const latest =
-        playedDates[
-            playedDates.length - 1
-        ];
+        playedDates[playedDates.length - 1];
 
+    // Streak today's date se start hogi
+    // agar aaj khela hai.
+    //
+    // Agar aaj nahi khela,
+    // to yesterday se start hogi.
 
-    // =====================================
-    // IMPORTANT
-    //
-    // Latest must be TODAY or YESTERDAY.
-    //
-    // Otherwise streak is expired.
-    // =====================================
+    let checkDate;
 
     if (
-
-        latest.getTime() !==
-            today.getTime()
-
-        &&
-
-        latest.getTime() !==
-            yesterday.getTime()
-
+        latest.getTime() ===
+        today.getTime()
     ) {
 
-        return result;
+        checkDate =
+            new Date(today);
+
+    } else if (
+        latest.getTime() ===
+        yesterday.getTime()
+    ) {
+
+        checkDate =
+            new Date(yesterday);
+
+    } else {
+
+        // Aaj aur kal dono nahi khele
+        return streakDates;
 
     }
 
 
-    // =====================================
-    // LATEST DATE IS FIRST STREAK DAY
-    // =====================================
+    // Backward check
+    for (;;) {
 
-    result.push(
-        latest
-    );
-
-
-    // =====================================
-    // WALK BACKWARDS
-    // =====================================
-
-    for (
-
-        let i =
-            playedDates.length - 1;
-
-        i > 0;
-
-        i--
-
-    ) {
-
-        const current =
-            playedDates[
-                i
-            ];
-
-
-        const previous =
-            playedDates[
-                i - 1
-            ];
-
-
-        const difference =
-            differenceInDays(
-                previous,
-                current
+        const played =
+            playedDates.some(
+                date =>
+                    date.getTime() ===
+                    checkDate.getTime()
             );
 
 
-        // =================================
-        // EXACTLY ONE DAY BEFORE
-        // =================================
-
-        if (
-            difference === 1
-        ) {
-
-            result.push(
-                previous
-            );
-
-        }
-
-        else {
-
-            // Streak broken
+        // Jis din nahi khela,
+        // wahi streak break.
+        if (!played) {
             break;
-
         }
+
+
+        streakDates.push(
+            new Date(checkDate)
+        );
+
+
+        // Ek din pichhe
+        checkDate.setDate(
+            checkDate.getDate() - 1
+        );
 
     }
 
 
-    return result;
-
-}
-
-
-// =====================================
+    return streakDates;
+}// =====================================
 // CURRENT STREAK NUMBER
 // =====================================
 
