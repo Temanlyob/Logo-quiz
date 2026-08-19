@@ -1,8 +1,4 @@
-import {
-  auth,
-  db,
-  storage
-} from "./firebase.js";
+import { auth, db, storage } from "./firebase.js";
 
 import {
   ref,
@@ -11,632 +7,1489 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-storage.js";
 
 import {
-onAuthStateChanged,
-signOut
+  onAuthStateChanged,
+  signOut,
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 import {
-doc,
-getDoc,
-updateDoc
+  doc,
+  getDoc,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-// =============================
 
-// Elements
-// =============================
 
-const avatar =
-document.getElementById("profilePhoto");
+// =====================================================
+// ELEMENTS
+// =====================================================
 
-const username =
-document.getElementById("username");
+const avatar = document.getElementById("profilePhoto");
+const username = document.getElementById("username");
+const email = document.getElementById("profileEmail");
 
-const email =
-document.getElementById("profileEmail");
+const score = document.getElementById("score");
+const streak = document.getElementById("streak");
+const accuracy = document.getElementById("accuracy");
+const played = document.getElementById("played");
 
-const score =
-document.getElementById("score");
+const level = document.getElementById("level");
 
-const streak =
-document.getElementById("streak");
+const logoutBtn = document.getElementById("logoutBtn");
 
-const accuracy =
-document.getElementById("accuracy");
+const achievementList =
+  document.getElementById("achievementList");
 
-const played =
-document.getElementById("played");
 
-const level =
-document.querySelector(".level");
-
-const logoutBtn =
-document.querySelector(".logout-btn");
-
-const achievementSection =
-document.querySelector(".achievement-section");
-
-// =============================
+// =====================================================
 // EDIT PROFILE ELEMENTS
-// =============================
+// =====================================================
 
 const editProfileBtn =
-document.getElementById("editProfileBtn");
+  document.getElementById("editProfileBtn");
 
 const editProfileModal =
-document.getElementById("editProfileModal");
+  document.getElementById("editProfileModal");
+
+const closeEditProfile =
+  document.getElementById("closeEditProfile");
 
 const editUsername =
-document.getElementById("editUsername");
+  document.getElementById("editUsername");
 
 const editPhotoPreview =
-document.getElementById("editPhotoPreview");
+  document.getElementById("editPhotoPreview");
 
 const profilePhotoInput =
-document.getElementById("profilePhotoInput");
+  document.getElementById("profilePhotoInput");
 
 const saveProfileBtn =
-document.getElementById("saveProfileBtn");
+  document.getElementById("saveProfileBtn");
 
 const cancelProfileBtn =
-document.getElementById("cancelProfileBtn");
+  document.getElementById("cancelProfileBtn");
 
-let selectedPhotoURL = null;
+
+// =====================================================
+// VARIABLES
+// =====================================================
+
 let currentUser = null;
 
-// =============================
-// Firebase
-// =============================
+let currentPhotoURL =
+  "default-avatar.png";
 
-onAuthStateChanged(auth, async(user)=>{
+let selectedPhotoFile = null;
 
-if(!user){
 
-window.location.replace("login.html");
-return;
+// =====================================================
+// NUMBER HELPER
+// =====================================================
 
-}
+function numberValue(...values) {
 
-currentUser = user;
+  for (const value of values) {
 
-const snap =
-await getDoc(
-doc(db,"users",user.uid)
-);
+    const number = Number(value);
 
-if(!snap.exists()){
+    if (Number.isFinite(number)) {
 
-username.textContent="User";
-email.textContent="";
-return;
-
-}
-
-const data =
-snap.data();
-username.textContent =
-data.username ||
-user.displayName ||
-"User";
-
-email.textContent =
-data.email ||
-user.email ||
-"";
-
-avatar.src =
-data.photoURL ||
-user.photoURL ||
-"default-avatar.png";
-
-// Current profile data for Edit Profile
-selectedPhotoURL =
-data.photoURL ||
-user.photoURL ||
-"default-avatar.png";
-
-editUsername.value =
-data.username ||
-user.displayName ||
-"User";
-
-editPhotoPreview.src =
-selectedPhotoURL;
-  
-function getCalendarStats() {
-
-  let played = 0;
-  let won = 0;
-
-  for (let key in localStorage) {
-
-    if (key.startsWith("quiz_")) {
-
-      const quiz = JSON.parse(localStorage.getItem(key));
-
-      if (quiz) {
-
-        played++;
-
-        if (quiz.correct) {
-
-          won++;
-
-        }
-
-      }
+      return number;
 
     }
 
   }
 
+  return 0;
+
+}
+
+
+// =====================================================
+// LOCAL STORAGE QUIZ DATA
+// =====================================================
+
+function getLocalQuizStats() {
+
+  let playedCount = 0;
+
+  let wonCount = 0;
+
+  let scoreTotal = 0;
+
+
+  for (
+    let i = 0;
+    i < localStorage.length;
+    i++
+  ) {
+
+    const key =
+      localStorage.key(i);
+
+
+    if (
+      !key ||
+      !key.startsWith("quiz_")
+    ) {
+
+      continue;
+
+    }
+
+
+    try {
+
+      const raw =
+        localStorage.getItem(key);
+
+      const quiz =
+        JSON.parse(raw);
+
+
+      if (
+        !quiz ||
+        typeof quiz !== "object"
+      ) {
+
+        continue;
+
+      }
+
+
+      playedCount++;
+
+
+      // Correct answer detection
+
+      if (
+
+        quiz.correct === true ||
+
+        quiz.isCorrect === true ||
+
+        quiz.result === "correct" ||
+
+        quiz.result === "won"
+
+      ) {
+
+        wonCount++;
+
+      }
+
+
+      // Score detection
+
+      scoreTotal += numberValue(
+
+        quiz.score,
+
+        quiz.points,
+
+        quiz.earnedPoints,
+
+        quiz.reward
+
+      );
+
+
+    } catch (error) {
+
+      console.warn(
+        "Invalid quiz history:",
+        key
+      );
+
+    }
+
+  }
+
+
   return {
-    played,
-    won,
-    lost: played - won
+
+    played: playedCount,
+
+    won: wonCount,
+
+    score: scoreTotal
+
   };
 
 }
 
-const totalScore =
-data.totalScore ?? 0;
 
-const currentStreak =
-data.currentStreak ?? 0;
+// =====================================================
+// GET ALL PROFILE STATS
+// =====================================================
 
-const stats = getCalendarStats();
+function getStats(data) {
 
-const puzzlesPlayed = stats.played;
+  const local =
+    getLocalQuizStats();
 
-const gamesWon = stats.won;
 
-const gamesLost = stats.lost;
-  
-const winRate =
-puzzlesPlayed === 0
-? 0
-: Math.round(
-(gamesWon / puzzlesPlayed) * 100
-);
+  // ---------------------------------------------------
+  // SCORE
+  // ---------------------------------------------------
 
-score.textContent =
-totalScore;
+  const totalScore =
+    numberValue(
 
-streak.textContent =
-currentStreak;
+      data.totalScore,
 
-accuracy.textContent =
-winRate + "%";
+      data.score,
 
-played.textContent =
-puzzlesPlayed;
+      data.points,
 
-// =============================
-// SAVE PROFILE PROGRESS
-// Home page will use these exact values
-// =============================
+      data.totalPoints,
 
-localStorage.setItem(
-  "profileProgress",
-  JSON.stringify({
-    score: totalScore,
-    streak: currentStreak,
-    accuracy: winRate
-  })
-);
+      local.score
 
-// =============================
-// Level
-// =============================
+    );
 
-let levelText = "⭐ Level 1";
 
-if(totalScore >= 1000){
+  // ---------------------------------------------------
+  // PLAYED
+  // ---------------------------------------------------
 
-levelText = "👑 Level 5";
+  const puzzlesPlayed =
+    numberValue(
 
-}else if(totalScore >= 500){
+      data.puzzlesPlayed,
 
-levelText = "💎 Level 4";
+      data.played,
 
-}else if(totalScore >= 250){
+      data.gamesPlayed,
 
-levelText = "🥇 Level 3";
+      data.totalPlayed,
 
-}else if(totalScore >= 100){
+      data.totalGames,
 
-levelText = "🥈 Level 2";
+      local.played
 
-}
+    );
 
-level.textContent = levelText;
 
-// =============================
-// Achievements
-// =============================
+  // ---------------------------------------------------
+  // WON
+  // ---------------------------------------------------
 
-let html = "";
+  const gamesWon =
+    numberValue(
 
-if(puzzlesPlayed >= 1){
+      data.gamesWon,
 
-html += `
-<div class="achievement-item">
-<span>🥇</span>
-<div>
-<h3>Logo Rookie</h3>
-<p>Completed your first puzzle.</p>
-</div>
-</div>`;
+      data.won,
 
-}
+      data.correctAnswers,
 
-if(currentStreak >= 7){
+      data.correct,
 
-html += `
-<div class="achievement-item">
-<span>🔥</span>
-<div>
-<h3>7 Day Streak</h3>
-<p>Solved puzzles for 7 consecutive days.</p>
-</div>
-</div>`;
+      data.totalWon,
 
-}
+      local.won
 
-if(totalScore >= 100){
+    );
 
-html += `
-<div class="achievement-item">
-<span>⭐</span>
-<div>
-<h3>100 Points Club</h3>
-<p>Earned 100+ points.</p>
-</div>
-</div>`;
 
-}
+  // ---------------------------------------------------
+  // STREAK
+  // ---------------------------------------------------
 
-if(puzzlesPlayed >= 30){
+  const currentStreak =
+    numberValue(
 
-html += `
-<div class="achievement-item">
-<span>🎮</span>
-<div>
-<h3>Puzzle Master</h3>
-<p>Played 30 puzzles.</p>
-</div>
-</div>`;
+      data.currentStreak,
 
-}
+      data.streak,
 
-if(winRate === 100 && puzzlesPlayed >= 10){
+      data.currentStreakCount
 
-html += `
-<div class="achievement-item">
-<span>🎯</span>
-<div>
-<h3>Accuracy Master</h3>
-<p>100% accuracy in 10 puzzles.</p>
-</div>
-</div>`;
+    );
 
-}
 
-if(html === ""){
+  // ---------------------------------------------------
+  // ACCURACY
+  // ---------------------------------------------------
 
-html = `
-<div class="achievement-item">
-<span>🔒</span>
-<div>
-<h3>No Achievements Yet</h3>
-<p>Keep playing to unlock achievements.</p>
-</div>
-</div>`;
+  let winRate = 0;
+
+
+  if (puzzlesPlayed > 0) {
+
+    winRate =
+      Math.round(
+        (gamesWon / puzzlesPlayed) * 100
+      );
+
+  } else {
+
+    winRate =
+      numberValue(
+
+        data.accuracy,
+
+        data.winRate
+
+      );
+
+  }
+
+
+  // Prevent impossible values
+
+  winRate =
+    Math.min(
+      100,
+      Math.max(0, winRate)
+    );
+
+
+  return {
+
+    totalScore,
+
+    puzzlesPlayed,
+
+    gamesWon,
+
+    currentStreak,
+
+    winRate
+
+  };
 
 }
 
-achievementSection.innerHTML =
-"<h2>Achievements</h2>" + html;
 
-// =============================
-// Logout
-// =============================
+// =====================================================
+// LEVEL
+// =====================================================
 
-logoutBtn.onclick = async () => {
+function renderLevel(totalScore) {
 
-await signOut(auth);
+  if (totalScore >= 1000) {
 
-window.location.replace("login.html");
+    return "👑 Level 5";
 
-};
+  }
 
-});           
 
-// =============================
-// Theme Popup
-// =============================
+  if (totalScore >= 500) {
 
-const themesBtn = document.getElementById("themesBtn");
-const themeModal = document.getElementById("themeModal");
-const closeTheme = document.getElementById("closeTheme");
-const themeOptions = document.querySelectorAll(".theme-option");
+    return "💎 Level 4";
 
-themesBtn.addEventListener("click", (e) => {
+  }
 
-    e.preventDefault();
 
-    themeModal.style.display = "flex";
+  if (totalScore >= 250) {
 
-});
+    return "🥇 Level 3";
 
-closeTheme.addEventListener("click", () => {
+  }
 
-    themeModal.style.display = "none";
 
-});
+  if (totalScore >= 100) {
 
-themeModal.addEventListener("click", (e) => {
+    return "🥈 Level 2";
 
-    if (e.target === themeModal) {
+  }
 
-        themeModal.style.display = "none";
+
+  return "⭐ Level 1";
+
+}
+
+
+// =====================================================
+// ACHIEVEMENTS
+// =====================================================
+
+function renderAchievements(stats) {
+
+  const achievements = [];
+
+
+  // First puzzle
+
+  if (stats.puzzlesPlayed >= 1) {
+
+    achievements.push({
+
+      icon: "🥇",
+
+      title: "Logo Rookie",
+
+      description:
+        "Completed your first puzzle."
+
+    });
+
+  }
+
+
+  // 7 day streak
+
+  if (stats.currentStreak >= 7) {
+
+    achievements.push({
+
+      icon: "🔥",
+
+      title: "7 Day Streak",
+
+      description:
+        "Solved puzzles for 7 consecutive days."
+
+    });
+
+  }
+
+
+  // 100 points
+
+  if (stats.totalScore >= 100) {
+
+    achievements.push({
+
+      icon: "⭐",
+
+      title: "100 Points Club",
+
+      description:
+        "Earned 100+ points."
+
+    });
+
+  }
+
+
+  // 30 puzzles
+
+  if (stats.puzzlesPlayed >= 30) {
+
+    achievements.push({
+
+      icon: "🎮",
+
+      title: "Puzzle Master",
+
+      description:
+        "Played 30 puzzles."
+
+    });
+
+  }
+
+
+  // Accuracy master
+
+  if (
+
+    stats.puzzlesPlayed >= 10 &&
+
+    stats.winRate === 100
+
+  ) {
+
+    achievements.push({
+
+      icon: "🎯",
+
+      title: "Accuracy Master",
+
+      description:
+        "100% accuracy in 10 puzzles."
+
+    });
+
+  }
+
+
+  // ---------------------------------------------------
+  // DISPLAY
+  // ---------------------------------------------------
+
+  if (achievements.length === 0) {
+
+    achievementList.innerHTML = `
+
+      <div class="achievement-item">
+
+        <span>🔒</span>
+
+        <div>
+
+          <h3>No Achievements Yet</h3>
+
+          <p>
+            Keep playing to unlock achievements.
+          </p>
+
+        </div>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  achievementList.innerHTML =
+    achievements.map(
+      achievement => `
+
+        <div class="achievement-item">
+
+          <span>
+            ${achievement.icon}
+          </span>
+
+          <div>
+
+            <h3>
+              ${achievement.title}
+            </h3>
+
+            <p>
+              ${achievement.description}
+            </p>
+
+          </div>
+
+        </div>
+
+      `
+    ).join("");
+
+}
+
+
+// =====================================================
+// RENDER STATS
+// =====================================================
+
+function renderStats(data) {
+
+  const stats =
+    getStats(data);
+
+
+  // Score
+
+  score.textContent =
+    stats.totalScore;
+
+
+  // Streak
+
+  streak.textContent =
+    stats.currentStreak;
+
+
+  // Accuracy
+
+  accuracy.textContent =
+    stats.winRate + "%";
+
+
+  // Played
+
+  played.textContent =
+    stats.puzzlesPlayed;
+
+
+  // Level
+
+  level.textContent =
+    renderLevel(
+      stats.totalScore
+    );
+
+
+  // Achievements
+
+  renderAchievements(stats);
+
+
+  // Save profile progress locally
+
+  localStorage.setItem(
+
+    "profileProgress",
+
+    JSON.stringify({
+
+      score:
+        stats.totalScore,
+
+      streak:
+        stats.currentStreak,
+
+      accuracy:
+        stats.winRate,
+
+      played:
+        stats.puzzlesPlayed
+
+    })
+
+  );
+
+}
+
+
+// =====================================================
+// LOAD PROFILE
+// =====================================================
+
+async function loadProfile(user) {
+
+  const userRef =
+    doc(
+      db,
+      "users",
+      user.uid
+    );
+
+
+  const snapshot =
+    await getDoc(userRef);
+
+
+  let data = {};
+
+
+  if (snapshot.exists()) {
+
+    data =
+      snapshot.data();
+
+  }
+
+
+  // ---------------------------------------------------
+  // USERNAME
+  // ---------------------------------------------------
+
+  username.textContent =
+
+    data.username ||
+
+    user.displayName ||
+
+    "User";
+
+
+  // ---------------------------------------------------
+  // EMAIL
+  // ---------------------------------------------------
+
+  email.textContent =
+
+    data.email ||
+
+    user.email ||
+
+    "";
+
+
+  // ---------------------------------------------------
+  // PHOTO
+  // ---------------------------------------------------
+
+  currentPhotoURL =
+
+    data.photoURL ||
+
+    user.photoURL ||
+
+    "default-avatar.png";
+
+
+  avatar.src =
+    currentPhotoURL;
+
+
+  // Edit modal values
+
+  editUsername.value =
+    username.textContent;
+
+
+  editPhotoPreview.src =
+    currentPhotoURL;
+
+
+  // ---------------------------------------------------
+  // STATS
+  // ---------------------------------------------------
+
+  renderStats(data);
+
+}
+
+
+// =====================================================
+// AUTH STATE
+// =====================================================
+
+onAuthStateChanged(
+  auth,
+  async (user) => {
+
+    if (!user) {
+
+      window.location.replace(
+        "login.html"
+      );
+
+      return;
 
     }
 
-});
+
+    currentUser =
+      user;
+
+
+    try {
+
+      await loadProfile(user);
+
+    } catch (error) {
+
+      console.error(
+        "PROFILE LOAD ERROR:",
+        error
+      );
+
+
+      // At least show Firebase Auth data
+
+      username.textContent =
+        user.displayName ||
+        "User";
+
+
+      email.textContent =
+        user.email ||
+        "";
+
+
+      renderStats({});
+
+    }
+
+  }
+);
+
+
+// =====================================================
+// OPEN EDIT PROFILE
+// =====================================================
+
+editProfileBtn.addEventListener(
+  "click",
+  () => {
+
+    editUsername.value =
+      username.textContent;
+
+
+    editPhotoPreview.src =
+      currentPhotoURL;
+
+
+    selectedPhotoFile =
+      null;
+
+
+    profilePhotoInput.value =
+      "";
+
+
+    editProfileModal.style.display =
+      "flex";
+
+
+    editProfileModal.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+  }
+);
+
+
+// =====================================================
+// CLOSE EDIT PROFILE
+// =====================================================
+
+function closeEditModal() {
+
+  editProfileModal.style.display =
+    "none";
+
+
+  editProfileModal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+
+  selectedPhotoFile =
+    null;
+
+
+  profilePhotoInput.value =
+    "";
+
+}
+
+
+cancelProfileBtn.addEventListener(
+  "click",
+  closeEditModal
+);
+
+
+closeEditProfile.addEventListener(
+  "click",
+  closeEditModal
+);
+
+
+// Click outside modal
+
+editProfileModal.addEventListener(
+  "click",
+  (event) => {
+
+    if (
+      event.target ===
+      editProfileModal
+    ) {
+
+      closeEditModal();
+
+    }
+
+  }
+);
+
+
+// =====================================================
+// SELECT PROFILE PHOTO
+// =====================================================
+
+profilePhotoInput.addEventListener(
+  "change",
+  () => {
+
+    const file =
+      profilePhotoInput.files?.[0];
+
+
+    if (!file) {
+
+      return;
+
+    }
+
+
+    // Image check
+
+    if (
+      !file.type.startsWith("image/")
+    ) {
+
+      alert(
+        "Please select an image."
+      );
+
+      profilePhotoInput.value =
+        "";
+
+      return;
+
+    }
+
+
+    // 5 MB limit
+
+    if (
+      file.size >
+      5 * 1024 * 1024
+    ) {
+
+      alert(
+        "Please choose an image smaller than 5 MB."
+      );
+
+      profilePhotoInput.value =
+        "";
+
+      return;
+
+    }
+
+
+    selectedPhotoFile =
+      file;
+
+
+    // Instant preview
+
+    const reader =
+      new FileReader();
+
+
+    reader.onload =
+      (event) => {
+
+        editPhotoPreview.src =
+          event.target.result;
+
+      };
+
+
+    reader.readAsDataURL(file);
+
+  }
+);
+
+
+// =====================================================
+// SAVE PROFILE
+// =====================================================
+
+saveProfileBtn.addEventListener(
+  "click",
+  async () => {
+
+    if (!currentUser) {
+
+      return;
+
+    }
+
+
+    const newUsername =
+      editUsername.value.trim();
+
+
+    // Username validation
+
+    if (!newUsername) {
+
+      alert(
+        "Please enter username."
+      );
+
+      return;
+
+    }
+
+
+    try {
+
+      // Disable button
+
+      saveProfileBtn.disabled =
+        true;
+
+
+      saveProfileBtn.textContent =
+        "Saving...";
+
+
+      // -----------------------------------------------
+      // PHOTO URL
+      // -----------------------------------------------
+
+      let newPhotoURL =
+        currentPhotoURL;
+
+
+      // -----------------------------------------------
+      // UPLOAD PHOTO
+      // -----------------------------------------------
+
+      if (selectedPhotoFile) {
+
+        const extension =
+
+          selectedPhotoFile.name
+            .split(".")
+            .pop()
+            ?.toLowerCase() ||
+
+          "jpg";
+
+
+        const photoReference =
+
+          ref(
+
+            storage,
+
+            `profilePhotos/${currentUser.uid}/profile.${extension}`
+
+          );
+
+
+        await uploadBytes(
+
+          photoReference,
+
+          selectedPhotoFile,
+
+          {
+
+            contentType:
+              selectedPhotoFile.type,
+
+            cacheControl:
+              "public,max-age=3600"
+
+          }
+
+        );
+
+
+        newPhotoURL =
+          await getDownloadURL(
+            photoReference
+          );
+
+      }
+
+
+      // -----------------------------------------------
+      // FIRESTORE
+      // -----------------------------------------------
+
+      const userReference =
+        doc(
+          db,
+          "users",
+          currentUser.uid
+        );
+
+
+      await setDoc(
+
+        userReference,
+
+        {
+
+          uid:
+            currentUser.uid,
+
+          username:
+            newUsername,
+
+          email:
+            currentUser.email ||
+            email.textContent ||
+            "",
+
+          photoURL:
+            newPhotoURL
+
+        },
+
+        {
+
+          merge: true
+
+        }
+
+      );
+
+
+      // -----------------------------------------------
+      // FIREBASE AUTH PROFILE
+      // -----------------------------------------------
+
+      await updateProfile(
+
+        currentUser,
+
+        {
+
+          displayName:
+            newUsername,
+
+          photoURL:
+            newPhotoURL
+
+        }
+
+      );
+
+
+      // -----------------------------------------------
+      // UPDATE SCREEN INSTANTLY
+      // -----------------------------------------------
+
+      username.textContent =
+        newUsername;
+
+
+      avatar.src =
+        newPhotoURL;
+
+
+      editPhotoPreview.src =
+        newPhotoURL;
+
+
+      currentPhotoURL =
+        newPhotoURL;
+
+
+      // Close modal
+
+      closeEditModal();
+
+
+      alert(
+        "Profile updated successfully!"
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "PROFILE UPDATE ERROR:",
+        error
+      );
+
+
+      alert(
+
+        "Failed to update profile.\n\n" +
+
+        (
+          error.message ||
+          "Please try again."
+        )
+
+      );
+
+
+    } finally {
+
+      saveProfileBtn.disabled =
+        false;
+
+
+      saveProfileBtn.textContent =
+        "Save Changes";
+
+    }
+
+  }
+);
+
+
+// =====================================================
+// LOGOUT
+// =====================================================
+
+logoutBtn.addEventListener(
+  "click",
+  async () => {
+
+    try {
+
+      await signOut(auth);
+
+      window.location.replace(
+        "login.html"
+      );
+
+    } catch (error) {
+
+      console.error(
+        "LOGOUT ERROR:",
+        error
+      );
+
+    }
+
+  }
+);
+
+
+// =====================================================
+// THEME
+// =====================================================
+
+const themesBtn =
+  document.getElementById(
+    "themesBtn"
+  );
+
+const themeModal =
+  document.getElementById(
+    "themeModal"
+  );
+
+const closeTheme =
+  document.getElementById(
+    "closeTheme"
+  );
+
+const themeOptions =
+  document.querySelectorAll(
+    ".theme-option"
+  );
+
+
+// =====================================================
+// THEME SELECTION
+// =====================================================
 
 function updateThemeSelection() {
 
-    const currentTheme =
-        localStorage.getItem("theme") || "default";
+  const currentTheme =
+    localStorage.getItem(
+      "theme"
+    ) || "default";
 
-    themeOptions.forEach(option => {
 
-        option.classList.remove("active");
+  themeOptions.forEach(
+    option => {
 
-        option.querySelector(".tick").textContent = "";
+      option.classList.remove(
+        "active"
+      );
 
-        if(option.dataset.theme === currentTheme){
 
-            option.classList.add("active");
-            option.querySelector(".tick").textContent = "✓";
-
-        }
-
-    });
-
-}
-
-function applyTheme(theme){
-
-document.body.classList.remove(
-"theme-light",
-"theme-dark"
-);
-
-if(theme==="light"){
-
-document.body.classList.add("theme-light");
-
-}else if(theme==="dark"){
-
-document.body.classList.add("theme-dark");
-
-}else{
-
-if(window.matchMedia("(prefers-color-scheme: dark)").matches){
-
-document.body.classList.add("theme-dark");
-
-}
-
-}
-
-}
-
-themeOptions.forEach(option => {
-
-    option.addEventListener("click", () => {
-
-        const selectedTheme = option.dataset.theme;
-
-        localStorage.setItem(
-            "theme",
-            selectedTheme
+      const tick =
+        option.querySelector(
+          ".tick"
         );
 
-      applyTheme(selectedTheme);
 
-      updateThemeSelection();
+      tick.textContent = "";
 
-    });
 
-});
+      if (
+        option.dataset.theme ===
+        currentTheme
+      ) {
 
-updateThemeSelection();
-applyTheme(
-localStorage.getItem("theme") || "default"
-);
+        option.classList.add(
+          "active"
+        );
 
-window.matchMedia("(prefers-color-scheme: dark)")
-.addEventListener("change",()=>{
 
-const theme =
-localStorage.getItem("theme") || "default";
+        tick.textContent =
+          "✓";
 
-if(theme==="default"){
+      }
 
-applyTheme("default");
+    }
+  );
 
 }
 
-});
-// =============================
-// EDIT PROFILE
-// =============================
 
-editProfileBtn.addEventListener("click", () => {
+// =====================================================
+// APPLY THEME
+// =====================================================
 
-    editUsername.value =
-        username.textContent;
+function applyTheme(theme) {
 
-    editPhotoPreview.src =
-        avatar.src;
+  document.body.classList.remove(
 
-    selectedPhotoURL =
-        avatar.src;
+    "theme-light",
 
-    editProfileModal.style.display =
-        "flex";
+    "theme-dark"
 
-});
+  );
 
 
-// =============================
-// CHANGE PHOTO PREVIEW
-// =============================
+  if (
+    theme === "light"
+  ) {
 
-profilePhotoInput.addEventListener(
+    document.body.classList.add(
+      "theme-light"
+    );
+
+  }
+
+
+  else if (
+    theme === "dark"
+  ) {
+
+    document.body.classList.add(
+      "theme-dark"
+    );
+
+  }
+
+
+  else {
+
+    if (
+      window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches
+    ) {
+
+      document.body.classList.add(
+        "theme-dark"
+      );
+
+    }
+
+  }
+
+}
+
+
+// =====================================================
+// OPEN THEME MODAL
+// =====================================================
+
+themesBtn.addEventListener(
+  "click",
+  (event) => {
+
+    event.preventDefault();
+
+    themeModal.style.display =
+      "flex";
+
+  }
+);
+
+
+// =====================================================
+// CLOSE THEME MODAL
+// =====================================================
+
+closeTheme.addEventListener(
+  "click",
+  () => {
+
+    themeModal.style.display =
+      "none";
+
+  }
+);
+
+
+themeModal.addEventListener(
+  "click",
+  (event) => {
+
+    if (
+      event.target ===
+      themeModal
+    ) {
+
+      themeModal.style.display =
+        "none";
+
+    }
+
+  }
+);
+
+
+// =====================================================
+// CHANGE THEME
+// =====================================================
+
+themeOptions.forEach(
+  option => {
+
+    option.addEventListener(
+      "click",
+      () => {
+
+        const selectedTheme =
+          option.dataset.theme;
+
+
+        localStorage.setItem(
+
+          "theme",
+
+          selectedTheme
+
+        );
+
+
+        applyTheme(
+          selectedTheme
+        );
+
+
+        updateThemeSelection();
+
+      }
+    );
+
+  }
+);
+
+
+// =====================================================
+// INITIAL THEME
+// =====================================================
+
+const savedTheme =
+  localStorage.getItem(
+    "theme"
+  ) || "default";
+
+
+updateThemeSelection();
+
+
+applyTheme(
+  savedTheme
+);
+
+
+// =====================================================
+// SYSTEM THEME CHANGE
+// =====================================================
+
+window
+  .matchMedia(
+    "(prefers-color-scheme: dark)"
+  )
+  .addEventListener(
     "change",
     () => {
 
-        const file =
-            profilePhotoInput.files[0];
+      const theme =
+        localStorage.getItem(
+          "theme"
+        ) || "default";
 
-        if(!file) return;
 
-        const reader =
-            new FileReader();
+      if (
+        theme === "default"
+      ) {
 
-        reader.onload = (e) => {
+        applyTheme(
+          "default"
+        );
 
-            selectedPhotoURL =
-                e.target.result;
-
-            editPhotoPreview.src =
-                e.target.result;
-
-        };
-
-        reader.readAsDataURL(file);
+      }
 
     }
-);
-
-
-// =============================
-// CANCEL
-// =============================
-
-cancelProfileBtn.addEventListener(
-    "click",
-    () => {
-
-        editProfileModal.style.display =
-            "none";
-
-    }
-);
-
-
-// =============================
-// CLOSE OUTSIDE
-// =============================
-
-editProfileModal.addEventListener(
-    "click",
-    (e) => {
-
-        if(e.target === editProfileModal){
-
-            editProfileModal.style.display =
-                "none";
-
-        }
-
-    }
-);
-
-
-// =============================
-// SAVE PROFILE
-// =============================
-
-saveProfileBtn.addEventListener(
-    "click",
-    async () => {
-
-        if(!currentUser) return;
-
-        const newUsername =
-            editUsername.value.trim();
-
-        if(!newUsername){
-
-            alert("Please enter username.");
-
-            return;
-
-        }
-
-        try{
-
-            saveProfileBtn.disabled = true;
-
-            saveProfileBtn.textContent =
-                "Saving...";
-
-            await updateDoc(
-    doc(
-        db,
-        "users",
-        currentUser.uid
-    ),
-    {
-        username: newUsername,
-        photoURL: selectedPhotoURL
-    }
-);
-
-          username.textContent =
-    newUsername;
-
-avatar.src =
-    selectedPhotoURL;
-
-editPhotoPreview.src =
-    selectedPhotoURL;
-
-            username.textContent =
-                newUsername;
-
-            avatar.src =
-                selectedPhotoURL;
-
-            editProfileModal.style.display =
-                "none";
-
-            alert("Profile updated successfully!");
-
-        }catch(error){
-
-            console.error(
-                "PROFILE UPDATE ERROR:",
-                error
-            );
-
-            alert(
-                "Failed to update profile."
-            );
-
-        }finally{
-
-            saveProfileBtn.disabled =
-                false;
-
-            saveProfileBtn.textContent =
-                "Save Changes";
-
-        }
-
-    }
-);
+  );
