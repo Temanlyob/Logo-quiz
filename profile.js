@@ -49,7 +49,7 @@ const achievementList =
 
 
 // =====================================================
-// EDIT PROFILE
+// EDIT PROFILE ELEMENTS
 // =====================================================
 
 const editProfileBtn =
@@ -90,7 +90,28 @@ let selectedPhotoFile = null;
 
 
 // =====================================================
-// AUTH
+// BASIC ELEMENT CHECK
+// =====================================================
+
+if (!editProfileBtn) {
+  console.error("Missing #editProfileBtn");
+}
+
+if (!editProfileModal) {
+  console.error("Missing #editProfileModal");
+}
+
+if (!profilePhotoInput) {
+  console.error("Missing #profilePhotoInput");
+}
+
+if (!saveProfileBtn) {
+  console.error("Missing #saveProfileBtn");
+}
+
+
+// =====================================================
+// AUTH STATE
 // =====================================================
 
 onAuthStateChanged(
@@ -107,9 +128,33 @@ onAuthStateChanged(
 
     }
 
-    currentUser = user;
 
-    await loadProfile(user);
+    currentUser =
+      user;
+
+
+    try {
+
+      await loadProfile(user);
+
+    } catch (error) {
+
+      console.error(
+        "PROFILE LOAD ERROR:",
+        error
+      );
+
+      username.textContent =
+        user.displayName ||
+        "User";
+
+      email.textContent =
+        user.email ||
+        "";
+
+      await loadStats({});
+
+    }
 
   }
 );
@@ -121,101 +166,94 @@ onAuthStateChanged(
 
 async function loadProfile(user) {
 
-  try {
-
-    const userRef =
-      doc(
-        db,
-        "users",
-        user.uid
-      );
-
-    const snap =
-      await getDoc(userRef);
-
-    let data = {};
-
-    if (snap.exists()) {
-
-      data =
-        snap.data();
-
-    }
-
-
-    // ===============================================
-    // USERNAME
-    // ===============================================
-
-    const savedUsername =
-      data.username ||
-      user.displayName ||
-      "User";
-
-    username.textContent =
-      savedUsername;
-
-    editUsername.value =
-      savedUsername;
-
-
-    // ===============================================
-    // EMAIL
-    // ===============================================
-
-    email.textContent =
-      data.email ||
-      user.email ||
-      "";
-
-
-    // ===============================================
-    // PHOTO
-    // ===============================================
-
-    currentPhotoURL =
-      data.photoURL ||
-      user.photoURL ||
-      "default-avatar.png";
-
-    avatar.src =
-      currentPhotoURL;
-
-    editPhotoPreview.src =
-      currentPhotoURL;
-
-
-    // ===============================================
-    // STATS
-    // ===============================================
-
-    await loadStats(data);
-
-
-  } catch (error) {
-
-    console.error(
-      "PROFILE LOAD ERROR:",
-      error
+  const userRef =
+    doc(
+      db,
+      "users",
+      user.uid
     );
 
-    username.textContent =
-      user.displayName ||
-      "User";
 
-    email.textContent =
-      user.email ||
-      "";
+  const snapshot =
+    await getDoc(userRef);
 
-    await loadStats({});
+
+  let data = {};
+
+
+  if (snapshot.exists()) {
+
+    data =
+      snapshot.data();
 
   }
+
+
+  // ===================================================
+  // USERNAME
+  // ===================================================
+
+  const savedUsername =
+    data.username ||
+    user.displayName ||
+    "User";
+
+
+  username.textContent =
+    savedUsername;
+
+
+  editUsername.value =
+    savedUsername;
+
+
+  // ===================================================
+  // EMAIL
+  // ===================================================
+
+  email.textContent =
+    data.email ||
+    user.email ||
+    "";
+
+
+  // ===================================================
+  // PHOTO
+  //
+  // IMPORTANT:
+  // Photo comes ONLY from Firestore.
+  // We don't use Auth photoURL.
+  // ===================================================
+
+  currentPhotoURL =
+    data.photoURL ||
+    "default-avatar.png";
+
+
+  avatar.src =
+    currentPhotoURL;
+
+
+  editPhotoPreview.src =
+    currentPhotoURL;
+
+
+  // ===================================================
+  // STATS
+  // ===================================================
+
+  await loadStats(data);
 
 }
 
 
 // =====================================================
-// EXACT SAME GAME STATS AS RESULTS.JS
+// GET EXACT GAME STATS
+//
+// Same logic used by Results page:
+// quiz_*
+// attempted === true
+// correct === true
 // =====================================================
 
 function getGameStats() {
@@ -249,22 +287,39 @@ function getGameStats() {
 
     try {
 
+      const raw =
+        localStorage.getItem(key);
+
+
       const quiz =
-        JSON.parse(
-          localStorage.getItem(key)
-        );
+        JSON.parse(raw);
 
 
       if (
-        quiz &&
+        !quiz ||
+        typeof quiz !== "object"
+      ) {
+
+        continue;
+
+      }
+
+
+      // =============================================
+      // ONLY ATTEMPTED GAMES
+      // =============================================
+
+      if (
         quiz.attempted === true
       ) {
 
-        // Total played
         puzzlesPlayed++;
 
 
-        // Won
+        // =========================================
+        // WON
+        // =========================================
+
         if (
           quiz.correct === true
         ) {
@@ -274,7 +329,10 @@ function getGameStats() {
         }
 
 
-        // Lost
+        // =========================================
+        // LOST
+        // =========================================
+
         else if (
           quiz.correct === false
         ) {
@@ -288,9 +346,9 @@ function getGameStats() {
 
     } catch (error) {
 
-      console.error(
-        "QUIZ DATA ERROR:",
-        error
+      console.warn(
+        "Invalid quiz data:",
+        key
       );
 
     }
@@ -298,26 +356,43 @@ function getGameStats() {
   }
 
 
-  const winRate =
-    puzzlesPlayed === 0
-      ? 0
-      : Math.round(
-          (
-            gamesWon /
-            puzzlesPlayed
-          ) * 100
-        );
+  // =================================================
+  // ACCURACY
+  // =================================================
+
+  let winRate = 0;
+
+
+  if (
+    puzzlesPlayed > 0
+  ) {
+
+    winRate =
+      Math.round(
+
+        (
+          gamesWon /
+          puzzlesPlayed
+        ) * 100
+
+      );
+
+  }
 
 
   return {
 
-    puzzlesPlayed,
+    puzzlesPlayed:
+      puzzlesPlayed,
 
-    gamesWon,
+    gamesWon:
+      gamesWon,
 
-    gamesLost,
+    gamesLost:
+      gamesLost,
 
-    winRate
+    winRate:
+      winRate
 
   };
 
@@ -330,9 +405,9 @@ function getGameStats() {
 
 async function loadStats(data) {
 
-  // ===============================================
-  // TOTAL SCORE
-  // ===============================================
+  // ===================================================
+  // SCORE
+  // ===================================================
 
   const totalScore =
     Number(
@@ -340,9 +415,9 @@ async function loadStats(data) {
     );
 
 
-  // ===============================================
-  // CURRENT STREAK
-  // ===============================================
+  // ===================================================
+  // STREAK
+  // ===================================================
 
   const currentStreak =
     Number(
@@ -350,34 +425,37 @@ async function loadStats(data) {
     );
 
 
-  // ===============================================
-  // GAME STATS
-  // ===============================================
+  // ===================================================
+  // GAME DATA
+  // ===================================================
 
   const gameStats =
     getGameStats();
 
 
-  // ===============================================
-  // UPDATE UI
-  // ===============================================
+  // ===================================================
+  // UPDATE SCREEN
+  // ===================================================
 
   score.textContent =
     totalScore;
 
+
   streak.textContent =
     currentStreak;
 
+
   accuracy.textContent =
     gameStats.winRate + "%";
+
 
   played.textContent =
     gameStats.puzzlesPlayed;
 
 
-  // ===============================================
+  // ===================================================
   // LEVEL
-  // ===============================================
+  // ===================================================
 
   if (
     totalScore >= 1000
@@ -423,9 +501,9 @@ async function loadStats(data) {
   }
 
 
-  // ===============================================
+  // ===================================================
   // ACHIEVEMENTS
-  // ===============================================
+  // ===================================================
 
   renderAchievements({
 
@@ -444,9 +522,9 @@ async function loadStats(data) {
   });
 
 
-  // ===============================================
-  // LOCAL PROFILE PROGRESS
-  // ===============================================
+  // ===================================================
+  // LOCAL BACKUP
+  // ===================================================
 
   localStorage.setItem(
 
@@ -472,7 +550,7 @@ async function loadStats(data) {
 
 
   console.log(
-    "PROFILE STATS:",
+    "PROFILE STATS",
     {
 
       score:
@@ -508,9 +586,9 @@ function renderAchievements(stats) {
   let html = "";
 
 
-  // ===============================================
-  // LOGO ROOKIE
-  // ===============================================
+  // ===================================================
+  // FIRST PUZZLE
+  // ===================================================
 
   if (
     stats.puzzlesPlayed >= 1
@@ -539,9 +617,9 @@ function renderAchievements(stats) {
   }
 
 
-  // ===============================================
+  // ===================================================
   // 7 DAY STREAK
-  // ===============================================
+  // ===================================================
 
   if (
     stats.currentStreak >= 7
@@ -570,9 +648,9 @@ function renderAchievements(stats) {
   }
 
 
-  // ===============================================
+  // ===================================================
   // 100 POINTS
-  // ===============================================
+  // ===================================================
 
   if (
     stats.totalScore >= 100
@@ -601,9 +679,9 @@ function renderAchievements(stats) {
   }
 
 
-  // ===============================================
-  // PUZZLE MASTER
-  // ===============================================
+  // ===================================================
+  // 30 PUZZLES
+  // ===================================================
 
   if (
     stats.puzzlesPlayed >= 30
@@ -632,9 +710,9 @@ function renderAchievements(stats) {
   }
 
 
-  // ===============================================
+  // ===================================================
   // ACCURACY MASTER
-  // ===============================================
+  // ===================================================
 
   if (
 
@@ -667,9 +745,9 @@ function renderAchievements(stats) {
   }
 
 
-  // ===============================================
+  // ===================================================
   // NO ACHIEVEMENTS
-  // ===============================================
+  // ===================================================
 
   if (
     html === ""
@@ -715,17 +793,22 @@ editProfileBtn.addEventListener(
     editUsername.value =
       username.textContent;
 
+
     editPhotoPreview.src =
       currentPhotoURL;
+
 
     selectedPhotoFile =
       null;
 
+
     profilePhotoInput.value =
       "";
 
+
     editProfileModal.style.display =
       "flex";
+
 
     editProfileModal.setAttribute(
       "aria-hidden",
@@ -737,7 +820,7 @@ editProfileBtn.addEventListener(
 
 
 // =====================================================
-// CLOSE EDIT PROFILE
+// CLOSE EDIT MODAL
 // =====================================================
 
 function closeEditModal() {
@@ -745,13 +828,16 @@ function closeEditModal() {
   editProfileModal.style.display =
     "none";
 
+
   editProfileModal.setAttribute(
     "aria-hidden",
     "true"
   );
 
+
   selectedPhotoFile =
     null;
+
 
   profilePhotoInput.value =
     "";
@@ -789,7 +875,7 @@ editProfileModal.addEventListener(
 
 
 // =====================================================
-// PHOTO SELECT
+// SELECT PHOTO
 // =====================================================
 
 profilePhotoInput.addEventListener(
@@ -807,9 +893,9 @@ profilePhotoInput.addEventListener(
     }
 
 
-    // ===============================================
-    // IMAGE CHECK
-    // ===============================================
+    // =================================================
+    // CHECK IMAGE
+    // =================================================
 
     if (
       !file.type.startsWith("image/")
@@ -827,9 +913,9 @@ profilePhotoInput.addEventListener(
     }
 
 
-    // ===============================================
-    // ORIGINAL FILE MAX 10 MB
-    // ===============================================
+    // =================================================
+    // MAX ORIGINAL SIZE 10 MB
+    // =================================================
 
     if (
       file.size >
@@ -852,9 +938,9 @@ profilePhotoInput.addEventListener(
       file;
 
 
-    // ===============================================
-    // PREVIEW
-    // ===============================================
+    // =================================================
+    // INSTANT PREVIEW
+    // =================================================
 
     const reader =
       new FileReader();
@@ -876,10 +962,10 @@ profilePhotoInput.addEventListener(
 
 
 // =====================================================
-// COMPRESS IMAGE
+// COMPRESS PHOTO
 //
-// Firebase Storage is NOT used.
-// Image is resized + compressed in browser.
+// No Firebase Storage.
+// Photo becomes a small Base64 JPEG.
 // =====================================================
 
 function compressImage(file) {
@@ -901,12 +987,12 @@ function compressImage(file) {
           image.onload =
             () => {
 
-              // =====================================
-              // MAX IMAGE SIZE
-              // =====================================
+              // =======================================
+              // MAX DIMENSION
+              // =======================================
 
               const MAX_SIZE =
-                500;
+                450;
 
 
               let width =
@@ -915,6 +1001,10 @@ function compressImage(file) {
               let height =
                 image.height;
 
+
+              // =======================================
+              // RESIZE
+              // =======================================
 
               if (
                 width > height
@@ -926,9 +1016,11 @@ function compressImage(file) {
 
                   height =
                     Math.round(
+
                       height *
                       MAX_SIZE /
                       width
+
                     );
 
                   width =
@@ -946,9 +1038,11 @@ function compressImage(file) {
 
                   width =
                     Math.round(
+
                       width *
                       MAX_SIZE /
                       height
+
                     );
 
                   height =
@@ -959,9 +1053,9 @@ function compressImage(file) {
               }
 
 
-              // =====================================
+              // =======================================
               // CANVAS
-              // =====================================
+              // =======================================
 
               const canvas =
                 document.createElement(
@@ -971,6 +1065,7 @@ function compressImage(file) {
 
               canvas.width =
                 width;
+
 
               canvas.height =
                 height;
@@ -995,34 +1090,35 @@ function compressImage(file) {
               );
 
 
-              // =====================================
-              // JPEG COMPRESSION
-              // =====================================
+              // =======================================
+              // COMPRESS
+              // =======================================
 
               let quality =
-                0.75;
+                0.70;
 
 
-              let compressed =
+              let result =
                 canvas.toDataURL(
+
                   "image/jpeg",
+
                   quality
+
                 );
 
 
-              // =====================================
-              // KEEP IT SMALL
-              // =====================================
-
-              // If Base64 is still large,
-              // compress further.
+              // =======================================
+              // MAKE SMALLER IF NEEDED
+              // =======================================
 
               while (
 
-                compressed.length >
-                  750000 &&
+                result.length >
+                  600000 &&
 
-                quality > 0.35
+                quality >
+                  0.30
 
               ) {
 
@@ -1030,28 +1126,35 @@ function compressImage(file) {
                   0.05;
 
 
-                compressed =
+                result =
                   canvas.toDataURL(
+
                     "image/jpeg",
+
                     quality
+
                   );
 
               }
 
 
-              // =====================================
-              // FINAL SIZE CHECK
-              // =====================================
+              // =======================================
+              // FINAL CHECK
+              // =======================================
 
               if (
-                compressed.length >
-                900000
+                result.length >
+                750000
               ) {
 
                 reject(
+
                   new Error(
-                    "Photo is still too large after compression."
+
+                    "Photo is too large even after compression. Please choose another photo."
+
                   )
+
                 );
 
                 return;
@@ -1059,8 +1162,20 @@ function compressImage(file) {
               }
 
 
+              console.log(
+
+                "PHOTO COMPRESSED:",
+
+                Math.round(
+                  result.length /
+                  1024
+                ) + " KB"
+
+              );
+
+
               resolve(
-                compressed
+                result
               );
 
             };
@@ -1070,9 +1185,11 @@ function compressImage(file) {
             () => {
 
               reject(
+
                 new Error(
-                  "Could not read image."
+                  "Could not process the image."
                 )
+
               );
 
             };
@@ -1088,9 +1205,11 @@ function compressImage(file) {
         () => {
 
           reject(
+
             new Error(
               "Could not read selected photo."
             )
+
           );
 
         };
@@ -1127,9 +1246,9 @@ saveProfileBtn.addEventListener(
       editUsername.value.trim();
 
 
-    // ===============================================
+    // =================================================
     // USERNAME VALIDATION
-    // ===============================================
+    // =================================================
 
     if (!newUsername) {
 
@@ -1160,9 +1279,9 @@ saveProfileBtn.addEventListener(
         );
 
 
-      // =============================================
+      // =================================================
       // PHOTO
-      // =============================================
+      // =================================================
 
       let newPhotoURL =
         currentPhotoURL;
@@ -1176,29 +1295,19 @@ saveProfileBtn.addEventListener(
           "Preparing Photo...";
 
 
-        // =========================================
-        // COMPRESS LOCALLY
-        // =========================================
-
         newPhotoURL =
           await compressImage(
             selectedPhotoFile
           );
 
-
-        console.log(
-          "Compressed photo size:",
-          Math.round(
-            newPhotoURL.length / 1024
-          ) + " KB"
-        );
-
       }
 
 
-      // =============================================
-      // SAVE EVERYTHING TO FIRESTORE
-      // =============================================
+      // =================================================
+      // SAVE TO FIRESTORE
+      //
+      // Photo is saved HERE only.
+      // =================================================
 
       saveProfileBtn.textContent =
         "Saving...";
@@ -1236,44 +1345,57 @@ saveProfileBtn.addEventListener(
       );
 
 
-      // =============================================
+      // =================================================
       // UPDATE FIREBASE AUTH
-      // =============================================
+      //
+      // IMPORTANT:
+      // DO NOT PUT photoURL HERE.
+      //
+      // Firebase Auth rejects the Base64 photo
+      // because it is too long.
+      // =================================================
 
       await updateProfile(
 
-  currentUser,
+        currentUser,
 
-  {
+        {
 
-    displayName:
-      newUsername
+          displayName:
+            newUsername
 
-  }
+        }
 
-);
+      );
 
 
-      // =============================================
-      // UPDATE SCREEN IMMEDIATELY
-      // =============================================
+      // =================================================
+      // UPDATE SCREEN
+      // =================================================
 
       username.textContent =
         newUsername;
 
+
       avatar.src =
         newPhotoURL;
 
+
       editPhotoPreview.src =
         newPhotoURL;
+
 
       currentPhotoURL =
         newPhotoURL;
 
 
-      // =============================================
+      selectedPhotoFile =
+        null;
+
+
+      // =================================================
       // CLOSE MODAL
-      // =============================================
+      // =================================================
 
       closeEditModal();
 
@@ -1291,10 +1413,6 @@ saveProfileBtn.addEventListener(
       );
 
 
-      // =============================================
-      // IMPORTANT: SHOW EXACT ERROR
-      // =============================================
-
       alert(
 
         "Profile save failed.\n\n" +
@@ -1306,16 +1424,15 @@ saveProfileBtn.addEventListener(
 
       );
 
+
     } finally {
 
       saveProfileBtn.disabled =
         false;
 
+
       saveProfileBtn.textContent =
         "Save Changes";
-
-      selectedPhotoFile =
-        null;
 
     }
 
@@ -1335,9 +1452,11 @@ logoutBtn.addEventListener(
 
       await signOut(auth);
 
+
       window.location.replace(
         "login.html"
       );
+
 
     } catch (error) {
 
@@ -1432,7 +1551,7 @@ function applyTheme(theme) {
 
 
 // =====================================================
-// UPDATE THEME SELECTION
+// THEME SELECTION
 // =====================================================
 
 function updateThemeSelection() {
@@ -1477,6 +1596,7 @@ function updateThemeSelection() {
           "active"
         );
 
+
         tick.textContent =
           "✓";
 
@@ -1497,6 +1617,7 @@ themesBtn.addEventListener(
   (event) => {
 
     event.preventDefault();
+
 
     themeModal.style.display =
       "flex";
@@ -1539,7 +1660,7 @@ themeModal.addEventListener(
 
 
 // =====================================================
-// SELECT THEME
+// CHANGE THEME
 // =====================================================
 
 themeOptions.forEach(
@@ -1588,13 +1709,14 @@ const savedTheme =
 
 updateThemeSelection();
 
+
 applyTheme(
   savedTheme
 );
 
 
 // =====================================================
-// PHONE THEME CHANGE
+// SYSTEM THEME CHANGE
 // =====================================================
 
 window
