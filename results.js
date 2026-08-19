@@ -390,24 +390,21 @@ function getStreakDates(history) {
 // CURRENT STREAK
 // =====================================
 
-function calculateCurrentStreak(
-  streakDates
-) {
+function calculateCurrentStreak(streakDates) {
 
-  if (
-    streakDates.length === 0
-  ) {
-
+  if (streakDates.length === 0) {
     return 0;
-
   }
 
-
   const today =
-    getLocalDateOnly(
-      new Date()
-    );
+    getLocalDateOnly(new Date());
 
+  const yesterday =
+    new Date(today);
+
+  yesterday.setDate(
+    yesterday.getDate() - 1
+  );
 
   const latest =
     streakDates[
@@ -415,18 +412,36 @@ function calculateCurrentStreak(
     ];
 
 
-  // Today's actual puzzle must
-  // have been completed today.
+  // =====================================
+  // LATEST PLAY MUST BE TODAY OR YESTERDAY
+  // =====================================
+
+  const latestTime =
+    latest.getTime();
+
+  const todayTime =
+    today.getTime();
+
+  const yesterdayTime =
+    yesterday.getTime();
+
+
+  // If last play was before yesterday,
+  // streak is already broken.
 
   if (
-    latest.getTime() !==
-    today.getTime()
+    latestTime !== todayTime &&
+    latestTime !== yesterdayTime
   ) {
 
     return 0;
 
   }
 
+
+  // =====================================
+  // COUNT BACKWARDS
+  // =====================================
 
   let streak = 1;
 
@@ -468,7 +483,9 @@ function calculateCurrentStreak(
 
       streak++;
 
-    } else {
+    }
+
+    else {
 
       break;
 
