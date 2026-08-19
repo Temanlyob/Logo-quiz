@@ -51,9 +51,9 @@ const months = [
 // CURRENT DATE
 // =====================================
 
-function cleanDate(date) {
+function getToday() {
 
-    const d = new Date(date);
+    const d = new Date();
 
     d.setHours(
         0,
@@ -67,7 +67,7 @@ function cleanDate(date) {
 
 
 let today =
-    cleanDate(new Date());
+    getToday();
 
 
 let currentMonth =
@@ -81,7 +81,7 @@ let currentYear =
 // =====================================
 // CURRENT STREAK
 //
-// SAME AS HOME.JS
+// SAME VALUE AS HOME.JS
 // =====================================
 
 let currentStreak = 0;
@@ -92,13 +92,18 @@ let currentStreak = 0;
 // =====================================
 
 const firstPuzzleDate =
-    cleanDate(
-        new Date(
-            2026,
-            6,
-            28
-        )
+    new Date(
+        2026,
+        6,
+        28
     );
+
+firstPuzzleDate.setHours(
+    0,
+    0,
+    0,
+    0
+);
 
 
 // =====================================
@@ -156,6 +161,7 @@ function applyTheme(theme) {
         }
 
     }
+
 }
 
 
@@ -163,6 +169,10 @@ applyTheme(
     localStorage.getItem("theme") || "default"
 );
 
+
+// =====================================
+// FOLLOW SYSTEM THEME
+// =====================================
 
 const systemTheme =
     window.matchMedia(
@@ -175,9 +185,8 @@ systemTheme.addEventListener(
     () => {
 
         const theme =
-            localStorage.getItem(
-                "theme"
-            ) || "default";
+            localStorage.getItem("theme")
+            || "default";
 
 
         if (
@@ -190,151 +199,6 @@ systemTheme.addEventListener(
 
     }
 );
-
-
-// =====================================
-// DATE KEY
-// =====================================
-
-function makeDateKey(
-    year,
-    month,
-    day
-) {
-
-    const d =
-        String(day)
-            .padStart(2, "0");
-
-
-    const m =
-        String(month + 1)
-            .padStart(2, "0");
-
-
-    const y =
-        String(year)
-            .slice(-2);
-
-
-    return `${d}-${m}-${y}`;
-}
-
-
-// =====================================
-// QUIZ DATA
-// =====================================
-
-function getQuiz(
-    date
-) {
-
-    try {
-
-        const key =
-            "quiz_" +
-            makeDateKey(
-                date.getFullYear(),
-                date.getMonth(),
-                date.getDate()
-            );
-
-
-        const saved =
-            localStorage.getItem(key);
-
-
-        return saved
-            ? JSON.parse(saved)
-            : null;
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "QUIZ DATA ERROR:",
-            error
-        );
-
-        return null;
-    }
-}
-
-
-// =====================================
-// FIRE DATES
-//
-// IMPORTANT:
-//
-// NO STREAK CALCULATION HERE.
-//
-// currentStreak comes directly from
-// the same Firestore field used by
-// home.js.
-//
-// If currentStreak = 5:
-//
-// Today
-// Yesterday
-// 2 days ago
-// 3 days ago
-// 4 days ago
-//
-// = exactly 5 🔥
-// =====================================
-
-function getFireDates() {
-
-    const fireDates = [];
-
-
-    if (
-        currentStreak <= 0
-    ) {
-
-        return fireDates;
-    }
-
-
-    for (
-        let i = 0;
-        i < currentStreak;
-        i++
-    ) {
-
-        const date =
-            new Date(today);
-
-
-        date.setDate(
-            today.getDate() - i
-        );
-
-
-        date.setHours(
-            0,
-            0,
-            0,
-            0
-        );
-
-
-        if (
-            date >= firstPuzzleDate
-        ) {
-
-            fireDates.push(
-                date
-            );
-
-        }
-
-    }
-
-
-    return fireDates;
-}
 
 
 // =====================================
@@ -384,12 +248,9 @@ streakStyle.textContent = `
 
     line-height: 1;
 
-    z-index: 20;
+    z-index: 50;
 
-    filter:
-        drop-shadow(
-            0 0 4px rgba(245,158,11,.65)
-        );
+    pointer-events: none;
 
 }
 
@@ -402,11 +263,6 @@ streakStyle.textContent = `
 
     border-color: #16a34a !important;
 
-    box-shadow:
-        0 0 8px rgba(34,197,94,.60),
-        0 0 18px rgba(34,197,94,.45),
-        0 0 30px rgba(245,158,11,.35);
-
 }
 
 
@@ -417,11 +273,6 @@ streakStyle.textContent = `
     color: #ffffff !important;
 
     border-color: #dc2626 !important;
-
-    box-shadow:
-        0 0 8px rgba(239,68,68,.60),
-        0 0 18px rgba(239,68,68,.45),
-        0 0 30px rgba(245,158,11,.35);
 
 }
 
@@ -454,26 +305,6 @@ body.theme-dark
 
 }
 
-
-body.theme-dark
-.day.correct-day.current-streak-day {
-
-    background: #22c55e !important;
-
-    color: #ffffff !important;
-
-}
-
-
-body.theme-dark
-.day.wrong-day.current-streak-day {
-
-    background: #ef4444 !important;
-
-    color: #ffffff !important;
-
-}
-
 `;
 
 
@@ -483,13 +314,166 @@ document.head.appendChild(
 
 
 // =====================================
+// DATE KEY
+// =====================================
+
+function makeDateKey(
+    year,
+    month,
+    day
+) {
+
+    const d =
+        String(day)
+            .padStart(2, "0");
+
+
+    const m =
+        String(month + 1)
+            .padStart(2, "0");
+
+
+    const y =
+        String(year)
+            .slice(-2);
+
+
+    return (
+        d +
+        "-" +
+        m +
+        "-" +
+        y
+    );
+
+}
+
+
+// =====================================
+// GET QUIZ DATA
+// =====================================
+
+function getQuiz(
+    dateKey
+) {
+
+    try {
+
+        const raw =
+            localStorage.getItem(
+                "quiz_" + dateKey
+            );
+
+
+        if (
+            !raw
+        ) {
+
+            return null;
+
+        }
+
+
+        return JSON.parse(
+            raw
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "QUIZ ERROR:",
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
+
+// =====================================
+// FIRE DATES
+//
+// IMPORTANT:
+//
+// NO STREAK CALCULATION.
+//
+// currentStreak comes directly from
+// Firestore, same as Home.
+//
+// currentStreak = 5
+// => today + previous 4 days
+//
+// currentStreak = 3
+// => today + previous 2 days
+// =====================================
+
+function getFireDates() {
+
+    const dates = [];
+
+
+    if (
+        currentStreak <= 0
+    ) {
+
+        return dates;
+
+    }
+
+
+    for (
+        let i = 0;
+        i < currentStreak;
+        i++
+    ) {
+
+        const date =
+            new Date(today);
+
+
+        date.setDate(
+            today.getDate() - i
+        );
+
+
+        date.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+
+        if (
+            date >= firstPuzzleDate
+        ) {
+
+            dates.push(
+                date
+            );
+
+        }
+
+    }
+
+
+    return dates;
+
+}
+
+
+// =====================================
 // RENDER CALENDAR
 // =====================================
 
 function renderCalendar() {
 
     today =
-        cleanDate(new Date());
+        getToday();
 
 
     calendarGrid.innerHTML =
@@ -504,8 +488,6 @@ function renderCalendar() {
 
     // =================================
     // FIRE DATES
-    //
-    // DIRECTLY FROM currentStreak
     // =================================
 
     const fireDates =
@@ -513,21 +495,22 @@ function renderCalendar() {
 
 
     console.log(
-        "HOME CURRENT STREAK:",
+        "CURRENT STREAK FROM HOME:",
         currentStreak
     );
 
 
     console.log(
-        "CALENDAR FIRE DATES:",
-        fireDates.map(
-            date =>
-                makeDateKey(
-                    date.getFullYear(),
-                    date.getMonth(),
-                    date.getDate()
-                )
-        )
+        "FIRE DATES:",
+        fireDates
+            .map(
+                date =>
+                    makeDateKey(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate()
+                    )
+            )
     );
 
 
@@ -603,16 +586,22 @@ function renderCalendar() {
 
 
         const thisDate =
-            cleanDate(
-                new Date(
-                    currentYear,
-                    currentMonth,
-                    day
-                )
+            new Date(
+                currentYear,
+                currentMonth,
+                day
             );
 
 
-        const dateKey =
+        thisDate.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+
+        const key =
             makeDateKey(
                 currentYear,
                 currentMonth,
@@ -625,9 +614,7 @@ function renderCalendar() {
         // =================================
 
         const quiz =
-            getQuiz(
-                thisDate
-            );
+            getQuiz(key);
 
 
         if (
@@ -659,9 +646,7 @@ function renderCalendar() {
 
 
         // =================================
-        // CURRENT STREAK FIRE
-        //
-        // ONLY compares dates.
+        // CURRENT STREAK
         // =================================
 
         const isFire =
@@ -680,6 +665,7 @@ function renderCalendar() {
                 "current-streak-day"
             );
 
+
             cell.title =
                 "🔥 Current Streak";
 
@@ -692,7 +678,8 @@ function renderCalendar() {
 
         if (
             thisDate.getTime() ===
-                today.getTime() &&
+                today.getTime()
+            &&
             !quiz
         ) {
 
@@ -746,7 +733,7 @@ function renderCalendar() {
 
                     window.location.href =
                         "dailypuzzel.html?date=" +
-                        dateKey;
+                        key;
 
                 };
 
@@ -763,15 +750,15 @@ function renderCalendar() {
 
 
 // =====================================
-// LOAD PROGRESS
+// LOAD SAME CURRENT STREAK AS HOME.JS
 //
-// THIS IS COPIED FROM HOME.JS:
+// HOME.JS:
 //
-// const snap = await getDoc(userRef)
+// const userRef = doc(db,"users",user.uid);
+// const snap = await getDoc(userRef);
+// currentStreak = data.currentStreak ?? 0;
 //
-// currentStreak =
-//     data.currentStreak ?? 0;
-//
+// EXACT SAME HERE.
 // =====================================
 
 async function loadProgress(
@@ -794,10 +781,6 @@ async function loadProgress(
             );
 
 
-        let currentStreakFromDB =
-            0;
-
-
         if (
             snap.exists()
         ) {
@@ -806,37 +789,34 @@ async function loadProgress(
                 snap.data();
 
 
-            currentStreakFromDB =
-                data.currentStreak ?? 0;
+            currentStreak =
+                Number(
+                    data.currentStreak ?? 0
+                );
+
+        }
+
+        else {
+
+            currentStreak = 0;
 
         }
 
 
-        // =================================
-        // EXACT SAME VALUE AS HOME
-        // =================================
-
-        currentStreak =
-            Number(
-                currentStreakFromDB
-            );
-
-
         console.log(
-            "HOME/RESULT CURRENT STREAK:",
+            "HOME CURRENT STREAK:",
             currentStreak
         );
 
 
         renderCalendar();
 
-
     }
 
     catch (error) {
 
         console.error(
-            "CALENDAR PROGRESS ERROR:",
+            "CALENDAR LOAD ERROR:",
             error
         );
 
@@ -859,7 +839,9 @@ onAuthStateChanged(
     auth,
     async user => {
 
-        if (!user) {
+        if (
+            !user
+        ) {
 
             window.location.replace(
                 "login.html"
@@ -882,8 +864,7 @@ onAuthStateChanged(
 // PREVIOUS MONTH
 // =====================================
 
-prevBtn.addEventListener(
-    "click",
+prevBtn.onclick =
     () => {
 
         currentMonth--;
@@ -902,16 +883,14 @@ prevBtn.addEventListener(
 
         renderCalendar();
 
-    }
-);
+    };
 
 
 // =====================================
 // NEXT MONTH
 // =====================================
 
-nextBtn.addEventListener(
-    "click",
+nextBtn.onclick =
     () => {
 
         currentMonth++;
@@ -930,8 +909,7 @@ nextBtn.addEventListener(
 
         renderCalendar();
 
-    }
-);
+    };
 
 
 // =====================================
@@ -951,7 +929,9 @@ document.addEventListener(
                 auth.currentUser;
 
 
-            if (user) {
+            if (
+                user
+            ) {
 
                 await loadProgress(
                     user
@@ -977,7 +957,9 @@ window.addEventListener(
             auth.currentUser;
 
 
-        if (user) {
+        if (
+            user
+        ) {
 
             await loadProgress(
                 user
