@@ -1242,19 +1242,16 @@ saveProfileBtn.addEventListener(
 
       await updateProfile(
 
-        currentUser,
+  currentUser,
 
-        {
+  {
 
-          displayName:
-            newUsername,
+    displayName:
+      newUsername
 
-          photoURL:
-            newPhotoURL
+  }
 
-        }
-
-      );
+);
 
 
       // =============================================
