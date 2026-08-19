@@ -5,285 +5,118 @@
 
 <meta charset="UTF-8">
 
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>My Profile</title>
 
-<link
-  rel="stylesheet"
-  href="profile.css"
->
+<link rel="stylesheet" href="profile.css">
 
-<link
-  rel="preconnect"
-  href="https://fonts.googleapis.com"
->
+<link rel="preconnect" href="https://fonts.googleapis.com">
 
-<link
-  rel="preconnect"
-  href="https://fonts.gstatic.com"
-  crossorigin
->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link
-  href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-  rel="stylesheet"
->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 </head>
-
 
 <body>
 
 <div class="container">
 
-
-<!-- =========================
-     HEADER
-========================= -->
-
 <header class="top">
 
-<a
-  href="home.html"
-  class="back-btn"
->
-  ←
-</a>
+<a href="home.html" class="back-btn">←</a>
 
-<h1>
-  My Profile
-</h1>
+<h1>My Profile</h1>
 
 </header>
 
-
-<!-- =========================
-     PROFILE CARD
-========================= -->
-
 <section class="profile-card">
 
-
 <img
-  id="profilePhoto"
-  src="default-avatar.png"
-  class="avatar"
->
-
+id="profilePhoto"
+src="default-avatar.png"
+class="avatar">
 
 <h2 id="username">
-  Loading...
-</h2>
 
+Loading...
+
+</h2>
 
 <p id="profileEmail">
-  Loading...
+
+Loading...
+
 </p>
 
-
 <div class="level">
-  ⭐ Level 1
+
+⭐ Level 1
+
 </div>
-
-
-<!-- EDIT PROFILE BUTTON -->
-
-<button
-  id="editProfileBtn"
-  class="edit-profile-btn"
->
-  ✏️ Edit Profile
-</button>
-
 
 </section>
-
-
-<!-- =========================
-     EDIT PROFILE MODAL
-========================= -->
-
-<div
-  id="editProfileModal"
-  class="edit-profile-modal"
->
-
-<div class="edit-profile-box">
-
-
-<h2>
-  Edit Profile
-</h2>
-
-
-<div class="edit-photo-area">
-
-
-<img
-  id="editPhotoPreview"
-  src="default-avatar.png"
-  class="edit-photo-preview"
->
-
-
-<label
-  for="profilePhotoInput"
-  class="change-photo-btn"
->
-  📷 Change Photo
-</label>
-
-
-<input
-  type="file"
-  id="profilePhotoInput"
-  accept="image/*"
-  hidden
->
-
-
-</div>
-
-
-<input
-  type="text"
-  id="editUsername"
-  placeholder="Username"
-  maxlength="30"
->
-
-
-<button
-  id="saveProfileBtn"
-  class="save-profile-btn"
->
-  Save Changes
-</button>
-
-
-<button
-  id="cancelProfileBtn"
-  class="cancel-profile-btn"
->
-  Cancel
-</button>
-
-
-</div>
-
-</div>
-
-
-<!-- =========================
-     STATS
-========================= -->
 
 <section class="stats-grid">
 
+<div class="stat-card">
+
+<div class="icon">🏆</div>
+
+<h3 id="score">0</h3>
+
+<p>Total Score</p>
+
+</div>
 
 <div class="stat-card">
 
-<div class="icon">
-  🏆
-</div>
+<div class="icon">🔥</div>
 
-<h3 id="score">
-  0
-</h3>
+<h3 id="streak">0</h3>
 
-<p>
-  Total Score
-</p>
+<p>Current Streak</p>
 
 </div>
-
 
 <div class="stat-card">
 
-<div class="icon">
-  🔥
-</div>
+<div class="icon">🎯</div>
 
-<h3 id="streak">
-  0
-</h3>
+<h3 id="accuracy">0%</h3>
 
-<p>
-  Current Streak
-</p>
+<p>Accuracy</p>
 
 </div>
-
 
 <div class="stat-card">
 
-<div class="icon">
-  🎯
-</div>
+<div class="icon">🧩</div>
 
-<h3 id="accuracy">
-  0%
-</h3>
+<h3 id="played">0</h3>
 
-<p>
-  Accuracy
-</p>
+<p>Puzzles Played</p>
 
 </div>
-
-
-<div class="stat-card">
-
-<div class="icon">
-  🧩
-</div>
-
-<h3 id="played">
-  0
-</h3>
-
-<p>
-  Puzzles Played
-</p>
-
-</div>
-
 
 </section>
 
+  <section class="achievement-section">
 
-<!-- =========================
-     ACHIEVEMENTS
-========================= -->
-
-<section class="achievement-section">
-
-<h2>
-  Achievements
-</h2>
-
+<h2>Achievements</h2>
 
 <div id="achievementList">
 
 <div class="achievement-item">
 
-<span>
-  🔒
-</span>
+<span>🔒</span>
 
 <div>
 
-<h3>
-  No Achievements Yet
-</h3>
+<h3>No Achievements Yet</h3>
 
-<p>
-  Keep playing to unlock achievements.
-</p>
+<p>Keep playing to unlock achievements.</p>
 
 </div>
 
@@ -293,193 +126,100 @@
 
 </section>
 
-
-<!-- =========================
-     SETTINGS
-========================= -->
-
 <section class="settings-section">
 
-<h2>
-  Settings
-</h2>
+<h2>Settings</h2>
 
+<a href="#" id="themesBtn" class="setting-item">
 
-<a
-  href="#"
-  id="themesBtn"
-  class="setting-item"
->
+<span>🎨</span>
 
-<span>
-  🎨
-</span>
+<span>Themes</span>
 
-<span>
-  Themes
-</span>
-
-<span>
-  >
-</span>
+<span>></span>
 
 </a>
 
 </section>
 
-
-<!-- =========================
-     LOGOUT
-========================= -->
-
-<section class="logout-section">
+  <section class="logout-section">
 
 <button
-  id="logoutBtn"
-  class="logout-btn"
->
-  🚪 Logout
+id="logoutBtn"
+class="logout-btn">
+
+🚪 Logout
+
 </button>
 
 </section>
 
-
-<!-- =========================
-     BOTTOM NAV
-========================= -->
-
 <nav class="bottom-nav">
-
 
 <a href="home.html">
 
 🏠
 
-<span>
-  Home
-</span>
+<span>Home</span>
 
 </a>
-
 
 <a href="calendar.html">
 
 📅
 
-<span>
-  Calendar
-</span>
+<span>Calendar</span>
 
 </a>
-
 
 <a href="results.html">
 
 🏆
 
-<span>
-  Results
-</span>
+<span>Results</span>
 
 </a>
 
-
-<a
-  href="profile.html"
-  class="active"
->
+<a href="profile.html" class="active">
 
 👤
 
-<span>
-  Profile
-</span>
+<span>Profile</span>
 
 </a>
 
-
 </nav>
 
+  </div>
 
-</div>
-
-
-<!-- =========================
-     THEME MODAL
-========================= -->
-
-<div
-  id="themeModal"
-  class="theme-modal"
->
+  <div id="themeModal" class="theme-modal">
 
 <div class="theme-box">
 
+<h2>Choose Theme</h2>
 
-<h2>
-  Choose Theme
-</h2>
-
-
-<div
-  class="theme-option"
-  data-theme="default"
->
-
-<span>
-  🟢 Default Theme
-</span>
-
-<span class="tick">
-  ✓
-</span>
-
+<div class="theme-option" data-theme="default">
+<span>🟢 Default Theme</span>
+<span class="tick">✓</span>
 </div>
 
-
-<div
-  class="theme-option"
-  data-theme="light"
->
-
-<span>
-  ☀️ Light Theme
-</span>
-
+<div class="theme-option" data-theme="light">
+<span>☀️ Light Theme</span>
 <span class="tick"></span>
-
 </div>
 
-
-<div
-  class="theme-option"
-  data-theme="dark"
->
-
-<span>
-  🌙 Dark Theme
-</span>
-
+<div class="theme-option" data-theme="dark">
+<span>🌙 Dark Theme</span>
 <span class="tick"></span>
+</div>
+
+<button id="closeTheme">Close</button>
 
 </div>
 
-
-<button id="closeTheme">
-  Close
-</button>
-
-
-</div>
-
-</div>
-
-
-<script
-  type="module"
-  src="profile.js"
-></script>
-
+  </div>
+  
+<script type="module" src="profile.js"></script>
 
 </body>
 
