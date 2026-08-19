@@ -1,10 +1,4 @@
-import { auth, db, storage } from "./firebase.js";
-
-import {
-  ref,
-  uploadBytesResumable,
-  getDownloadURL
-} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-storage.js";
+import { auth, db } from "./firebase.js";
 
 import {
   onAuthStateChanged,
@@ -93,8 +87,6 @@ let currentPhotoURL =
   "default-avatar.png";
 
 let selectedPhotoFile = null;
-
-let photoUploadTask = null;
 
 
 // =====================================================
@@ -207,7 +199,6 @@ async function loadProfile(user) {
       error
     );
 
-
     username.textContent =
       user.displayName ||
       "User";
@@ -224,9 +215,7 @@ async function loadProfile(user) {
 
 
 // =====================================================
-// GET EXACT RESULTS DATA
-//
-// SAME LOGIC AS results.js
+// EXACT SAME GAME STATS AS RESULTS.JS
 // =====================================================
 
 function getGameStats() {
@@ -271,17 +260,11 @@ function getGameStats() {
         quiz.attempted === true
       ) {
 
-        // =========================================
-        // TOTAL PLAYED
-        // =========================================
-
+        // Total played
         puzzlesPlayed++;
 
 
-        // =========================================
-        // WON
-        // =========================================
-
+        // Won
         if (
           quiz.correct === true
         ) {
@@ -291,10 +274,7 @@ function getGameStats() {
         }
 
 
-        // =========================================
-        // LOST
-        // =========================================
-
+        // Lost
         else if (
           quiz.correct === false
         ) {
@@ -309,7 +289,7 @@ function getGameStats() {
     } catch (error) {
 
       console.error(
-        "PROFILE QUIZ DATA ERROR:",
+        "QUIZ DATA ERROR:",
         error
       );
 
@@ -317,10 +297,6 @@ function getGameStats() {
 
   }
 
-
-  // ===============================================
-  // ACCURACY
-  // ===============================================
 
   const winRate =
     puzzlesPlayed === 0
@@ -355,7 +331,7 @@ function getGameStats() {
 async function loadStats(data) {
 
   // ===============================================
-  // FIRESTORE SCORE
+  // TOTAL SCORE
   // ===============================================
 
   const totalScore =
@@ -365,7 +341,7 @@ async function loadStats(data) {
 
 
   // ===============================================
-  // FIRESTORE STREAK
+  // CURRENT STREAK
   // ===============================================
 
   const currentStreak =
@@ -375,10 +351,10 @@ async function loadStats(data) {
 
 
   // ===============================================
-  // EXACT RESULTS LOGIC
+  // GAME STATS
   // ===============================================
 
-  const stats =
+  const gameStats =
     getGameStats();
 
 
@@ -393,10 +369,10 @@ async function loadStats(data) {
     currentStreak;
 
   accuracy.textContent =
-    stats.winRate + "%";
+    gameStats.winRate + "%";
 
   played.textContent =
-    stats.puzzlesPlayed;
+    gameStats.puzzlesPlayed;
 
 
   // ===============================================
@@ -453,21 +429,23 @@ async function loadStats(data) {
 
   renderAchievements({
 
-    totalScore,
+    totalScore:
+      totalScore,
 
-    currentStreak,
+    currentStreak:
+      currentStreak,
 
     puzzlesPlayed:
-      stats.puzzlesPlayed,
+      gameStats.puzzlesPlayed,
 
     winRate:
-      stats.winRate
+      gameStats.winRate
 
   });
 
 
   // ===============================================
-  // SAVE LOCAL PROFILE PROGRESS
+  // LOCAL PROFILE PROGRESS
   // ===============================================
 
   localStorage.setItem(
@@ -483,19 +461,15 @@ async function loadStats(data) {
         currentStreak,
 
       accuracy:
-        stats.winRate,
+        gameStats.winRate,
 
       played:
-        stats.puzzlesPlayed
+        gameStats.puzzlesPlayed
 
     })
 
   );
 
-
-  // ===============================================
-  // DEBUG
-  // ===============================================
 
   console.log(
     "PROFILE STATS:",
@@ -508,16 +482,16 @@ async function loadStats(data) {
         currentStreak,
 
       played:
-        stats.puzzlesPlayed,
+        gameStats.puzzlesPlayed,
 
       won:
-        stats.gamesWon,
+        gameStats.gamesWon,
 
       lost:
-        stats.gamesLost,
+        gameStats.gamesLost,
 
       accuracy:
-        stats.winRate
+        gameStats.winRate
 
     }
   );
@@ -535,7 +509,7 @@ function renderAchievements(stats) {
 
 
   // ===============================================
-  // FIRST PUZZLE
+  // LOGO ROOKIE
   // ===============================================
 
   if (
@@ -628,7 +602,7 @@ function renderAchievements(stats) {
 
 
   // ===============================================
-  // 30 PUZZLES
+  // PUZZLE MASTER
   // ===============================================
 
   if (
@@ -785,10 +759,6 @@ function closeEditModal() {
 }
 
 
-// =====================================================
-// CLOSE BUTTON
-// =====================================================
-
 cancelProfileBtn.addEventListener(
   "click",
   closeEditModal
@@ -800,10 +770,6 @@ closeEditProfile.addEventListener(
   closeEditModal
 );
 
-
-// =====================================================
-// CLICK OUTSIDE MODAL
-// =====================================================
 
 editProfileModal.addEventListener(
   "click",
@@ -842,7 +808,7 @@ profilePhotoInput.addEventListener(
 
 
     // ===============================================
-    // CHECK IMAGE
+    // IMAGE CHECK
     // ===============================================
 
     if (
@@ -862,16 +828,16 @@ profilePhotoInput.addEventListener(
 
 
     // ===============================================
-    // MAX 5 MB
+    // ORIGINAL FILE MAX 10 MB
     // ===============================================
 
     if (
       file.size >
-      5 * 1024 * 1024
+      10 * 1024 * 1024
     ) {
 
       alert(
-        "Please choose an image smaller than 5 MB."
+        "Please select an image smaller than 10 MB."
       );
 
       profilePhotoInput.value =
@@ -887,7 +853,7 @@ profilePhotoInput.addEventListener(
 
 
     // ===============================================
-    // INSTANT PREVIEW
+    // PREVIEW
     // ===============================================
 
     const reader =
@@ -910,210 +876,227 @@ profilePhotoInput.addEventListener(
 
 
 // =====================================================
-// UPLOAD PHOTO WITH TIMEOUT
+// COMPRESS IMAGE
+//
+// Firebase Storage is NOT used.
+// Image is resized + compressed in browser.
 // =====================================================
 
-function uploadProfilePhoto(
-  file
-) {
+function compressImage(file) {
 
   return new Promise(
     (resolve, reject) => {
 
-      if (!file) {
-
-        resolve(
-          currentPhotoURL
-        );
-
-        return;
-
-      }
+      const reader =
+        new FileReader();
 
 
-      // =============================================
-      // FILE EXTENSION
-      // =============================================
+      reader.onload =
+        (event) => {
 
-      let extension =
-        file.name
-          .split(".")
-          .pop()
-          ?.toLowerCase();
+          const image =
+            new Image();
 
 
-      if (
-        !extension
-      ) {
+          image.onload =
+            () => {
 
-        extension =
-          "jpg";
+              // =====================================
+              // MAX IMAGE SIZE
+              // =====================================
 
-      }
-
-
-      // =============================================
-      // STORAGE PATH
-      // =============================================
-
-      const storageReference =
-        ref(
-
-          storage,
-
-          `profilePhotos/${currentUser.uid}/profile.${extension}`
-
-        );
+              const MAX_SIZE =
+                500;
 
 
-      // =============================================
-      // RESUMABLE UPLOAD
-      // =============================================
+              let width =
+                image.width;
 
-      photoUploadTask =
-        uploadBytesResumable(
-
-          storageReference,
-
-          file,
-
-          {
-
-            contentType:
-              file.type,
-
-            cacheControl:
-              "public,max-age=3600"
-
-          }
-
-        );
+              let height =
+                image.height;
 
 
-      // =============================================
-      // 20 SECOND TIMEOUT
-      // =============================================
+              if (
+                width > height
+              ) {
 
-      const timeout =
-        setTimeout(
-          () => {
+                if (
+                  width > MAX_SIZE
+                ) {
 
-            if (
-              photoUploadTask
-            ) {
+                  height =
+                    Math.round(
+                      height *
+                      MAX_SIZE /
+                      width
+                    );
 
-              photoUploadTask.cancel();
+                  width =
+                    MAX_SIZE;
 
-            }
+                }
+
+              }
+
+              else {
+
+                if (
+                  height > MAX_SIZE
+                ) {
+
+                  width =
+                    Math.round(
+                      width *
+                      MAX_SIZE /
+                      height
+                    );
+
+                  height =
+                    MAX_SIZE;
+
+                }
+
+              }
 
 
-            reject(
-              new Error(
-                "Photo upload timed out. Please check Firebase Storage Rules or your internet connection."
-              )
-            );
+              // =====================================
+              // CANVAS
+              // =====================================
 
-          },
-          20000
-        );
+              const canvas =
+                document.createElement(
+                  "canvas"
+                );
 
 
-      // =============================================
-      // UPLOAD EVENTS
-      // =============================================
+              canvas.width =
+                width;
 
-      photoUploadTask.on(
+              canvas.height =
+                height;
 
-        "state_changed",
 
-        (snapshot) => {
+              const ctx =
+                canvas.getContext(
+                  "2d"
+                );
 
-          if (
-            snapshot.totalBytes > 0
-          ) {
 
-            const percent =
-              Math.round(
+              ctx.drawImage(
 
-                (
-                  snapshot.bytesTransferred /
-                  snapshot.totalBytes
-                ) * 100
+                image,
+
+                0,
+                0,
+
+                width,
+                height
 
               );
 
 
-            saveProfileBtn.textContent =
-              "Uploading " +
-              percent +
-              "%...";
+              // =====================================
+              // JPEG COMPRESSION
+              // =====================================
 
-          }
-
-        },
+              let quality =
+                0.75;
 
 
-        (error) => {
-
-          clearTimeout(
-            timeout
-          );
-
-          photoUploadTask =
-            null;
+              let compressed =
+                canvas.toDataURL(
+                  "image/jpeg",
+                  quality
+                );
 
 
-          console.error(
-            "PHOTO UPLOAD ERROR:",
-            error
-          );
+              // =====================================
+              // KEEP IT SMALL
+              // =====================================
 
+              // If Base64 is still large,
+              // compress further.
+
+              while (
+
+                compressed.length >
+                  750000 &&
+
+                quality > 0.35
+
+              ) {
+
+                quality -=
+                  0.05;
+
+
+                compressed =
+                  canvas.toDataURL(
+                    "image/jpeg",
+                    quality
+                  );
+
+              }
+
+
+              // =====================================
+              // FINAL SIZE CHECK
+              // =====================================
+
+              if (
+                compressed.length >
+                900000
+              ) {
+
+                reject(
+                  new Error(
+                    "Photo is still too large after compression."
+                  )
+                );
+
+                return;
+
+              }
+
+
+              resolve(
+                compressed
+              );
+
+            };
+
+
+          image.onerror =
+            () => {
+
+              reject(
+                new Error(
+                  "Could not read image."
+                )
+              );
+
+            };
+
+
+          image.src =
+            event.target.result;
+
+        };
+
+
+      reader.onerror =
+        () => {
 
           reject(
-            error
+            new Error(
+              "Could not read selected photo."
+            )
           );
 
-        },
+        };
 
 
-        async () => {
-
-          clearTimeout(
-            timeout
-          );
-
-
-          try {
-
-            const url =
-              await getDownloadURL(
-                storageReference
-              );
-
-
-            photoUploadTask =
-              null;
-
-
-            resolve(
-              url
-            );
-
-
-          } catch (error) {
-
-            photoUploadTask =
-              null;
-
-            reject(
-              error
-            );
-
-          }
-
-        }
-
-      );
+      reader.readAsDataURL(file);
 
     }
   );
@@ -1169,20 +1152,56 @@ saveProfileBtn.addEventListener(
         "Saving...";
 
 
-      // =============================================
-      // STEP 1
-      // SAVE USERNAME FIRST
-      //
-      // This means username will not be blocked
-      // by a photo upload problem.
-      // =============================================
-
       const userRef =
         doc(
           db,
           "users",
           currentUser.uid
         );
+
+
+      // =============================================
+      // PHOTO
+      // =============================================
+
+      let newPhotoURL =
+        currentPhotoURL;
+
+
+      if (
+        selectedPhotoFile
+      ) {
+
+        saveProfileBtn.textContent =
+          "Preparing Photo...";
+
+
+        // =========================================
+        // COMPRESS LOCALLY
+        // =========================================
+
+        newPhotoURL =
+          await compressImage(
+            selectedPhotoFile
+          );
+
+
+        console.log(
+          "Compressed photo size:",
+          Math.round(
+            newPhotoURL.length / 1024
+          ) + " KB"
+        );
+
+      }
+
+
+      // =============================================
+      // SAVE EVERYTHING TO FIRESTORE
+      // =============================================
+
+      saveProfileBtn.textContent =
+        "Saving...";
 
 
       await setDoc(
@@ -1200,20 +1219,25 @@ saveProfileBtn.addEventListener(
           email:
             currentUser.email ||
             email.textContent ||
-            ""
+            "",
+
+          photoURL:
+            newPhotoURL
 
         },
 
         {
+
           merge:
             true
+
         }
 
       );
 
 
       // =============================================
-      // UPDATE AUTH USERNAME
+      // UPDATE FIREBASE AUTH
       // =============================================
 
       await updateProfile(
@@ -1223,7 +1247,10 @@ saveProfileBtn.addEventListener(
         {
 
           displayName:
-            newUsername
+            newUsername,
+
+          photoURL:
+            newPhotoURL
 
         }
 
@@ -1237,140 +1264,26 @@ saveProfileBtn.addEventListener(
       username.textContent =
         newUsername;
 
+      avatar.src =
+        newPhotoURL;
 
-      editUsername.value =
-        newUsername;
+      editPhotoPreview.src =
+        newPhotoURL;
 
-
-      // =============================================
-      // STEP 2
-      // PHOTO UPLOAD
-      // =============================================
-
-      if (
-        selectedPhotoFile
-      ) {
-
-        saveProfileBtn.textContent =
-          "Uploading Photo...";
-
-
-        try {
-
-          const newPhotoURL =
-            await uploadProfilePhoto(
-              selectedPhotoFile
-            );
-
-
-          // ===========================================
-          // SAVE PHOTO URL
-          // ===========================================
-
-          await setDoc(
-
-            userRef,
-
-            {
-
-              photoURL:
-                newPhotoURL
-
-            },
-
-            {
-              merge:
-                true
-            }
-
-          );
-
-
-          // ===========================================
-          // UPDATE AUTH PHOTO
-          // ===========================================
-
-          await updateProfile(
-
-            currentUser,
-
-            {
-
-              photoURL:
-                newPhotoURL
-
-            }
-
-          );
-
-
-          // ===========================================
-          // UPDATE UI
-          // ===========================================
-
-          currentPhotoURL =
-            newPhotoURL;
-
-
-          avatar.src =
-            newPhotoURL;
-
-
-          editPhotoPreview.src =
-            newPhotoURL;
-
-
-          selectedPhotoFile =
-            null;
-
-
-        } catch (photoError) {
-
-          console.error(
-            "PHOTO SAVE ERROR:",
-            photoError
-          );
-
-
-          // Username is already saved.
-          // Only photo failed.
-
-          alert(
-
-            "Username saved successfully, but profile photo could not be uploaded.\n\n" +
-
-            (
-              photoError.message ||
-              "Please check Firebase Storage Rules."
-            )
-
-          );
-
-        }
-
-      }
+      currentPhotoURL =
+        newPhotoURL;
 
 
       // =============================================
-      // CLOSE
+      // CLOSE MODAL
       // =============================================
 
       closeEditModal();
 
 
-      // =============================================
-      // SUCCESS
-      // =============================================
-
-      if (
-        !selectedPhotoFile
-      ) {
-
-        alert(
-          "Profile updated successfully!"
-        );
-
-      }
+      alert(
+        "Profile updated successfully!"
+      );
 
 
     } catch (error) {
@@ -1380,6 +1293,10 @@ saveProfileBtn.addEventListener(
         error
       );
 
+
+      // =============================================
+      // IMPORTANT: SHOW EXACT ERROR
+      // =============================================
 
       alert(
 
@@ -1400,7 +1317,7 @@ saveProfileBtn.addEventListener(
       saveProfileBtn.textContent =
         "Save Changes";
 
-      photoUploadTask =
+      selectedPhotoFile =
         null;
 
     }
@@ -1518,7 +1435,7 @@ function applyTheme(theme) {
 
 
 // =====================================================
-// THEME SELECTION
+// UPDATE THEME SELECTION
 // =====================================================
 
 function updateThemeSelection() {
@@ -1625,7 +1542,7 @@ themeModal.addEventListener(
 
 
 // =====================================================
-// CHANGE THEME
+// SELECT THEME
 // =====================================================
 
 themeOptions.forEach(
