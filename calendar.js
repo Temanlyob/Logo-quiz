@@ -716,6 +716,10 @@ function getCurrentStreakDates(
     }
 
 
+    // =================================
+    // TODAY
+    // =================================
+
     const todayDate =
         new Date();
 
@@ -727,20 +731,52 @@ function getCurrentStreakDates(
     );
 
 
+    // =================================
+    // YESTERDAY
+    // =================================
+
+    const yesterdayDate =
+        new Date(
+            todayDate
+        );
+
+    yesterdayDate.setDate(
+        yesterdayDate.getDate() - 1
+    );
+
+
+    // =================================
+    // LATEST PLAYED DATE
+    // =================================
+
     const latest =
         playedDates[
             playedDates.length - 1
         ];
 
 
-    // --------------------------------
-    // If today wasn't played,
-    // there is no current streak.
-    // --------------------------------
+    const latestTime =
+        latest.getTime();
+
+
+    const todayTime =
+        todayDate.getTime();
+
+
+    const yesterdayTime =
+        yesterdayDate.getTime();
+
+
+    // =================================
+    // LATEST MUST BE TODAY OR YESTERDAY
+    // =================================
 
     if(
-        latest.getTime() !==
-        todayDate.getTime()
+
+        latestTime !== todayTime &&
+
+        latestTime !== yesterdayTime
+
     ){
 
         return streakDates;
@@ -748,26 +784,34 @@ function getCurrentStreakDates(
     }
 
 
-    // --------------------------------
-    // Start from today
-    // --------------------------------
+    // =================================
+    // ADD LATEST DAY
+    //
+    // If today played:
+    // today gets fire.
+    //
+    // If only yesterday played:
+    // yesterday gets fire.
+    // =================================
 
     streakDates.push(
         latest
     );
 
 
-    // --------------------------------
-    // Go backwards
-    // --------------------------------
+    // =================================
+    // GO BACK THROUGH CONSECUTIVE DAYS
+    // =================================
 
     for(
+
         let i =
             playedDates.length - 1;
 
         i > 0;
 
         i--
+
     ){
 
         const current =
@@ -779,21 +823,32 @@ function getCurrentStreakDates(
 
         const diffDays =
             Math.round(
+
                 (
                     current.getTime() -
                     previous.getTime()
-                ) /
+                )
+
+                /
+
                 (
                     1000 *
                     60 *
                     60 *
                     24
                 )
+
             );
 
 
+        // =================================
+        // CONSECUTIVE DAY
+        // =================================
+
         if(
+
             diffDays === 1
+
         ){
 
             streakDates.push(
@@ -814,8 +869,6 @@ function getCurrentStreakDates(
     return streakDates;
 
 }
-
-
 // =====================================
 // RENDER CALENDAR
 // =====================================
