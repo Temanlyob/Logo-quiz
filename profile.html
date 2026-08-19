@@ -1,226 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>My Profile</title>
-
 <link rel="stylesheet" href="profile.css">
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
-
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
 </head>
 
 <body>
-
 <div class="container">
 
 <header class="top">
-
-<a href="home.html" class="back-btn">←</a>
-
-<h1>My Profile</h1>
-
+  <a href="home.html" class="back-btn">←</a>
+  <h1>My Profile</h1>
 </header>
 
 <section class="profile-card">
+  <img id="profilePhoto" src="default-avatar.png" class="avatar" alt="Profile photo">
+  <h2 id="username">Loading...</h2>
+  <p id="profileEmail">Loading...</p>
 
-<img
-id="profilePhoto"
-src="default-avatar.png"
-class="avatar">
+  <div class="level" id="level">⭐ Level 1</div>
 
-<h2 id="username">
-
-Loading...
-
-</h2>
-
-<p id="profileEmail">
-
-Loading...
-
-</p>
-
-<div class="level">
-
-⭐ Level 1
-
-</div>
-
+  <button id="editProfileBtn" class="edit-profile-btn" type="button">✏️ Edit Profile</button>
 </section>
 
 <section class="stats-grid">
-
-<div class="stat-card">
-
-<div class="icon">🏆</div>
-
-<h3 id="score">0</h3>
-
-<p>Total Score</p>
-
-</div>
-
-<div class="stat-card">
-
-<div class="icon">🔥</div>
-
-<h3 id="streak">0</h3>
-
-<p>Current Streak</p>
-
-</div>
-
-<div class="stat-card">
-
-<div class="icon">🎯</div>
-
-<h3 id="accuracy">0%</h3>
-
-<p>Accuracy</p>
-
-</div>
-
-<div class="stat-card">
-
-<div class="icon">🧩</div>
-
-<h3 id="played">0</h3>
-
-<p>Puzzles Played</p>
-
-</div>
-
+  <div class="stat-card"><div class="icon">🏆</div><h3 id="score">0</h3><p>Total Score</p></div>
+  <div class="stat-card"><div class="icon">🔥</div><h3 id="streak">0</h3><p>Current Streak</p></div>
+  <div class="stat-card"><div class="icon">🎯</div><h3 id="accuracy">0%</h3><p>Accuracy</p></div>
+  <div class="stat-card"><div class="icon">🧩</div><h3 id="played">0</h3><p>Puzzles Played</p></div>
 </section>
 
-  <section class="achievement-section">
-
-<h2>Achievements</h2>
-
-<div id="achievementList">
-
-<div class="achievement-item">
-
-<span>🔒</span>
-
-<div>
-
-<h3>No Achievements Yet</h3>
-
-<p>Keep playing to unlock achievements.</p>
-
-</div>
-
-</div>
-
-</div>
-
+<section class="achievement-section">
+  <h2>Achievements</h2>
+  <div id="achievementList">
+    <div class="achievement-item">
+      <span>🔒</span>
+      <div><h3>No Achievements Yet</h3><p>Keep playing to unlock achievements.</p></div>
+    </div>
+  </div>
 </section>
 
 <section class="settings-section">
-
-<h2>Settings</h2>
-
-<a href="#" id="themesBtn" class="setting-item">
-
-<span>🎨</span>
-
-<span>Themes</span>
-
-<span>></span>
-
-</a>
-
+  <h2>Settings</h2>
+  <a href="#" id="themesBtn" class="setting-item">
+    <span>🎨</span><span>Themes</span><span>›</span>
+  </a>
 </section>
 
-  <section class="logout-section">
-
-<button
-id="logoutBtn"
-class="logout-btn">
-
-🚪 Logout
-
-</button>
-
+<section class="logout-section">
+  <button id="logoutBtn" class="logout-btn" type="button">🚪 Logout</button>
 </section>
 
 <nav class="bottom-nav">
-
-<a href="home.html">
-
-🏠
-
-<span>Home</span>
-
-</a>
-
-<a href="calendar.html">
-
-📅
-
-<span>Calendar</span>
-
-</a>
-
-<a href="results.html">
-
-🏆
-
-<span>Results</span>
-
-</a>
-
-<a href="profile.html" class="active">
-
-👤
-
-<span>Profile</span>
-
-</a>
-
+  <a href="home.html">🏠<span>Home</span></a>
+  <a href="calendar.html">📅<span>Calendar</span></a>
+  <a href="results.html">🏆<span>Results</span></a>
+  <a href="profile.html" class="active">👤<span>Profile</span></a>
 </nav>
+</div>
 
+<!-- Edit Profile -->
+<div id="editProfileModal" class="edit-modal" aria-hidden="true">
+  <div class="edit-box">
+    <button id="closeEditProfile" class="modal-close" type="button">×</button>
+    <h2>Edit Profile</h2>
+
+    <label class="photo-picker" for="profilePhotoInput">
+      <img id="editPhotoPreview" src="default-avatar.png" alt="Photo preview">
+      <span>📷 Change Photo</span>
+    </label>
+    <input id="profilePhotoInput" type="file" accept="image/*">
+
+    <label for="editUsername">Username</label>
+    <input id="editUsername" type="text" maxlength="30" autocomplete="off" placeholder="Enter username">
+
+    <div class="edit-actions">
+      <button id="cancelProfileBtn" type="button" class="cancel-btn">Cancel</button>
+      <button id="saveProfileBtn" type="button" class="save-btn">Save Changes</button>
+    </div>
   </div>
-
-  <div id="themeModal" class="theme-modal">
-
-<div class="theme-box">
-
-<h2>Choose Theme</h2>
-
-<div class="theme-option" data-theme="default">
-<span>🟢 Default Theme</span>
-<span class="tick">✓</span>
 </div>
 
-<div class="theme-option" data-theme="light">
-<span>☀️ Light Theme</span>
-<span class="tick"></span>
-</div>
-
-<div class="theme-option" data-theme="dark">
-<span>🌙 Dark Theme</span>
-<span class="tick"></span>
-</div>
-
-<button id="closeTheme">Close</button>
-
-</div>
-
+<!-- Theme -->
+<div id="themeModal" class="theme-modal">
+  <div class="theme-box">
+    <h2>Choose Theme</h2>
+    <div class="theme-option" data-theme="default"><span>🟢 Default Theme</span><span class="tick"></span></div>
+    <div class="theme-option" data-theme="light"><span>☀️ Light Theme</span><span class="tick"></span></div>
+    <div class="theme-option" data-theme="dark"><span>🌙 Dark Theme</span><span class="tick"></span></div>
+    <button id="closeTheme" type="button">Close</button>
   </div>
-  
+</div>
+
 <script type="module" src="profile.js"></script>
-
 </body>
-
 </html>
