@@ -99,6 +99,12 @@ const contactStatus =
 const sendContactBtn =
   document.getElementById("sendContactBtn");
 
+const contactUserName =
+  document.getElementById("contactUserName");
+
+const contactUserEmail =
+  document.getElementById("contactUserEmail");
+
 
 // =====================================================
 // VARIABLES
@@ -494,21 +500,69 @@ if (
       event.preventDefault();
 
 
+      if (!currentUser) {
+
+        contactStatus.textContent =
+          "❌ Please login again.";
+
+        contactStatus.style.color =
+          "#ef4444";
+
+        return;
+
+      }
+
+
       sendContactBtn.disabled =
         true;
 
       sendContactBtn.textContent =
         "Sending...";
 
-
       contactStatus.textContent =
         "";
 
 
       const formData =
-        new FormData(
-          contactForm
-        );
+        new FormData(contactForm);
+
+
+      const messageType =
+        formData.get("type");
+
+      const message =
+        formData.get("message");
+
+
+      const userName =
+        currentUser.displayName ||
+        username.textContent ||
+        "Temanlyob User";
+
+      const userEmail =
+        currentUser.email ||
+        email.textContent ||
+        "";
+
+
+      // =============================================
+      // PUT USER DATA INTO HIDDEN FORM FIELDS
+      // =============================================
+
+      if (contactUserName) {
+
+        contactUserName.value =
+          userName;
+
+      }
+
+
+      if (contactUserEmail) {
+
+        contactUserEmail.value =
+          userEmail;
+
+      }
 
 
       try {
@@ -532,33 +586,29 @@ if (
 
               body: JSON.stringify({
 
-  name:
-    username.textContent ||
-    currentUser.displayName ||
-    "User",
+                name:
+                  userName,
 
-  email:
-    currentUser.email ||
-    "",
+                email:
+                  userEmail,
 
-  type:
-    messageType,
+                type:
+                  messageType,
 
-  message:
-    message,
+                message:
+                  message,
 
-  _subject:
-    "Temanlyob - " +
-    messageType,
+                _subject:
+                  "Temanlyob - " +
+                  messageType,
 
-  _replyto:
-    currentUser.email ||
-    "",
+                _replyto:
+                  userEmail,
 
-  _template:
-    "table"
+                _template:
+                  "table"
 
-})
+              })
 
             }
           );
@@ -637,10 +687,7 @@ if (
     }
   );
 
-}
-
-
-// =====================================================
+}// =====================================================
 // LOAD STATS
 // =====================================================
 
