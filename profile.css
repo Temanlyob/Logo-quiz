@@ -193,3 +193,148 @@ body.theme-dark .cancel-btn{background:#2a2a2a;color:#fff}
   .profile-card h2{font-size:22px}
   .achievement-section h2,.settings-section h2{font-size:24px}
 }
+
+/* ==========================
+   CONTACT US
+========================== */
+
+#contactUsBtn{
+  margin-top:12px;
+}
+
+.contact-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:flex-end;
+  z-index:1000;
+}
+
+.contact-box{
+  background:#fff;
+  width:100%;
+  border-radius:25px 25px 0 0;
+  padding:25px;
+  position:relative;
+  animation:contactUp .25s ease;
+  max-height:90vh;
+  overflow-y:auto;
+}
+
+@keyframes contactUp{
+  from{
+    transform:translateY(100%);
+  }
+  to{
+    transform:translateY(0);
+  }
+}
+
+.contact-box h2{
+  font-size:24px;
+  margin-bottom:6px;
+}
+
+.contact-subtitle{
+  color:#64748b;
+  font-size:14px;
+  margin-bottom:20px;
+}
+
+.contact-close{
+  position:absolute;
+  right:18px;
+  top:12px;
+  border:0;
+  background:transparent;
+  font-size:32px;
+  line-height:1;
+  cursor:pointer;
+  color:#64748b;
+}
+
+#contactForm{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+#contactForm input,
+#contactForm select,
+#contactForm textarea{
+  width:100%;
+  padding:14px;
+  border:1px solid #dbe3ef;
+  border-radius:12px;
+  outline:none;
+  font:inherit;
+  color:#102a54;
+  background:#fff;
+}
+
+#contactForm textarea{
+  resize:vertical;
+}
+
+#contactForm input:focus,
+#contactForm select:focus,
+#contactForm textarea:focus{
+  border-color:#22c55e;
+}
+
+#sendContactBtn{
+  width:100%;
+  padding:15px;
+  border:0;
+  border-radius:14px;
+  background:#22c55e;
+  color:#fff;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+#sendContactBtn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.contact-status{
+  text-align:center;
+  margin-top:14px;
+  font-size:14px;
+}
+
+
+/* DARK THEME */
+
+body.theme-dark .contact-box{
+  background:#1f1f1f;
+  color:#fff;
+}
+
+body.theme-dark .contact-box h2{
+  color:#fff;
+}
+
+body.theme-dark .contact-subtitle{
+  color:#bdbdbd;
+}
+
+body.theme-dark .contact-close{
+  color:#fff;
+}
+
+body.theme-dark #contactForm input,
+body.theme-dark #contactForm select,
+body.theme-dark #contactForm textarea{
+  background:#2a2a2a;
+  color:#fff;
+  border-color:#444;
+}
+
+body.theme-dark #contactForm input::placeholder,
+body.theme-dark #contactForm textarea::placeholder{
+  color:#999;
+}
