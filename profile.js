@@ -569,7 +569,7 @@ if (
 
         const response =
           await fetch(
-            "https://formsubmit.co/ajax/temanlyob@gmail.com",
+            "https://formsubmit.co/ajax/temanlyoblogoquiz@gmail.com",
             {
 
               method: "POST",
