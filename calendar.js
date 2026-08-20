@@ -1,3 +1,15 @@
+import { auth, db } from "./firebase.js";
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+import {
+    doc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+
 const monthTitle =
     document.getElementById("monthTitle");
 
@@ -37,12 +49,7 @@ const months = [
 
 let today = new Date();
 
-today.setHours(
-    0,
-    0,
-    0,
-    0
-);
+today.setHours(0, 0, 0, 0);
 
 
 let currentMonth =
@@ -60,19 +67,24 @@ let currentYear =
 const firstPuzzleDate =
     new Date(2026, 6, 28);
 
-firstPuzzleDate.setHours(
-    0,
-    0,
-    0,
-    0
-);
+firstPuzzleDate.setHours(0, 0, 0, 0);
 
 
 // =====================================
-// THEME SYSTEM
+// ALL GAMES
+//
+// Firestore = MAIN SOURCE
+// localStorage = BACKUP
 // =====================================
 
-function applyTheme(theme){
+let allGames = {};
+
+
+// =====================================
+// THEME
+// =====================================
+
+function applyTheme(theme) {
 
     document.body.classList.remove(
         "theme-light",
@@ -80,7 +92,7 @@ function applyTheme(theme){
     );
 
 
-    if(theme === "light"){
+    if (theme === "light") {
 
         document.body.classList.add(
             "theme-light"
@@ -88,7 +100,7 @@ function applyTheme(theme){
 
     }
 
-    else if(theme === "dark"){
+    else if (theme === "dark") {
 
         document.body.classList.add(
             "theme-dark"
@@ -96,15 +108,13 @@ function applyTheme(theme){
 
     }
 
-    else{
+    else {
 
-        // DEFAULT = PHONE SYSTEM THEME
-
-        if(
+        if (
             window.matchMedia(
                 "(prefers-color-scheme: dark)"
             ).matches
-        ){
+        ) {
 
             document.body.classList.add(
                 "theme-dark"
@@ -112,7 +122,7 @@ function applyTheme(theme){
 
         }
 
-        else{
+        else {
 
             document.body.classList.add(
                 "theme-light"
@@ -125,18 +135,14 @@ function applyTheme(theme){
 }
 
 
-// =====================================
-// LOAD SAVED THEME
-// =====================================
+// Initial theme
 
 applyTheme(
     localStorage.getItem("theme") || "default"
 );
 
 
-// =====================================
-// FOLLOW PHONE THEME
-// =====================================
+// Follow phone theme
 
 const systemTheme =
     window.matchMedia(
@@ -152,7 +158,9 @@ systemTheme.addEventListener(
             localStorage.getItem("theme") || "default";
 
 
-        if(currentTheme === "default"){
+        if (
+            currentTheme === "default"
+        ) {
 
             applyTheme("default");
 
@@ -163,32 +171,27 @@ systemTheme.addEventListener(
 
 
 // =====================================
-// INJECT STREAK CSS
+// STREAK FIRE CSS
 // =====================================
 
 const streakStyle =
-document.createElement("style");
+    document.createElement("style");
+
 
 streakStyle.textContent = `
-
-/* =================================
-   CURRENT STREAK FIRE
-================================= */
 
 .day.current-streak-day{
 
     position:relative;
 
-    background:#fff3cd !important;
+    z-index:2;
 
-    color:#d97706 !important;
-
-    border:2px solid #f59e0b !important;
+    border:2px solid #ff9f43 !important;
 
     box-shadow:
-        0 0 8px rgba(245,158,11,.45),
-        0 0 18px rgba(245,158,11,.35),
-        0 0 30px rgba(245,158,11,.20);
+        0 0 8px rgba(255,140,50,.70),
+        0 0 18px rgba(255,90,50,.55),
+        0 0 30px rgba(255,70,40,.30);
 
     animation:
         streakFire 1.4s ease-in-out infinite;
@@ -196,15 +199,13 @@ streakStyle.textContent = `
 }
 
 
-/* Small fire */
-
 .day.current-streak-day::after{
 
     content:"🔥";
 
     position:absolute;
 
-    top:-13px;
+    top:-14px;
 
     right:-7px;
 
@@ -214,15 +215,13 @@ streakStyle.textContent = `
 
     filter:
         drop-shadow(
-            0 0 4px rgba(245,158,11,.65)
+            0 0 4px rgba(255,120,30,.75)
         );
 
 }
 
 
-/* =================================
-   CORRECT + STREAK
-================================= */
+/* GREEN STREAK */
 
 .day.correct-day.current-streak-day{
 
@@ -230,19 +229,10 @@ streakStyle.textContent = `
 
     color:#ffffff !important;
 
-    border-color:#16a34a !important;
-
-    box-shadow:
-        0 0 8px rgba(34,197,94,.60),
-        0 0 18px rgba(34,197,94,.45),
-        0 0 30px rgba(245,158,11,.35);
-
 }
 
 
-/* =================================
-   WRONG + STREAK
-================================= */
+/* RED STREAK */
 
 .day.wrong-day.current-streak-day{
 
@@ -250,23 +240,18 @@ streakStyle.textContent = `
 
     color:#ffffff !important;
 
-    border-color:#dc2626 !important;
-
-    box-shadow:
-        0 0 8px rgba(239,68,68,.60),
-        0 0 18px rgba(239,68,68,.45),
-        0 0 30px rgba(245,158,11,.35);
-
 }
 
 
-/* =================================
-   FIRE ANIMATION
-================================= */
+/* FIRE ANIMATION */
 
 @keyframes streakFire{
 
     0%{
+
+        box-shadow:
+            0 0 7px rgba(255,140,50,.55),
+            0 0 15px rgba(255,90,50,.35);
 
         transform:scale(1);
 
@@ -274,11 +259,20 @@ streakStyle.textContent = `
 
     50%{
 
+        box-shadow:
+            0 0 15px rgba(255,170,50,.95),
+            0 0 28px rgba(255,80,40,.70),
+            0 0 40px rgba(255,60,30,.35);
+
         transform:scale(1.035);
 
     }
 
     100%{
+
+        box-shadow:
+            0 0 7px rgba(255,140,50,.55),
+            0 0 15px rgba(255,90,50,.35);
 
         transform:scale(1);
 
@@ -287,23 +281,16 @@ streakStyle.textContent = `
 }
 
 
-/* =================================
-   DARK MODE
-================================= */
+/* DARK MODE */
 
-body.theme-dark
-.day.current-streak-day{
+body.theme-dark .day.current-streak-day{
 
-    background:#3a2d12 !important;
-
-    color:#fbbf24 !important;
-
-    border-color:#f59e0b !important;
+    border-color:#ff9f43 !important;
 
     box-shadow:
-        0 0 8px rgba(245,158,11,.55),
-        0 0 18px rgba(245,158,11,.40),
-        0 0 30px rgba(245,158,11,.25);
+        0 0 10px rgba(255,140,50,.85),
+        0 0 22px rgba(255,80,40,.60),
+        0 0 35px rgba(255,60,30,.40);
 
 }
 
@@ -315,8 +302,6 @@ body.theme-dark
 
     color:#ffffff !important;
 
-    border-color:#16a34a !important;
-
 }
 
 
@@ -327,11 +312,10 @@ body.theme-dark
 
     color:#ffffff !important;
 
-    border-color:#dc2626 !important;
-
 }
 
 `;
+
 
 document.head.appendChild(
     streakStyle
@@ -347,13 +331,13 @@ function makeDateKey(
     year,
     month,
     day
-){
+) {
 
     const d =
-        String(day).padStart(2,"0");
+        String(day).padStart(2, "0");
 
     const m =
-        String(month + 1).padStart(2,"0");
+        String(month + 1).padStart(2, "0");
 
     const y =
         String(year).slice(-2);
@@ -364,18 +348,18 @@ function makeDateKey(
 
 
 // =====================================
-// PARSE DD-MM-YY
+// PARSE DATE KEY
 // =====================================
 
-function parseDateKey(
-    dateKey
-){
+function parseDateKey(dateKey) {
 
     const parts =
         dateKey.split("-");
 
 
-    if(parts.length !== 3){
+    if (
+        parts.length !== 3
+    ) {
 
         return null;
 
@@ -389,7 +373,9 @@ function parseDateKey(
         Number(parts[1]) - 1;
 
     const year =
-        Number("20" + parts[2]);
+        Number(
+            "20" + parts[2]
+        );
 
 
     const date =
@@ -414,103 +400,153 @@ function parseDateKey(
 
 
 // =====================================
-// GET ACTUAL PLAYED DATES
+// ACTUAL PLAY DATE
 //
-// IMPORTANT:
-//
-// Puzzle date ≠ actual played date.
-//
-// Example:
-//
-// quiz_17-08-26
-// playedAt = 18-08-26
-//
-// Streak counts 18-08-26.
-// It does NOT count 17-08-26.
+// SAME AS results.js
 // =====================================
 
-function getActualPlayedDates(){
+function getActualPlayDate(item) {
 
-    const dates = [];
+    if (
+        !item ||
+        !item.playedAt
+    ) {
+
+        return null;
+
+    }
 
 
-    for(
-        let key in localStorage
-    ){
+    const playedAt =
+        new Date(
+            item.playedAt
+        );
 
-        if(
-            !key.startsWith("quiz_")
-        ){
+
+    if (
+        Number.isNaN(
+            playedAt.getTime()
+        )
+    ) {
+
+        return null;
+
+    }
+
+
+    playedAt.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    return playedAt;
+
+}
+
+
+// =====================================
+// GET ALL GAMES
+//
+// SAME LOGIC AS results.js
+// =====================================
+
+function getAllGames(
+    firestoreHistory
+) {
+
+    const games = {};
+
+
+    // =================================
+    // FIRESTORE
+    // =================================
+
+    for (
+        const key in firestoreHistory
+    ) {
+
+        const item =
+            firestoreHistory[key];
+
+
+        if (
+            !item ||
+            item.played !== true
+        ) {
 
             continue;
 
         }
 
 
-        try{
+        games[key] = {
+            ...item
+        };
 
-            const quiz =
+    }
+
+
+    // =================================
+    // LOCAL STORAGE BACKUP
+    // =================================
+
+    for (
+        let key in localStorage
+    ) {
+
+        if (
+            !key.startsWith("quiz_")
+        ) {
+
+            continue;
+
+        }
+
+
+        const dateKey =
+            key.replace(
+                "quiz_",
+                ""
+            );
+
+
+        try {
+
+            const localQuiz =
                 JSON.parse(
                     localStorage.getItem(key)
                 );
 
 
-            if(
-                !quiz ||
-                quiz.attempted !== true
-            ){
+            if (
+                !localQuiz ||
+                localQuiz.attempted !== true
+            ) {
 
                 continue;
 
             }
 
 
-            // --------------------------------
-            // ACTUAL PLAY DATE
-            // --------------------------------
+            if (
+                !games[dateKey]
+            ) {
 
-            if(!quiz.playedAt){
-
-                continue;
-
-            }
-
-
-            const playedAt =
-                new Date(
-                    quiz.playedAt
-                );
-
-
-            if(
-                Number.isNaN(
-                    playedAt.getTime()
-                )
-            ){
-
-                continue;
+                games[dateKey] = {
+                    ...localQuiz
+                };
 
             }
-
-
-            playedAt.setHours(
-                0,
-                0,
-                0,
-                0
-            );
-
-
-            dates.push(
-                playedAt
-            );
 
         }
 
-        catch(error){
+        catch(error) {
 
             console.error(
-                "CALENDAR QUIZ ERROR:",
+                "LOCAL QUIZ ERROR:",
                 error
             );
 
@@ -519,16 +555,95 @@ function getActualPlayedDates(){
     }
 
 
-    // --------------------------------
+    return games;
+
+}
+
+
+// =====================================
+// GET STREAK ELIGIBLE DATES
+//
+// EXACT SAME LOGIC AS results.js
+// =====================================
+
+function getStreakDates(history) {
+
+    const dates = [];
+
+
+    for (
+        const key in history
+    ) {
+
+        const item =
+            history[key];
+
+
+        if (
+            !item ||
+            item.played !== true
+        ) {
+
+            continue;
+
+        }
+
+
+        const actualPlayDate =
+            getActualPlayDate(
+                item
+            );
+
+
+        if (!actualPlayDate) {
+
+            continue;
+
+        }
+
+
+        const puzzleDateObj =
+            parseDateKey(key);
+
+
+        if (!puzzleDateObj) {
+
+            continue;
+
+        }
+
+
+        // IMPORTANT
+        // Puzzle date and actual
+        // play date must be same.
+
+        if (
+            puzzleDateObj.getTime() !==
+            actualPlayDate.getTime()
+        ) {
+
+            continue;
+
+        }
+
+
+        dates.push(
+            actualPlayDate
+        );
+
+    }
+
+
+    // =================================
     // REMOVE DUPLICATES
-    // --------------------------------
+    // =================================
 
     const uniqueDates = [];
 
 
-    for(
+    for (
         const date of dates
-    ){
+    ) {
 
         const exists =
             uniqueDates.some(
@@ -538,7 +653,7 @@ function getActualPlayedDates(){
             );
 
 
-        if(!exists){
+        if (!exists) {
 
             uniqueDates.push(
                 date
@@ -549,12 +664,10 @@ function getActualPlayedDates(){
     }
 
 
-    // --------------------------------
     // OLD → NEW
-    // --------------------------------
 
     uniqueDates.sort(
-        (a,b) =>
+        (a, b) =>
             a.getTime() -
             b.getTime()
     );
@@ -566,152 +679,33 @@ function getActualPlayedDates(){
 
 
 // =====================================
-// CALCULATE CURRENT STREAK
-//
-// RULE:
-//
-// Today played = 1
-//
-// Yesterday + today = 2
-//
-// One missed day = BREAK
-//
-// Late completion of an old puzzle
-// does NOT restore the old date.
-// =====================================
-
-function calculateCurrentStreak(
-    playedDates
-){
-
-    if(
-        playedDates.length === 0
-    ){
-
-        return 0;
-
-    }
-
-
-    const todayDate =
-        new Date();
-
-    todayDate.setHours(
-        0,
-        0,
-        0,
-        0
-    );
-
-
-    const latest =
-        playedDates[
-            playedDates.length - 1
-        ];
-
-
-    // --------------------------------
-    // MUST HAVE PLAYED TODAY
-    // --------------------------------
-
-    if(
-        latest.getTime() !==
-        todayDate.getTime()
-    ){
-
-        return 0;
-
-    }
-
-
-    // Today = 1
-
-    let streak = 1;
-
-
-    // --------------------------------
-    // GO BACKWARDS
-    // --------------------------------
-
-    for(
-        let i =
-            playedDates.length - 1;
-
-        i > 0;
-
-        i--
-    ){
-
-        const current =
-            playedDates[i];
-
-        const previous =
-            playedDates[i - 1];
-
-
-        const diffDays =
-            Math.round(
-                (
-                    current.getTime() -
-                    previous.getTime()
-                ) /
-                (
-                    1000 *
-                    60 *
-                    60 *
-                    24
-                )
-            );
-
-
-        // Consecutive date
-
-        if(
-            diffDays === 1
-        ){
-
-            streak++;
-
-        }
-
-        else{
-
-            // A day was missed.
-            // STOP HERE.
-
-            break;
-
-        }
-
-    }
-
-
-    return streak;
-
-}
-
-
-// =====================================
 // GET CURRENT STREAK DATES
 //
-// Returns only the dates that belong
-// to the CURRENT streak.
+// Example:
 //
-// These dates will receive 🔥 glow.
+// 17 + 18 + 19 + 20
+//
+// Result:
+//
+// 17 🔥
+// 18 🔥
+// 19 🔥
+// 20 🔥
+//
 // =====================================
 
 function getCurrentStreakDates(
-    playedDates
-){
+    streakDates
+) {
 
-    const streakDates = [];
+    const result = [];
 
 
-    if(
-        playedDates.length === 0
-    ){
+    if (
+        streakDates.length === 0
+    ) {
 
-        return streakDates;
+        return result;
 
     }
 
@@ -728,53 +722,50 @@ function getCurrentStreakDates(
 
 
     const latest =
-        playedDates[
-            playedDates.length - 1
+        streakDates[
+            streakDates.length - 1
         ];
 
 
-    // --------------------------------
-    // If today wasn't played,
-    // there is no current streak.
-    // --------------------------------
+    // =================================
+    // TODAY MUST BE COMPLETED
+    // =================================
 
-    if(
+    if (
         latest.getTime() !==
         todayDate.getTime()
-    ){
+    ) {
 
-        return streakDates;
+        return result;
 
     }
 
 
-    // --------------------------------
-    // Start from today
-    // --------------------------------
+    // Today belongs to streak.
 
-    streakDates.push(
+    result.push(
         latest
     );
 
 
-    // --------------------------------
-    // Go backwards
-    // --------------------------------
+    // =================================
+    // GO BACKWARDS
+    // =================================
 
-    for(
+    for (
         let i =
-            playedDates.length - 1;
+            streakDates.length - 1;
 
         i > 0;
 
         i--
-    ){
+    ) {
 
         const current =
-            playedDates[i];
+            streakDates[i];
 
         const previous =
-            playedDates[i - 1];
+            streakDates[i - 1];
 
 
         const diffDays =
@@ -792,17 +783,17 @@ function getCurrentStreakDates(
             );
 
 
-        if(
+        if (
             diffDays === 1
-        ){
+        ) {
 
-            streakDates.push(
+            result.push(
                 previous
             );
 
         }
 
-        else{
+        else {
 
             break;
 
@@ -811,7 +802,7 @@ function getCurrentStreakDates(
     }
 
 
-    return streakDates;
+    return result;
 
 }
 
@@ -820,14 +811,14 @@ function getCurrentStreakDates(
 // RENDER CALENDAR
 // =====================================
 
-function renderCalendar(){
+function renderCalendar() {
 
     calendarGrid.innerHTML = "";
 
 
-    // --------------------------------
+    // =================================
     // MONTH TITLE
-    // --------------------------------
+    // =================================
 
     monthTitle.innerHTML =
         months[currentMonth] +
@@ -835,27 +826,25 @@ function renderCalendar(){
         currentYear;
 
 
-    // --------------------------------
-    // ACTUAL PLAYED DATES
-    // --------------------------------
+    // =================================
+    // STREAK
+    // =================================
 
-    const playedDates =
-        getActualPlayedDates();
-
-
-    // --------------------------------
-    // CURRENT STREAK DATES
-    // --------------------------------
-
-    const currentStreakDates =
-        getCurrentStreakDates(
-            playedDates
+    const streakDates =
+        getStreakDates(
+            allGames
         );
 
 
-    // --------------------------------
-    // FIRST DAY OF MONTH
-    // --------------------------------
+    const currentStreakDates =
+        getCurrentStreakDates(
+            streakDates
+        );
+
+
+    // =================================
+    // FIRST DAY
+    // =================================
 
     const firstDay =
         new Date(
@@ -865,9 +854,9 @@ function renderCalendar(){
         ).getDay();
 
 
-    // --------------------------------
+    // =================================
     // DAYS IN MONTH
-    // --------------------------------
+    // =================================
 
     const daysInMonth =
         new Date(
@@ -877,15 +866,15 @@ function renderCalendar(){
         ).getDate();
 
 
-    // --------------------------------
+    // =================================
     // EMPTY BOXES
-    // --------------------------------
+    // =================================
 
-    for(
+    for (
         let i = 0;
         i < firstDay;
         i++
-    ){
+    ) {
 
         const empty =
             document.createElement(
@@ -907,11 +896,11 @@ function renderCalendar(){
     // EACH DAY
     // =================================
 
-    for(
+    for (
         let day = 1;
         day <= daysInMonth;
         day++
-    ){
+    ) {
 
         const cell =
             document.createElement(
@@ -951,51 +940,23 @@ function renderCalendar(){
             );
 
 
-        // --------------------------------
-        // PUZZLE RESULT
-        // --------------------------------
+        // =================================
+        // GET RESULT
+        // =================================
 
-        let quiz = null;
-
-
-        try{
-
-            const saved =
-                localStorage.getItem(
-                    "quiz_" + dateKey
-                );
+        const quiz =
+            allGames[dateKey];
 
 
-            if(saved){
-
-                quiz =
-                    JSON.parse(
-                        saved
-                    );
-
-            }
-
-        }
-
-        catch(error){
-
-            console.error(
-                "QUIZ READ ERROR:",
-                error
-            );
-
-        }
-
-
-        // --------------------------------
+        // =================================
         // CORRECT / WRONG
-        // --------------------------------
+        // =================================
 
-        if(quiz){
+        if (quiz) {
 
-            if(
+            if (
                 quiz.correct === true
-            ){
+            ) {
 
                 cell.classList.add(
                     "correct-day"
@@ -1003,9 +964,9 @@ function renderCalendar(){
 
             }
 
-            else if(
+            else if (
                 quiz.correct === false
-            ){
+            ) {
 
                 cell.classList.add(
                     "wrong-day"
@@ -1028,9 +989,9 @@ function renderCalendar(){
             );
 
 
-        if(
+        if (
             isCurrentStreakDate
-        ){
+        ) {
 
             cell.classList.add(
                 "current-streak-day"
@@ -1042,16 +1003,16 @@ function renderCalendar(){
         }
 
 
-        // --------------------------------
+        // =================================
         // TODAY
-        // --------------------------------
+        // =================================
 
-        if(
+        if (
             day === today.getDate() &&
             currentMonth === today.getMonth() &&
             currentYear === today.getFullYear() &&
             !quiz
-        ){
+        ) {
 
             cell.classList.add(
                 "today"
@@ -1061,12 +1022,12 @@ function renderCalendar(){
 
 
         // =================================
-        // DISABLED / LOCKED / PLAYABLE
+        // DISABLED / LOCKED
         // =================================
 
-        if(
+        if (
             thisDate < firstPuzzleDate
-        ){
+        ) {
 
             cell.classList.add(
                 "disabled"
@@ -1074,9 +1035,9 @@ function renderCalendar(){
 
         }
 
-        else if(
+        else if (
             thisDate > today
-        ){
+        ) {
 
             cell.classList.add(
                 "locked"
@@ -1084,10 +1045,10 @@ function renderCalendar(){
 
         }
 
-        else{
+        else {
 
             cell.onclick =
-                function(){
+                function() {
 
                     window.location.href =
                         `dailypuzzel.html?date=${dateKey}`;
@@ -1096,10 +1057,6 @@ function renderCalendar(){
 
         }
 
-
-        // --------------------------------
-        // ADD TO GRID
-        // --------------------------------
 
         calendarGrid.appendChild(
             cell
@@ -1111,18 +1068,148 @@ function renderCalendar(){
 
 
 // =====================================
+// FIREBASE AUTH
+// =====================================
+
+onAuthStateChanged(
+    auth,
+    async (user) => {
+
+        if (!user) {
+
+            window.location.replace(
+                "login.html"
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            // =================================
+            // USER DOCUMENT
+            // =================================
+
+            const userRef =
+                doc(
+                    db,
+                    "users",
+                    user.uid
+                );
+
+
+            const snap =
+                await getDoc(
+                    userRef
+                );
+
+
+            let history = {};
+
+
+            if (
+                snap.exists()
+            ) {
+
+                const data =
+                    snap.data();
+
+
+                history =
+                    data.history || {};
+
+            }
+
+
+            // =================================
+            // MERGE DATA
+            // =================================
+
+            allGames =
+                getAllGames(
+                    history
+                );
+
+
+            // =================================
+            // DEBUG
+            // =================================
+
+            const streakDates =
+                getStreakDates(
+                    allGames
+                );
+
+
+            const currentStreakDates =
+                getCurrentStreakDates(
+                    streakDates
+                );
+
+
+            console.log(
+                "CALENDAR ALL GAMES:",
+                allGames
+            );
+
+
+            console.log(
+                "CALENDAR STREAK DATES:",
+                currentStreakDates
+            );
+
+
+            console.log(
+                "CALENDAR CURRENT STREAK:",
+                currentStreakDates.length
+            );
+
+
+            // =================================
+            // RENDER AFTER FIRESTORE LOAD
+            // =================================
+
+            renderCalendar();
+
+        }
+
+        catch(error) {
+
+            console.error(
+                "CALENDAR FIREBASE ERROR:",
+                error
+            );
+
+
+            // LocalStorage fallback
+
+            allGames =
+                getAllGames({});
+
+
+            renderCalendar();
+
+        }
+
+    }
+);
+
+
+// =====================================
 // PREVIOUS MONTH
 // =====================================
 
 prevBtn.onclick =
-    function(){
+    function() {
 
         currentMonth--;
 
 
-        if(
+        if (
             currentMonth < 0
-        ){
+        ) {
 
             currentMonth = 11;
 
@@ -1141,14 +1228,14 @@ prevBtn.onclick =
 // =====================================
 
 nextBtn.onclick =
-    function(){
+    function() {
 
         currentMonth++;
 
 
-        if(
+        if (
             currentMonth > 11
-        ){
+        ) {
 
             currentMonth = 0;
 
@@ -1163,24 +1250,17 @@ nextBtn.onclick =
 
 
 // =====================================
-// INITIAL RENDER
-// =====================================
-
-renderCalendar();
-
-
-// =====================================
-// REFRESH WHEN PAGE BECOMES VISIBLE
+// REFRESH WHEN PAGE VISIBLE
 // =====================================
 
 document.addEventListener(
     "visibilitychange",
     () => {
 
-        if(
+        if (
             document.visibilityState ===
             "visible"
-        ){
+        ) {
 
             renderCalendar();
 
