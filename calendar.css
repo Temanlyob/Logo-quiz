@@ -831,3 +831,18 @@ body.theme-dark .day.streak-day{
         0 0 35px rgba(255,60,30,.40);
 
 }
+
+/* ==========================
+   CURRENT STREAK LEGEND
+========================== */
+
+.current-streak-legend{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.fire-legend{
+    font-size:18px;
+    line-height:1;
+}
