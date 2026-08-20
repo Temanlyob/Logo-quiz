@@ -128,78 +128,45 @@
 
     <form id="contactForm">
 
-      <input
-        type="text"
-        name="name"
-        placeholder="Your Name"
-        required
-      >
+  <select
+    name="type"
+    required>
 
-      <input
-        type="email"
-        name="email"
-        placeholder="Your Email"
-        required
-      >
+    <option value="">
+      Select Type
+    </option>
 
-      <select
-        name="type"
-        required>
+    <option value="Review">
+      ⭐ Review
+    </option>
 
-        <option value="">
-          Select Type
-        </option>
+    <option value="Feedback">
+      💡 Feedback
+    </option>
 
-        <option value="Review">
-          ⭐ Review
-        </option>
+    <option value="Issue">
+      ⚠️ Issue / Bug
+    </option>
 
-        <option value="Feedback">
-          💡 Feedback
-        </option>
+    <option value="Other">
+      📝 Other
+    </option>
 
-        <option value="Issue">
-          ⚠️ Issue / Bug
-        </option>
+  </select>
 
-        <option value="Other">
-          📝 Other
-        </option>
+  <textarea
+    name="message"
+    placeholder="Write your message..."
+    rows="6"
+    required></textarea>
 
-      </select>
+  <button
+    type="submit"
+    id="sendContactBtn">
+    📩 Send Message
+  </button>
 
-      <textarea
-        name="message"
-        placeholder="Write your message..."
-        rows="6"
-        required></textarea>
-
-      <input
-        type="hidden"
-        name="_subject"
-        value="Temanlyob - New Contact Message"
-      >
-
-      <input
-        type="hidden"
-        name="_replyto"
-        id="contactReplyTo"
-      >
-
-      <input
-        type="hidden"
-        name="_template"
-        value="table"
-      >
-
-      <button
-        type="submit"
-        id="sendContactBtn">
-        📩 Send Message
-      </button>
-
-    </form>
-
+</form>
     <p
       id="contactStatus"
       class="contact-status">
