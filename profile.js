@@ -76,6 +76,31 @@ const saveProfileBtn =
 const cancelProfileBtn =
   document.getElementById("cancelProfileBtn");
 
+// =====================================================
+// CONTACT US ELEMENTS
+// =====================================================
+
+const contactUsBtn =
+  document.getElementById("contactUsBtn");
+
+const contactModal =
+  document.getElementById("contactModal");
+
+const closeContact =
+  document.getElementById("closeContact");
+
+const contactForm =
+  document.getElementById("contactForm");
+
+const contactStatus =
+  document.getElementById("contactStatus");
+
+const sendContactBtn =
+  document.getElementById("sendContactBtn");
+
+const contactReplyTo =
+  document.getElementById("contactReplyTo");
+
 
 // =====================================================
 // VARIABLES
@@ -354,6 +379,215 @@ function getGameStats() {
     }
 
   }
+
+  // =====================================================
+// CONTACT US
+// =====================================================
+
+contactUsBtn.addEventListener(
+  "click",
+  (event) => {
+
+    event.preventDefault();
+
+    contactModal.style.display =
+      "flex";
+
+    contactStatus.textContent = "";
+
+  }
+);
+
+
+// =====================================================
+// CLOSE CONTACT
+// =====================================================
+
+closeContact.addEventListener(
+  "click",
+  () => {
+
+    contactModal.style.display =
+      "none";
+
+  }
+);
+
+
+// =====================================================
+// CLOSE BY OUTSIDE CLICK
+// =====================================================
+
+contactModal.addEventListener(
+  "click",
+  (event) => {
+
+    if (
+      event.target === contactModal
+    ) {
+
+      contactModal.style.display =
+        "none";
+
+    }
+
+  }
+);
+
+
+// =====================================================
+// SEND CONTACT MESSAGE
+// =====================================================
+
+contactForm.addEventListener(
+  "submit",
+  async (event) => {
+
+    event.preventDefault();
+
+
+    sendContactBtn.disabled =
+      true;
+
+    sendContactBtn.textContent =
+      "Sending...";
+
+
+    contactStatus.textContent =
+      "";
+
+
+    const formData =
+      new FormData(
+        contactForm
+      );
+
+
+    // User email → Reply-To
+
+    contactReplyTo.value =
+      formData.get("email");
+
+
+    try {
+
+      const response =
+        await fetch(
+          "https://formsubmit.co/ajax/temanlyob@gmail.com",
+          {
+
+            method:"POST",
+
+            headers:{
+              "Content-Type":
+                "application/json",
+
+              "Accept":
+                "application/json"
+            },
+
+            body:JSON.stringify({
+
+              name:
+                formData.get("name"),
+
+              email:
+                formData.get("email"),
+
+              type:
+                formData.get("type"),
+
+              message:
+                formData.get("message"),
+
+              _subject:
+                "Temanlyob - " +
+                formData.get("type"),
+
+              _replyto:
+                formData.get("email"),
+
+              _template:
+                "table"
+
+            })
+
+          }
+        );
+
+
+      const result =
+        await response.json();
+
+
+      if (
+        response.ok &&
+        result.success !== false
+      ) {
+
+        contactStatus.textContent =
+          "✅ Message sent successfully!";
+
+        contactStatus.style.color =
+          "#22c55e";
+
+
+        contactForm.reset();
+
+
+        setTimeout(
+          () => {
+
+            contactModal.style.display =
+              "none";
+
+            contactStatus.textContent =
+              "";
+
+          },
+          1800
+        );
+
+      }
+
+      else {
+
+        throw new Error(
+          "Message could not be sent."
+        );
+
+      }
+
+    }
+
+    catch(error) {
+
+      console.error(
+        "CONTACT ERROR:",
+        error
+      );
+
+
+      contactStatus.textContent =
+        "❌ Message send nahi hua. Please try again.";
+
+      contactStatus.style.color =
+        "#ef4444";
+
+    }
+
+    finally {
+
+      sendContactBtn.disabled =
+        false;
+
+      sendContactBtn.textContent =
+        "📩 Send Message";
+
+    }
+
+  }
+);
 
 
   // =================================================
