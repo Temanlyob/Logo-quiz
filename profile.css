@@ -199,7 +199,51 @@ body.theme-dark .cancel-btn{background:#2a2a2a;color:#fff}
 ========================== */
 
 #contactUsBtn{
+  width:100%;
   margin-top:12px;
+  border:0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 20px;
+  border-radius:18px;
+  text-align:left;
+  font-family:inherit;
+  font-size:inherit;
+  color:#102a54;
+  background:#fff;
+  font-weight:600;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+  transition:.25s;
+  cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
+}
+
+#contactUsBtn{
+  width:100%;
+  margin-top:12px;
+  border:0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 20px;
+  border-radius:18px;
+  text-align:left;
+  font-family:inherit;
+  font-size:inherit;
+  color:#102a54;
+  background:#fff;
+  font-weight:600;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+  transition:.25s;
+  cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
+}
+
+#contactUsBtn:hover{
+  transform:translateY(-2px);
 }
 
 .contact-modal{
@@ -312,6 +356,12 @@ body.theme-dark .cancel-btn{background:#2a2a2a;color:#fff}
 body.theme-dark .contact-box{
   background:#1f1f1f;
   color:#fff;
+}
+
+body.theme-dark #contactUsBtn{
+  background:#1f1f1f;
+  color:#fff;
+  box-shadow:none;
 }
 
 body.theme-dark .contact-box h2{
