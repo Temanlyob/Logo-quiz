@@ -47,11 +47,21 @@
 
 <section class="settings-section">
   <h2>Settings</h2>
-  <a href="#" id="themesBtn" class="setting-item">
-    <span>🎨</span><span>Themes</span><span>›</span>
-  </a>
-</section>
 
+  <a href="#" id="themesBtn" class="setting-item">
+    <span>🎨</span>
+    <span>Themes</span>
+    <span>›</span>
+  </a>
+
+  <a href="#" id="contactUsBtn" class="setting-item">
+    <span>📩</span>
+    <span>Contact Us</span>
+    <span>›</span>
+  </a>
+
+</section>
+  
 <section class="logout-section">
   <button id="logoutBtn" class="logout-btn" type="button">🚪 Logout</button>
 </section>
@@ -95,6 +105,108 @@
     <div class="theme-option" data-theme="dark"><span>🌙 Dark Theme</span><span class="tick"></span></div>
     <button id="closeTheme" type="button">Close</button>
   </div>
+</div>
+
+<!-- Contact Us -->
+
+<div id="contactModal" class="contact-modal">
+
+  <div class="contact-box">
+
+    <button
+      id="closeContact"
+      class="modal-close"
+      type="button">
+      ×
+    </button>
+
+    <h2>Contact Us</h2>
+
+    <p class="contact-subtitle">
+      Share your review, feedback or issue.
+    </p>
+
+    <form id="contactForm">
+
+      <input
+        type="text"
+        name="name"
+        placeholder="Your Name"
+        required
+      >
+
+      <input
+        type="email"
+        name="email"
+        placeholder="Your Email"
+        required
+      >
+
+      <select
+        name="type"
+        required>
+
+        <option value="">
+          Select Type
+        </option>
+
+        <option value="Review">
+          ⭐ Review
+        </option>
+
+        <option value="Feedback">
+          💡 Feedback
+        </option>
+
+        <option value="Issue">
+          ⚠️ Issue / Bug
+        </option>
+
+        <option value="Other">
+          📝 Other
+        </option>
+
+      </select>
+
+      <textarea
+        name="message"
+        placeholder="Write your message..."
+        rows="6"
+        required></textarea>
+
+      <input
+        type="hidden"
+        name="_subject"
+        value="Temanlyob - New Contact Message"
+      >
+
+      <input
+        type="hidden"
+        name="_replyto"
+        id="contactReplyTo"
+      >
+
+      <input
+        type="hidden"
+        name="_template"
+        value="table"
+      >
+
+      <button
+        type="submit"
+        id="sendContactBtn">
+        📩 Send Message
+      </button>
+
+    </form>
+
+    <p
+      id="contactStatus"
+      class="contact-status">
+    </p>
+
+  </div>
+
 </div>
 
 <script type="module" src="profile.js?v=3"></script>
