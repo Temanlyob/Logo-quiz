@@ -532,29 +532,33 @@ if (
 
               body: JSON.stringify({
 
-                name:
-                  formData.get("name"),
+  name:
+    username.textContent ||
+    currentUser.displayName ||
+    "User",
 
-                email:
-                  formData.get("email"),
+  email:
+    currentUser.email ||
+    "",
 
-                type:
-                  formData.get("type"),
+  type:
+    messageType,
 
-                message:
-                  formData.get("message"),
+  message:
+    message,
 
-                _subject:
-                  "Temanlyob - " +
-                  formData.get("type"),
+  _subject:
+    "Temanlyob - " +
+    messageType,
 
-                _replyto:
-                  formData.get("email"),
+  _replyto:
+    currentUser.email ||
+    "",
 
-                _template:
-                  "table"
+  _template:
+    "table"
 
-              })
+})
 
             }
           );
