@@ -122,6 +122,9 @@ const infoTitle =
 const infoText =
   document.getElementById("infoText");
 
+const infoIcon =
+  document.querySelector(".info-icon");
+
 const showResultsBtn =
   document.getElementById("showResultsBtn");
 
@@ -578,6 +581,9 @@ function restoreResult(data) {
 
     pointsCard.innerHTML =
       "0 Points";
+
+    infoIcon.innerHTML =
+  "❌";
 
     infoTitle.innerHTML =
       "Wrong Choice";
