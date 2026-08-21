@@ -583,7 +583,7 @@ function restoreResult(data) {
       "0 Points";
 
     infoIcon.innerHTML =
-  "❌";
+  "🚫";
 
     infoTitle.innerHTML =
       "Wrong Choice";
