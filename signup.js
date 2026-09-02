@@ -3,115 +3,213 @@ import {
   googleProvider,
   createUserDocument,
   createUserWithEmailAndPassword,
-  signInWithPopup
+  signInWithPopup,
+  onAuthStateChanged
 } from "./auth.js";
 
-// =============================
-// DEVICE THEME ONLY
-// =============================
 
-function applyDeviceTheme(){
+// =====================================
+// DEVICE THEME
+// =====================================
 
-    document.body.classList.remove(
-        "theme-light",
-        "theme-dark"
-    );
+function applyDeviceTheme() {
 
-    if(
-        window.matchMedia(
-            "(prefers-color-scheme: dark)"
-        ).matches
-    ){
+  document.body.classList.remove(
+    "theme-light",
+    "theme-dark"
+  );
 
-        document.body.classList.add("theme-dark");
+  document.body.classList.add(
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "theme-dark"
+      : "theme-light"
+  );
 
-    }else{
-
-        document.body.classList.add("theme-light");
-
-    }
 }
 
 applyDeviceTheme();
 
-const deviceTheme =
-window.matchMedia(
-    "(prefers-color-scheme: dark)"
-);
 
-deviceTheme.addEventListener("change", () => {
+// =====================================
+// EMAIL SIGN UP
+// =====================================
 
-    applyDeviceTheme();
-
-});
-
-// ------------------------------
-// Email Sign Up
-// ------------------------------
-
-const form = document.getElementById("signupForm");
+const form =
+  document.getElementById("signupForm");
 
 form.addEventListener("submit", async (e) => {
 
   e.preventDefault();
 
-  const username = document.getElementById("username").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const confirm = document.getElementById("confirmPassword").value;
+  const username =
+    document.getElementById("username").value.trim();
 
-  if (password !== confirm) {
+  const email =
+    document.getElementById("email").value.trim();
+
+  const password =
+    document.getElementById("password").value;
+
+  const confirmPassword =
+    document.getElementById("confirmPassword").value;
+
+
+  if (password !== confirmPassword) {
+
     alert("Passwords do not match.");
+
     return;
+
   }
+
 
   try {
 
-    const result = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
+    const result =
+      await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+
+    await createUserDocument(
+      result.user,
+      username
     );
 
-    await createUserDocument(result.user, username);
 
     window.location.replace("home.html");
 
-  } catch (err) {
 
-    console.error(err);
-    alert(err.message);
+  } catch (error) {
 
-  }
+    console.error(
+      "Email signup error:",
+      error
+    );
 
-});
-
-// ------------------------------
-// Google Sign Up
-// ------------------------------
-
-const googleSignup = document.getElementById("googleSignup");
-
-googleSignup.addEventListener("click", async () => {
-
-  try {
-
-    const result = await signInWithPopup(auth, googleProvider);
-
-    const created = await createUserDocument(result.user);
-
-if (!created) {
-  alert("Failed to create user profile.");
-  return;
-}
-
-window.location.replace("home.html");
-
-  } catch (err) {
-
-    console.error(err);
-    alert(err.message);
+    alert(
+      error.message ||
+      "Account creation failed."
+    );
 
   }
 
 });
+
+
+// =====================================
+// GOOGLE SIGN UP
+// =====================================
+
+const googleButton =
+  document.getElementById("googleSignup");
+
+
+googleButton.addEventListener(
+  "click",
+  async () => {
+
+    googleButton.disabled = true;
+
+    googleButton.textContent =
+      "Connecting to Google...";
+
+
+    try {
+
+      // Google login/signup
+      // Firebase automatically creates
+      // the account if it does not exist.
+
+      const result =
+        await signInWithPopup(
+          auth,
+          googleProvider
+        );
+
+
+      // Create / update Firestore profile
+
+      await createUserDocument(
+        result.user
+      );
+
+
+      // Go to Home
+
+      window.location.replace(
+        "home.html"
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Google signup error:",
+        error
+      );
+
+
+      googleButton.disabled = false;
+
+      googleButton.textContent =
+        "Continue with Google";
+
+
+      // User closed Google window
+
+      if (
+        error.code ===
+        "auth/popup-closed-by-user"
+      ) {
+
+        return;
+
+      }
+
+
+      // Popup blocked by browser
+
+      if (
+        error.code ===
+        "auth/popup-blocked"
+      ) {
+
+        alert(
+          "Google popup was blocked. Please allow popups and try again."
+        );
+
+        return;
+
+      }
+
+
+      // Unauthorized domain
+
+      if (
+        error.code ===
+        "auth/unauthorized-domain"
+      ) {
+
+        alert(
+          "This website domain is not authorized in Firebase Authentication."
+        );
+
+        return;
+
+      }
+
+
+      // Any other error
+
+      alert(
+        "Google Sign Up failed:\n\n" +
+        (error.message || error.code)
+      );
+
+    }
+
+  }
+);
