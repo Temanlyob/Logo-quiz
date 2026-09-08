@@ -13,9 +13,9 @@ import {
 console.log("RESULTS PAGE LOADED");
 
 
-// =====================================
+// =====================================================
 // THEME
-// =====================================
+// =====================================================
 
 function applyTheme(theme) {
 
@@ -26,15 +26,11 @@ function applyTheme(theme) {
 
   if (theme === "light") {
 
-    document.body.classList.add(
-      "theme-light"
-    );
+    document.body.classList.add("theme-light");
 
   } else if (theme === "dark") {
 
-    document.body.classList.add(
-      "theme-dark"
-    );
+    document.body.classList.add("theme-dark");
 
   } else {
 
@@ -44,15 +40,11 @@ function applyTheme(theme) {
       ).matches
     ) {
 
-      document.body.classList.add(
-        "theme-dark"
-      );
+      document.body.classList.add("theme-dark");
 
     } else {
 
-      document.body.classList.add(
-        "theme-light"
-      );
+      document.body.classList.add("theme-light");
 
     }
 
@@ -60,14 +52,11 @@ function applyTheme(theme) {
 
 }
 
-
-// Initial theme
 applyTheme(
   localStorage.getItem("theme") || "default"
 );
 
 
-// Follow phone theme
 const systemTheme =
   window.matchMedia(
     "(prefers-color-scheme: dark)"
@@ -81,9 +70,7 @@ systemTheme.addEventListener(
     const currentTheme =
       localStorage.getItem("theme") || "default";
 
-    if (
-      currentTheme === "default"
-    ) {
+    if (currentTheme === "default") {
 
       applyTheme("default");
 
@@ -93,9 +80,9 @@ systemTheme.addEventListener(
 );
 
 
-// =====================================
+// =====================================================
 // BUTTONS
-// =====================================
+// =====================================================
 
 const homeBtn =
   document.getElementById("homeBtn");
@@ -104,9 +91,9 @@ const calendarBtn =
   document.getElementById("calendarBtn");
 
 
-// =====================================
+// =====================================================
 // RESULT UI
-// =====================================
+// =====================================================
 
 const resultIcon =
   document.getElementById("resultIcon");
@@ -118,9 +105,9 @@ const scoreValue =
   document.getElementById("scoreValue");
 
 
-// =====================================
+// =====================================================
 // PUZZLE DATE FROM URL
-// =====================================
+// =====================================================
 
 const params =
   new URLSearchParams(
@@ -133,8 +120,7 @@ let puzzleDate =
 
 if (!puzzleDate) {
 
-  const now =
-    new Date();
+  const now = new Date();
 
   const day =
     String(
@@ -163,101 +149,18 @@ console.log(
 );
 
 
-// =====================================
+// =====================================================
 // DATE HELPERS
-// =====================================
-
-function parseDateKey(dateKey) {
-
-  const parts =
-    dateKey.split("-");
-
-  if (
-    parts.length !== 3
-  ) {
-
-    return null;
-
-  }
-
-
-  const day =
-    Number(parts[0]);
-
-  const month =
-    Number(parts[1]) - 1;
-
-  const year =
-    Number(
-      "20" + parts[2]
-    );
-
-
-  const date =
-    new Date(
-      year,
-      month,
-      day
-    );
-
-
-  date.setHours(
-    0,
-    0,
-    0,
-    0
-  );
-
-
-  return date;
-
-}
-
+// =====================================================
 
 function getLocalDateOnly(date) {
 
-  const result =
+  const d =
     new Date(date);
-
-
-  result.setHours(
-    0,
-    0,
-    0,
-    0
-  );
-
-
-  return result;
-
-}
-
-
-// =====================================
-// ACTUAL PLAY DATE
-// =====================================
-
-function getActualPlayDate(item) {
-
-  if (
-    !item ||
-    !item.playedAt
-  ) {
-
-    return null;
-
-  }
-
-
-  const playedAt =
-    new Date(
-      item.playedAt
-    );
-
 
   if (
     Number.isNaN(
-      playedAt.getTime()
+      d.getTime()
     )
   ) {
 
@@ -265,34 +168,265 @@ function getActualPlayDate(item) {
 
   }
 
+  d.setHours(
+    0,
+    0,
+    0,
+    0
+  );
 
-  return getLocalDateOnly(
-    playedAt
+  return d;
+
+}
+
+
+function dateId(date) {
+
+  const d =
+    getLocalDateOnly(date);
+
+  if (!d) {
+
+    return "";
+
+  }
+
+  const year =
+    d.getFullYear();
+
+  const month =
+    String(
+      d.getMonth() + 1
+    ).padStart(2, "0");
+
+  const day =
+    String(
+      d.getDate()
+    ).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+
+}
+
+
+function daysBetween(a, b) {
+
+  const one =
+    getLocalDateOnly(a);
+
+  const two =
+    getLocalDateOnly(b);
+
+  if (!one || !two) {
+
+    return 0;
+
+  }
+
+  return Math.round(
+    (
+      two.getTime() -
+      one.getTime()
+    ) /
+    (
+      1000 *
+      60 *
+      60 *
+      24
+    )
   );
 
 }
 
 
-// =====================================
-// GET STREAK ELIGIBLE DATES
-// =====================================
+// =====================================================
+// GET ACTUAL PLAY DATE
+//
+// IMPORTANT:
+// Puzzle date is NOT used for streak.
+//
+// Only playedAt matters.
+// =====================================================
 
-function getStreakDates(history) {
+function getActualPlayDate(game) {
 
-  const dates = [];
+  if (
+    !game ||
+    !game.playedAt
+  ) {
+
+    return null;
+
+  }
+
+  return getLocalDateOnly(
+    game.playedAt
+  );
+
+}
+
+
+// =====================================================
+// MERGE ALL GAMES
+//
+// Firestore + localStorage
+//
+// Same puzzle = one game.
+// =====================================================
+
+function getAllGames(
+  firestoreHistory
+) {
+
+  const games = {};
+
+
+  // ---------------------------------------------------
+  // FIRESTORE
+  // ---------------------------------------------------
+
+  if (
+    firestoreHistory &&
+    typeof firestoreHistory === "object"
+  ) {
+
+    for (
+      const key in firestoreHistory
+    ) {
+
+      const game =
+        firestoreHistory[key];
+
+      if (
+        !game ||
+        game.played !== true
+      ) {
+
+        continue;
+
+      }
+
+      games[key] = {
+        ...game
+      };
+
+    }
+
+  }
+
+
+  // ---------------------------------------------------
+  // LOCAL STORAGE
+  // ---------------------------------------------------
+
+  for (
+    let i = 0;
+    i < localStorage.length;
+    i++
+  ) {
+
+    const storageKey =
+      localStorage.key(i);
+
+    if (
+      !storageKey ||
+      !storageKey.startsWith("quiz_")
+    ) {
+
+      continue;
+
+    }
+
+
+    try {
+
+      const game =
+        JSON.parse(
+          localStorage.getItem(
+            storageKey
+          )
+        );
+
+
+      if (
+        !game ||
+        game.attempted !== true
+      ) {
+
+        continue;
+
+      }
+
+
+      const puzzleKey =
+        storageKey.replace(
+          "quiz_",
+          ""
+        );
+
+
+      // Firestore already has this
+      // puzzle → don't duplicate.
+
+      if (
+        !games[puzzleKey]
+      ) {
+
+        games[puzzleKey] = {
+          ...game,
+          played: true
+        };
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "LOCAL GAME ERROR:",
+        error
+      );
+
+    }
+
+  }
+
+
+  return games;
+
+}
+
+
+// =====================================================
+// GAME STATISTICS
+//
+// ALL COMPLETED GAMES
+//
+// No restriction on puzzle date.
+// No restriction on play method.
+// =====================================================
+
+function calculateGameStats(
+  allGames
+) {
+
+  let totalGames = 0;
+
+  let gamesWon = 0;
+
+  let gamesLost = 0;
 
 
   for (
-    const key in history
+    const key in allGames
   ) {
 
-    const item =
-      history[key];
+    const game =
+      allGames[key];
 
 
     if (
-      !item ||
-      item.played !== true
+      !game ||
+      game.played !== true
     ) {
 
       continue;
@@ -300,138 +434,146 @@ function getStreakDates(history) {
     }
 
 
-    const actualPlayDate =
+    totalGames++;
+
+
+    if (
+      game.correct === true
+    ) {
+
+      gamesWon++;
+
+    }
+
+    else if (
+      game.correct === false
+    ) {
+
+      gamesLost++;
+
+    }
+
+  }
+
+
+  const winRate =
+    totalGames === 0
+      ? 0
+      : Math.round(
+          (
+            gamesWon /
+            totalGames
+          ) * 100
+        );
+
+
+  return {
+
+    totalGames,
+    gamesWon,
+    gamesLost,
+    winRate
+
+  };
+
+}
+
+
+// =====================================================
+// GET UNIQUE ACTUAL PLAY DATES
+//
+// Example:
+//
+// 1 Sept puzzle played 1 Sept
+// 2 Sept puzzle played 3 Sept
+// 5 Sept puzzle played 5 Sept
+//
+// Streak dates:
+//
+// 1 Sept
+// 3 Sept
+// 5 Sept
+//
+// Puzzle date is irrelevant.
+// =====================================================
+
+function getActualPlayDates(
+  allGames
+) {
+
+  const dateSet =
+    new Set();
+
+
+  for (
+    const key in allGames
+  ) {
+
+    const game =
+      allGames[key];
+
+
+    if (
+      !game ||
+      game.played !== true
+    ) {
+
+      continue;
+
+    }
+
+
+    const playedDate =
       getActualPlayDate(
-        item
+        game
       );
 
 
-    if (!actualPlayDate) {
+    if (!playedDate) {
 
       continue;
 
     }
 
 
-    const puzzleDateObj =
-      parseDateKey(key);
-
-
-    if (!puzzleDateObj) {
-
-      continue;
-
-    }
-
-
-    // Only same-day puzzle counts
-    // for streak.
-
-    if (
-      puzzleDateObj.getTime() !==
-      actualPlayDate.getTime()
-    ) {
-
-      continue;
-
-    }
-
-
-    dates.push(
-      actualPlayDate
+    dateSet.add(
+      dateId(
+        playedDate
+      )
     );
 
   }
 
 
-  // Remove duplicate dates
-
-  const uniqueDates = [];
-
-
-  for (
-    const date of dates
-  ) {
-
-    const exists =
-      uniqueDates.some(
-        existing =>
-          existing.getTime() ===
-          date.getTime()
-      );
-
-
-    if (!exists) {
-
-      uniqueDates.push(
-        date
-      );
-
-    }
-
-  }
-
-
-  // Old → New
-
-  uniqueDates.sort(
-    (a, b) =>
-      a.getTime() -
-      b.getTime()
-  );
-
-
-  return uniqueDates;
+  return Array.from(
+    dateSet
+  ).sort();
 
 }
 
 
-// =====================================
+// =====================================================
 // CURRENT STREAK
-// =====================================
+//
+// RULE:
+//
+// If user played today:
+//     start from today.
+//
+// If user did NOT play today:
+//     start from yesterday.
+//
+// Then go backward one day at a time.
+//
+// Any game played that day counts.
+// =====================================================
 
-function calculateCurrentStreak(streakDates) {
-
-  if (streakDates.length === 0) {
-    return 0;
-  }
-
-  const today =
-    getLocalDateOnly(new Date());
-
-  const yesterday =
-    new Date(today);
-
-  yesterday.setDate(
-    yesterday.getDate() - 1
-  );
-
-  const latest =
-    streakDates[
-      streakDates.length - 1
-    ];
-
-
-  // =====================================
-  // LATEST PLAY MUST BE TODAY OR YESTERDAY
-  // =====================================
-
-  const latestTime =
-    latest.getTime();
-
-  const todayTime =
-    today.getTime();
-
-  const yesterdayTime =
-    yesterday.getTime();
-
-
-  // If last play was before yesterday,
-  // streak is already broken.
+function calculateCurrentStreak(
+  playDateIds
+) {
 
   if (
-    latestTime !== todayTime &&
-    latestTime !== yesterdayTime
+    playDateIds.length === 0
   ) {
 
     return 0;
@@ -439,57 +581,85 @@ function calculateCurrentStreak(streakDates) {
   }
 
 
-  // =====================================
-  // COUNT BACKWARDS
-  // =====================================
+  const played =
+    new Set(
+      playDateIds
+    );
 
-  let streak = 1;
+
+  const today =
+    getLocalDateOnly(
+      new Date()
+    );
 
 
-  for (
-    let i =
-      streakDates.length - 1;
+  const todayId =
+    dateId(
+      today
+    );
 
-    i > 0;
 
-    i--
+  let cursor;
+
+
+  // ---------------------------------------------------
+  // TODAY PLAYED
+  // ---------------------------------------------------
+
+  if (
+    played.has(todayId)
   ) {
 
-    const current =
-      streakDates[i];
+    cursor =
+      today;
 
-    const previous =
-      streakDates[i - 1];
+  }
+
+  // ---------------------------------------------------
+  // TODAY NOT PLAYED
+  //
+  // Yesterday can still be current streak.
+  // ---------------------------------------------------
+
+  else {
+
+    cursor =
+      new Date(today);
+
+    cursor.setDate(
+      cursor.getDate() - 1
+    );
+
+  }
 
 
-    const diffDays =
-      Math.round(
-        (
-          current.getTime() -
-          previous.getTime()
-        ) /
-        (
-          1000 *
-          60 *
-          60 *
-          24
-        )
-      );
+  let streak = 0;
+
+
+  while (true) {
+
+    const id =
+      dateId(cursor);
 
 
     if (
-      diffDays === 1
+      !played.has(id)
     ) {
-
-      streak++;
-
-    }
-
-    else {
 
       break;
 
     }
+
+
+    streak++;
+
+
+    cursor =
+      new Date(cursor);
+
+    cursor.setDate(
+      cursor.getDate() - 1
+    );
 
   }
 
@@ -499,16 +669,16 @@ function calculateCurrentStreak(streakDates) {
 }
 
 
-// =====================================
+// =====================================================
 // BEST STREAK
-// =====================================
+// =====================================================
 
 function calculateBestStreak(
-  streakDates
+  playDateIds
 ) {
 
   if (
-    streakDates.length === 0
+    playDateIds.length === 0
   ) {
 
     return 0;
@@ -523,27 +693,31 @@ function calculateBestStreak(
 
   for (
     let i = 1;
-    i < streakDates.length;
+    i < playDateIds.length;
     i++
   ) {
 
-    const diffDays =
-      Math.round(
-        (
-          streakDates[i].getTime() -
-          streakDates[i - 1].getTime()
-        ) /
-        (
-          1000 *
-          60 *
-          60 *
-          24
-        )
+    const previous =
+      new Date(
+        playDateIds[i - 1]
+      );
+
+
+    const currentDate =
+      new Date(
+        playDateIds[i]
+      );
+
+
+    const diff =
+      daysBetween(
+        previous,
+        currentDate
       );
 
 
     if (
-      diffDays === 1
+      diff === 1
     ) {
 
       current++;
@@ -572,133 +746,11 @@ function calculateBestStreak(
 }
 
 
-// =====================================
-// GET ALL GAMES
+// =====================================================
+// TODAY'S SCORE
 //
-// Firestore = main source
-// localStorage = backup
-//
-// Same puzzle date counted only once.
-// =====================================
-
-function getAllGames(
-  firestoreHistory
-) {
-
-  const games = {};
-
-
-  // ===================================
-  // FIRESTORE HISTORY
-  // ===================================
-
-  for (
-    const key in firestoreHistory
-  ) {
-
-    const item =
-      firestoreHistory[key];
-
-
-    if (
-      !item ||
-      item.played !== true
-    ) {
-
-      continue;
-
-    }
-
-
-    games[key] = {
-      ...item
-    };
-
-  }
-
-
-  // ===================================
-  // LOCAL STORAGE BACKUP
-  // ===================================
-
-  for (
-    let key in localStorage
-  ) {
-
-    if (
-      !key.startsWith("quiz_")
-    ) {
-
-      continue;
-
-    }
-
-
-    const dateKey =
-      key.replace(
-        "quiz_",
-        ""
-      );
-
-
-    try {
-
-      const localQuiz =
-        JSON.parse(
-          localStorage.getItem(key)
-        );
-
-
-      if (
-        !localQuiz ||
-        localQuiz.attempted !== true
-      ) {
-
-        continue;
-
-      }
-
-
-      // Firestore already has this
-      // puzzle → don't duplicate it.
-
-      if (
-        !games[dateKey]
-      ) {
-
-        games[dateKey] = {
-          ...localQuiz
-        };
-
-      }
-
-    } catch(error) {
-
-      console.error(
-        "LOCAL QUIZ ERROR:",
-        error
-      );
-
-    }
-
-  }
-
-
-  return games;
-
-}
-
-
-// =====================================
-// GET TODAY'S TOTAL SCORE
-//
-// Example:
-//
-// Previous puzzle completed today = +5
-// Today's puzzle completed today   = +10
-//
-// Today's Score = +15
-// =====================================
+// All games played today.
+// =====================================================
 
 function getTodayScore(
   allGames
@@ -710,24 +762,20 @@ function getTodayScore(
     );
 
 
-  let todayScore = 0;
+  let score = 0;
 
 
   for (
-    const game of Object.values(allGames)
+    const key in allGames
   ) {
+
+    const game =
+      allGames[key];
+
 
     if (
       !game ||
-      game.played !== true
-    ) {
-
-      continue;
-
-    }
-
-
-    if (
+      game.played !== true ||
       !game.playedAt
     ) {
 
@@ -737,19 +785,18 @@ function getTodayScore(
 
 
     const playedDate =
-      getLocalDateOnly(
-        new Date(
-          game.playedAt
-        )
+      getActualPlayDate(
+        game
       );
 
 
     if (
+      playedDate &&
       playedDate.getTime() ===
       today.getTime()
     ) {
 
-      todayScore +=
+      score +=
         Number(
           game.score || 0
         );
@@ -759,14 +806,14 @@ function getTodayScore(
   }
 
 
-  return todayScore;
+  return score;
 
 }
 
 
-// =====================================
-// FIREBASE AUTH
-// =====================================
+// =====================================================
+// AUTH
+// =====================================================
 
 onAuthStateChanged(
   auth,
@@ -785,9 +832,9 @@ onAuthStateChanged(
 
     try {
 
-      // =================================
-      // USER DOCUMENT
-      // =================================
+      // =================================================
+      // FIRESTORE USER
+      // =================================================
 
       const userRef =
         doc(
@@ -828,9 +875,9 @@ onAuthStateChanged(
       }
 
 
-      // =================================
+      // =================================================
       // ALL GAMES
-      // =================================
+      // =================================================
 
       const allGames =
         getAllGames(
@@ -838,108 +885,32 @@ onAuthStateChanged(
         );
 
 
-      // =================================
-      // GAME COUNT
-      //
-      // COPIED FROM OLD RESULT LOGIC
-      //
-      // Every quiz_* attempted counts.
-      // Previous-day puzzles also count.
-      // =================================
+      // =================================================
+      // GAME STATS
+      // =================================================
 
-      let puzzlesPlayed = 0;
-
-      let gamesWon = 0;
-
-      let gamesLost = 0;
+      const stats =
+        calculateGameStats(
+          allGames
+        );
 
 
-      for (
-        let key in localStorage
-      ) {
+      const totalGames =
+        stats.totalGames;
 
-        if (
-          key.startsWith("quiz_")
-        ) {
+      const gamesWon =
+        stats.gamesWon;
 
-          try {
-
-            const quiz =
-              JSON.parse(
-                localStorage.getItem(key)
-              );
-
-
-            if (
-              quiz &&
-              quiz.attempted === true
-            ) {
-
-              // Total Games
-              puzzlesPlayed++;
-
-
-              // Games Won
-              if (
-                quiz.correct === true
-              ) {
-
-                gamesWon++;
-
-              }
-
-
-              // Games Lost
-              else if (
-                quiz.correct === false
-              ) {
-
-                gamesLost++;
-
-              }
-
-            }
-
-          } catch (error) {
-
-            console.error(
-              "Result quiz data error:",
-              error
-            );
-
-          }
-
-        }
-
-      }
-
-
-      // =================================
-      // WIN RATE
-      // =================================
+      const gamesLost =
+        stats.gamesLost;
 
       const winRate =
-        puzzlesPlayed === 0
-          ? 0
-          : Math.round(
-              (
-                gamesWon /
-                puzzlesPlayed
-              ) * 100
-            );
+        stats.winRate;
 
 
-      // =================================
-      // CURRENT RESULT
-      // =================================
-
-      const currentResult =
-        allGames[puzzleDate];
-
-
-      // =================================
-      // TODAY'S TOTAL SCORE
-      // =================================
+      // =================================================
+      // TODAY SCORE
+      // =================================================
 
       const todayScore =
         getTodayScore(
@@ -947,58 +918,80 @@ onAuthStateChanged(
         );
 
 
-      // =================================
-      // RESULT UI
-      // =================================
+      // =================================================
+      // STREAK
+      // =================================================
 
-      if (
-        currentResult
-      ) {
-
-        // -------------------------------
-        // RESULT TITLE ALWAYS
-        // -------------------------------
-
-        resultTitle.innerHTML =
-          "Today's Result";
+      const playDateIds =
+        getActualPlayDates(
+          allGames
+        );
 
 
-        // -------------------------------
-        // CURRENT PUZZLE RESULT
-        // -------------------------------
-
-        if (
-          currentResult.correct === true
-        ) {
-
-          resultIcon.innerHTML =
-            "🏆";
-
-          resultIcon.style.color =
-            "#22c55e";
+      const currentStreak =
+        calculateCurrentStreak(
+          playDateIds
+        );
 
 
-          scoreValue.style.color =
-            "#22c55e";
-
-        } else {
-
-          resultIcon.innerHTML =
-            "❌";
-
-          resultIcon.style.color =
-            "#ef4444";
+      const bestStreak =
+        calculateBestStreak(
+          playDateIds
+        );
 
 
-          scoreValue.style.color =
-            "#ef4444";
+      // =================================================
+      // SAVE CALCULATED STREAK
+      // =================================================
 
+      await setDoc(
+        userRef,
+        {
+
+          currentStreak:
+            currentStreak,
+
+          bestStreak:
+            bestStreak
+
+        },
+
+        {
+          merge: true
         }
 
+      );
 
-        // -------------------------------
-        // TODAY'S COMBINED SCORE
-        // -------------------------------
+
+      // =================================================
+      // CURRENT PUZZLE
+      // =================================================
+
+      const currentResult =
+        allGames[puzzleDate];
+
+
+      // =================================================
+      // RESULT UI
+      // =================================================
+
+      resultTitle.textContent =
+        "Today's Result";
+
+
+      if (
+        currentResult &&
+        currentResult.correct === true
+      ) {
+
+        resultIcon.textContent =
+          "🏆";
+
+        resultIcon.style.color =
+          "#22c55e";
+
+        scoreValue.style.color =
+          "#22c55e";
 
         scoreValue.textContent =
           "+" +
@@ -1006,16 +999,27 @@ onAuthStateChanged(
 
       }
 
+      else if (
+        currentResult &&
+        currentResult.correct === false
+      ) {
+
+        resultIcon.textContent =
+          "❌";
+
+        resultIcon.style.color =
+          "#ef4444";
+
+        scoreValue.style.color =
+          "#ef4444";
+
+        scoreValue.textContent =
+          "+" +
+          todayScore;
+
+      }
 
       else {
-
-        // =================================
-        // FALLBACK
-        // =================================
-
-        resultTitle.innerHTML =
-          "Today's Result";
-
 
         const lastResult =
           localStorage.getItem(
@@ -1027,83 +1031,43 @@ onAuthStateChanged(
           lastResult === "correct"
         ) {
 
-          resultIcon.innerHTML =
+          resultIcon.textContent =
             "🏆";
 
           resultIcon.style.color =
+            "#22c55e";
+
+          scoreValue.style.color =
             "#22c55e";
 
           scoreValue.textContent =
             "+" +
             todayScore;
 
-          scoreValue.style.color =
-            "#22c55e";
+        }
 
-        } else {
+        else {
 
-          resultIcon.innerHTML =
+          resultIcon.textContent =
             "❌";
 
           resultIcon.style.color =
             "#ef4444";
 
-          scoreValue.textContent =
-            "0";
-
           scoreValue.style.color =
             "#ef4444";
+
+          scoreValue.textContent =
+            "0";
 
         }
 
       }
 
 
-      // =================================
-      // STREAK
-      // =================================
-
-      const streakDates =
-        getStreakDates(
-          allGames
-        );
-
-
-      const currentStreak =
-        calculateCurrentStreak(
-          streakDates
-        );
-
-
-      const bestStreak =
-        calculateBestStreak(
-          streakDates
-        );
-
-
-      // =================================
-      // SAVE STREAK
-      // =================================
-
-      await setDoc(
-        userRef,
-        {
-          currentStreak:
-            currentStreak,
-
-          bestStreak:
-            bestStreak
-        },
-        {
-          merge:
-            true
-        }
-      );
-
-
-      // =================================
+      // =================================================
       // UI ELEMENTS
-      // =================================
+      // =================================================
 
       const totalGamesElement =
         document.getElementById(
@@ -1141,23 +1105,19 @@ onAuthStateChanged(
         );
 
 
-      // =================================
-      // SHOW TOTAL GAMES
-      // =================================
+      // =================================================
+      // SHOW STATS
+      // =================================================
 
       if (
         totalGamesElement
       ) {
 
         totalGamesElement.textContent =
-          puzzlesPlayed;
+          totalGames;
 
       }
 
-
-      // =================================
-      // SHOW GAMES WON
-      // =================================
 
       if (
         gamesWonElement
@@ -1169,10 +1129,6 @@ onAuthStateChanged(
       }
 
 
-      // =================================
-      // SHOW GAMES LOST
-      // =================================
-
       if (
         gamesLostElement
       ) {
@@ -1182,10 +1138,6 @@ onAuthStateChanged(
 
       }
 
-
-      // =================================
-      // SHOW CURRENT STREAK
-      // =================================
 
       if (
         currentStreakElement
@@ -1198,10 +1150,6 @@ onAuthStateChanged(
       }
 
 
-      // =================================
-      // SHOW BEST STREAK
-      // =================================
-
       if (
         bestStreakElement
       ) {
@@ -1212,10 +1160,6 @@ onAuthStateChanged(
 
       }
 
-
-      // =================================
-      // SHOW WIN RATE
-      // =================================
 
       if (
         winRateElement
@@ -1228,9 +1172,9 @@ onAuthStateChanged(
       }
 
 
-      // =================================
+      // =================================================
       // DEBUG
-      // =================================
+      // =================================================
 
       console.log(
         "=============================="
@@ -1238,7 +1182,7 @@ onAuthStateChanged(
 
       console.log(
         "TOTAL GAMES:",
-        puzzlesPlayed
+        totalGames
       );
 
       console.log(
@@ -1257,11 +1201,6 @@ onAuthStateChanged(
       );
 
       console.log(
-        "TODAY'S SCORE:",
-        todayScore
-      );
-
-      console.log(
         "CURRENT STREAK:",
         currentStreak
       );
@@ -1269,6 +1208,11 @@ onAuthStateChanged(
       console.log(
         "BEST STREAK:",
         bestStreak
+      );
+
+      console.log(
+        "PLAY DATES:",
+        playDateIds
       );
 
       console.log(
@@ -1285,8 +1229,9 @@ onAuthStateChanged(
         "=============================="
       );
 
+    }
 
-    } catch(error) {
+    catch (error) {
 
       console.error(
         "RESULTS ERROR:",
@@ -1299,9 +1244,9 @@ onAuthStateChanged(
 );
 
 
-// =====================================
+// =====================================================
 // BUTTONS
-// =====================================
+// =====================================================
 
 if (homeBtn) {
 
