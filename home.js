@@ -185,11 +185,12 @@ function dateId(date) {
 
 
 // =====================================================
-// MERGE ALL GAMES
+// GET ALL GAMES
 //
-// Firestore + localStorage
+// Firestore = main source
+// localStorage = backup
 //
-// Same puzzle counted only once.
+// Same puzzle is counted only once.
 // =====================================================
 
 function getAllGames(
@@ -200,7 +201,7 @@ function getAllGames(
 
 
   // ---------------------------------------------------
-  // FIRESTORE
+  // FIRESTORE HISTORY
   // ---------------------------------------------------
 
   if (
@@ -218,7 +219,7 @@ function getAllGames(
 
       if (
         !game ||
-        game.played !== true
+        typeof game !== "object"
       ) {
 
         continue;
@@ -226,8 +227,26 @@ function getAllGames(
       }
 
 
+      /*
+       * A puzzle is considered completed when
+       * either played OR attempted is true.
+       */
+
+      const completed =
+        game.played === true ||
+        game.attempted === true;
+
+
+      if (!completed) {
+
+        continue;
+
+      }
+
+
       games[key] = {
-        ...game
+        ...game,
+        played: true
       };
 
     }
@@ -261,17 +280,21 @@ function getAllGames(
 
     try {
 
+      const raw =
+        localStorage.getItem(
+          storageKey
+        );
+
+
       const game =
         JSON.parse(
-          localStorage.getItem(
-            storageKey
-          )
+          raw
         );
 
 
       if (
         !game ||
-        game.attempted !== true
+        typeof game !== "object"
       ) {
 
         continue;
@@ -279,20 +302,39 @@ function getAllGames(
       }
 
 
+      const completed =
+        game.played === true ||
+        game.attempted === true;
+
+
+      if (!completed) {
+
+        continue;
+
+      }
+
+
       const puzzleKey =
-        storageKey.replace(
-          "quiz_",
-          ""
+        storageKey.substring(
+          5
         );
 
+
+      /*
+       * Firestore already has this puzzle.
+       * Therefore don't count it again.
+       */
 
       if (
         !games[puzzleKey]
       ) {
 
         games[puzzleKey] = {
+
           ...game,
+
           played: true
+
         };
 
       }
@@ -317,12 +359,79 @@ function getAllGames(
 
 
 // =====================================================
+// TOTAL SCORE
+//
+// IMPORTANT:
+//
+// Total Score is NOT taken from old
+// data.totalScore.
+//
+// It is calculated fresh:
+//
+// Puzzle 1 score
+// + Puzzle 2 score
+// + Puzzle 3 score
+// + ...
+//
+// Every completed puzzle is included.
+// =====================================================
+
+function calculateTotalScore(
+  allGames
+) {
+
+  let totalScore = 0;
+
+
+  for (
+    const game of Object.values(
+      allGames
+    )
+  ) {
+
+    if (
+      !game ||
+      game.played !== true
+    ) {
+
+      continue;
+
+    }
+
+
+    const gameScore =
+      Number(
+        game.score
+      );
+
+
+    if (
+      Number.isFinite(
+        gameScore
+      )
+    ) {
+
+      totalScore +=
+        gameScore;
+
+    }
+
+  }
+
+
+  return totalScore;
+
+}
+
+
+// =====================================================
 // GAME STATS
 //
-// ALL COMPLETED GAMES COUNT
+// Total Games = completed games
+// Won = correct === true
+// Lost = correct === false
 //
-// Puzzle date doesn't matter.
-// How/when it was played doesn't matter.
+// Puzzle date does NOT matter.
 // =====================================================
 
 function calculateGameStats(
@@ -337,16 +446,29 @@ function calculateGameStats(
 
 
   for (
-    const key in allGames
+    const game of Object.values(
+      allGames
+    )
   ) {
-
-    const game =
-      allGames[key];
-
 
     if (
       !game ||
       game.played !== true
+    ) {
+
+      continue;
+
+    }
+
+
+    /*
+     * Only count games which actually
+     * have a result.
+     */
+
+    if (
+      game.correct !== true &&
+      game.correct !== false
     ) {
 
       continue;
@@ -365,15 +487,23 @@ function calculateGameStats(
 
     }
 
-    else if (
-      game.correct === false
-    ) {
+    else {
 
       gamesLost++;
 
     }
 
   }
+
+
+  /*
+   * Safety:
+   * Total must always equal Won + Lost.
+   */
+
+  totalGames =
+    gamesWon +
+    gamesLost;
 
 
   const winRate =
@@ -409,7 +539,7 @@ function calculateGameStats(
 // =====================================================
 // ACTUAL PLAY DATES
 //
-// STREAK USES ONLY playedAt.
+// Streak uses playedAt.
 //
 // Puzzle's original date is ignored.
 // =====================================================
@@ -423,16 +553,22 @@ function getActualPlayDates(
 
 
   for (
-    const key in allGames
+    const game of Object.values(
+      allGames
+    )
   ) {
-
-    const game =
-      allGames[key];
-
 
     if (
       !game ||
-      game.played !== true ||
+      game.played !== true
+    ) {
+
+      continue;
+
+    }
+
+
+    if (
       !game.playedAt
     ) {
 
@@ -473,14 +609,17 @@ function getActualPlayDates(
 // =====================================================
 // CURRENT STREAK
 //
-// TODAY PLAYED:
-//   start from today.
+// If today was played:
+//     today counts.
 //
-// TODAY NOT PLAYED:
-//   start from yesterday.
+// If today was not played:
+//     yesterday can still remain active.
 //
-// Previous-day puzzle played today
-// STILL COUNTS FOR TODAY.
+// Multiple puzzles on same day:
+//     counts as ONE streak day.
+//
+// Previous-day puzzle played today:
+//     counts for TODAY.
 // =====================================================
 
 function calculateCurrentStreak(
@@ -529,7 +668,9 @@ function calculateCurrentStreak(
   else {
 
     cursor =
-      new Date(today);
+      new Date(
+        today
+      );
 
     cursor.setDate(
       cursor.getDate() - 1
@@ -562,7 +703,9 @@ function calculateCurrentStreak(
 
 
     cursor =
-      new Date(cursor);
+      new Date(
+        cursor
+      );
 
     cursor.setDate(
       cursor.getDate() - 1
@@ -617,12 +760,18 @@ function calculateBestStreak(
 
 
     previous.setHours(
-      0, 0, 0, 0
+      0,
+      0,
+      0,
+      0
     );
 
 
     currentDate.setHours(
-      0, 0, 0, 0
+      0,
+      0,
+      0,
+      0
     );
 
 
@@ -677,7 +826,9 @@ function calculateBestStreak(
 // LOAD PROGRESS
 // =====================================================
 
-async function loadProgress(user) {
+async function loadProgress(
+  user
+) {
 
   try {
 
@@ -713,26 +864,33 @@ async function loadProgress(user) {
 
 
     // =================================================
-    // TOTAL SCORE
-    // =================================================
-
-    const totalScore =
-      Number(
-        data.totalScore || 0
-      );
-
-
-    // =================================================
-    // ALL GAMES
+    // HISTORY
     // =================================================
 
     const history =
       data.history || {};
 
 
+    // =================================================
+    // ALL GAMES
+    // =================================================
+
     const allGames =
       getAllGames(
         history
+      );
+
+
+    // =================================================
+    // TOTAL SCORE
+    // =================================================
+    //
+    // Calculate fresh from every puzzle.
+    //
+
+    const totalScore =
+      calculateTotalScore(
+        allGames
       );
 
 
@@ -747,7 +905,7 @@ async function loadProgress(user) {
 
 
     // =================================================
-    // STREAK
+    // ACTUAL PLAY DATES
     // =================================================
 
     const playDateIds =
@@ -756,11 +914,19 @@ async function loadProgress(user) {
       );
 
 
+    // =================================================
+    // CURRENT STREAK
+    // =================================================
+
     const currentStreak =
       calculateCurrentStreak(
         playDateIds
       );
 
+
+    // =================================================
+    // BEST STREAK
+    // =================================================
 
     const bestStreak =
       calculateBestStreak(
@@ -769,12 +935,18 @@ async function loadProgress(user) {
 
 
     // =================================================
-    // SAVE STREAK
+    // SAVE CALCULATED PROGRESS
+    //
+    // This updates Firestore so the calculated
+    // Total Score and streak remain available.
     // =================================================
 
     await setDoc(
       userRef,
       {
+
+        totalScore:
+          totalScore,
 
         currentStreak:
           currentStreak,
@@ -894,7 +1066,10 @@ async function loadProgress(user) {
           stats.winRate,
 
         playDates:
-          playDateIds
+          playDateIds,
+
+        allGames:
+          allGames
 
       }
     );
@@ -917,7 +1092,9 @@ async function loadProgress(user) {
 // ACHIEVEMENTS
 // =====================================================
 
-function renderAchievements(stats) {
+function renderAchievements(
+  stats
+) {
 
   if (!achievementList) {
 
@@ -1150,7 +1327,7 @@ onAuthStateChanged(
 
 
 // =====================================================
-// REFRESH WHEN RETURNING
+// REFRESH WHEN RETURNING TO HOME
 // =====================================================
 
 window.addEventListener(
@@ -1159,6 +1336,7 @@ window.addEventListener(
 
     const user =
       auth.currentUser;
+
 
     if (user) {
 
@@ -1173,7 +1351,7 @@ window.addEventListener(
 
 
 // =====================================================
-// REFRESH WHEN VISIBLE
+// REFRESH WHEN PAGE BECOMES VISIBLE
 // =====================================================
 
 document.addEventListener(
@@ -1187,6 +1365,7 @@ document.addEventListener(
 
       const user =
         auth.currentUser;
+
 
       if (user) {
 
