@@ -111,6 +111,23 @@ const sendContactBtn =
 
 
 // =====================================================
+// THEME
+// =====================================================
+
+const themesBtn =
+  document.getElementById("themesBtn");
+
+const themeModal =
+  document.getElementById("themeModal");
+
+const closeTheme =
+  document.getElementById("closeTheme");
+
+const themeOptions =
+  document.querySelectorAll(".theme-option");
+
+
+// =====================================================
 // VARIABLES
 // =====================================================
 
@@ -123,129 +140,46 @@ let selectedPhotoFile = null;
 
 
 // =====================================================
-// AUTH
+// DATE KEY
 // =====================================================
 
-onAuthStateChanged(
-  auth,
-  async (user) => {
+function getDateKey(date) {
 
-    if (!user) {
+  const d =
+    new Date(date);
 
-      window.location.replace(
-        "login.html"
-      );
+  if (
+    Number.isNaN(
+      d.getTime()
+    )
+  ) {
 
-      return;
-    }
-
-    currentUser =
-      user;
-
-    try {
-
-      await loadProfile(user);
-
-    } catch (error) {
-
-      console.error(
-        "PROFILE LOAD ERROR:",
-        error
-      );
-
-      username.textContent =
-        user.displayName ||
-        "User";
-
-      email.textContent =
-        user.email ||
-        "";
-
-      await loadStats({});
-    }
+    return null;
 
   }
-);
 
 
-// =====================================================
-// LOAD PROFILE
-// =====================================================
+  const year =
+    d.getFullYear();
 
-async function loadProfile(user) {
+  const month =
+    String(
+      d.getMonth() + 1
+    ).padStart(2, "0");
 
-  const userRef =
-    doc(
-      db,
-      "users",
-      user.uid
-    );
-
-  const snapshot =
-    await getDoc(userRef);
-
-  let data = {};
-
-  if (snapshot.exists()) {
-
-    data =
-      snapshot.data();
-  }
+  const day =
+    String(
+      d.getDate()
+    ).padStart(2, "0");
 
 
-  // ===================================================
-  // USERNAME
-  // ===================================================
-
-  const savedUsername =
-    data.username ||
-    user.displayName ||
-    "User";
-
-  username.textContent =
-    savedUsername;
-
-  if (editUsername) {
-
-    editUsername.value =
-      savedUsername;
-  }
-
-
-  // ===================================================
-  // EMAIL
-  // ===================================================
-
-  email.textContent =
-    data.email ||
-    user.email ||
-    "";
-
-
-  // ===================================================
-  // PHOTO
-  // ===================================================
-
-  currentPhotoURL =
-    data.photoURL ||
-    user.photoURL ||
-    "default-avatar.png";
-
-  avatar.src =
-    currentPhotoURL;
-
-  if (editPhotoPreview) {
-
-    editPhotoPreview.src =
-      currentPhotoURL;
-  }
-
-
-  // ===================================================
-  // STATS
-  // ===================================================
-
-  await loadStats(data);
+  return (
+    year +
+    "-" +
+    month +
+    "-" +
+    day
+  );
 
 }
 
@@ -258,6 +192,7 @@ function getLocalGames() {
 
   const games = {};
 
+
   for (
     let i = 0;
     i < localStorage.length;
@@ -267,21 +202,26 @@ function getLocalGames() {
     const key =
       localStorage.key(i);
 
+
     if (
       !key ||
       !key.startsWith("quiz_")
     ) {
 
       continue;
+
     }
+
 
     try {
 
       const raw =
         localStorage.getItem(key);
 
+
       const quiz =
         JSON.parse(raw);
+
 
       if (
         !quiz ||
@@ -289,39 +229,51 @@ function getLocalGames() {
       ) {
 
         continue;
+
       }
+
 
       const puzzleKey =
         key.substring(5);
 
+
       games[puzzleKey] =
         quiz;
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
       console.warn(
         "Invalid local quiz:",
         key
       );
+
     }
+
   }
 
+
   return games;
+
 }
 
 
 // =====================================================
 // MERGE ALL GAMES
 //
-// Firestore history = main source
-// localStorage = backup for unsynced games
+// Firestore history = MAIN SOURCE
+// localStorage = BACKUP
 //
-// Same puzzle is counted only once.
+// Same puzzle counted only once.
 // =====================================================
 
-function mergeGames(firestoreHistory) {
+function mergeGames(
+  firestoreHistory
+) {
 
   const games = {};
+
 
   const history =
     firestoreHistory &&
@@ -329,12 +281,17 @@ function mergeGames(firestoreHistory) {
       ? firestoreHistory
       : {};
 
-  // Firestore first
+
+  // ---------------------------------------------------
+  // FIRESTORE FIRST
+  // ---------------------------------------------------
+
   Object.keys(history).forEach(
     (key) => {
 
       const game =
         history[key];
+
 
       if (
         game &&
@@ -343,23 +300,32 @@ function mergeGames(firestoreHistory) {
 
         games[key] =
           game;
+
       }
 
     }
   );
 
 
-  // LocalStorage only fills missing games
+  // ---------------------------------------------------
+  // LOCAL STORAGE
+  // Only fills missing puzzles.
+  // ---------------------------------------------------
+
   const localGames =
     getLocalGames();
+
 
   Object.keys(localGames).forEach(
     (key) => {
 
-      if (!games[key]) {
+      if (
+        !games[key]
+      ) {
 
         games[key] =
           localGames[key];
+
       }
 
     }
@@ -367,20 +333,25 @@ function mergeGames(firestoreHistory) {
 
 
   return games;
+
 }
 
 
 // =====================================================
 // CHECK COMPLETED GAME
 //
-// A game is completed only when
-// correct is explicitly true OR false.
+// A completed game must have:
 //
-// This prevents unfinished games from
-// increasing Total Games.
+// played === true OR attempted === true
+//
+// AND
+//
+// correct === true OR correct === false
 // =====================================================
 
-function isCompletedGame(game) {
+function isCompletedGame(
+  game
+) {
 
   if (
     !game ||
@@ -388,25 +359,101 @@ function isCompletedGame(game) {
   ) {
 
     return false;
+
   }
+
 
   const hasPlayedFlag =
     game.played === true ||
     game.attempted === true;
 
+
   const hasResult =
     game.correct === true ||
     game.correct === false;
+
 
   return (
     hasPlayedFlag &&
     hasResult
   );
+
+}
+
+
+// =====================================================
+// CALCULATE TOTAL SCORE
+//
+// Every completed puzzle's score is added.
+//
+// Puzzle date does NOT matter.
+// Playing date does NOT matter.
+//
+// Example:
+//
+// Puzzle A = 10
+// Puzzle B = 15
+// Puzzle C = 5
+//
+// Total Score = 30
+// =====================================================
+
+function calculateTotalScore(
+  allGames
+) {
+
+  let totalScore = 0;
+
+
+  Object.values(
+    allGames
+  ).forEach(
+    (game) => {
+
+      if (
+        !isCompletedGame(game)
+      ) {
+
+        return;
+
+      }
+
+
+      const gameScore =
+        Number(
+          game.score || 0
+        );
+
+
+      if (
+        Number.isFinite(
+          gameScore
+        )
+      ) {
+
+        totalScore +=
+          gameScore;
+
+      }
+
+    }
+  );
+
+
+  return totalScore;
+
 }
 
 
 // =====================================================
 // CALCULATE GAME STATS
+//
+// Total Games = Won + Lost
+// Won = correct true
+// Lost = correct false
+//
+// No puzzle-date restriction.
+// No playing-date restriction.
 // =====================================================
 
 function calculateGameStats(
@@ -418,38 +465,27 @@ function calculateGameStats(
       firestoreHistory
     );
 
+
   let totalGames = 0;
+
   let gamesWon = 0;
+
   let gamesLost = 0;
 
-  const playedDates =
-    new Set();
 
-
-  Object.keys(allGames).forEach(
-    (key) => {
-
-      const game =
-        allGames[key];
+  Object.values(
+    allGames
+  ).forEach(
+    (game) => {
 
       if (
         !isCompletedGame(game)
       ) {
 
         return;
+
       }
 
-
-      // ===============================================
-      // TOTAL
-      // ===============================================
-
-      totalGames++;
-
-
-      // ===============================================
-      // WON / LOST
-      // ===============================================
 
       if (
         game.correct === true
@@ -457,40 +493,13 @@ function calculateGameStats(
 
         gamesWon++;
 
-      } else if (
+      }
+
+      else if (
         game.correct === false
       ) {
 
         gamesLost++;
-      }
-
-
-      // ===============================================
-      // ACTUAL PLAY DATE
-      //
-      // Streak uses playedAt,
-      // NOT puzzle date.
-      // ===============================================
-
-      if (
-        game.playedAt
-      ) {
-
-        const date =
-          new Date(
-            game.playedAt
-          );
-
-        if (
-          !Number.isNaN(
-            date.getTime()
-          )
-        ) {
-
-          playedDates.add(
-            getDateKey(date)
-          );
-        }
 
       }
 
@@ -499,7 +508,7 @@ function calculateGameStats(
 
 
   // Safety:
-  // Total Games must always equal Won + Lost
+  // Total must always equal Won + Lost.
 
   totalGames =
     gamesWon +
@@ -517,12 +526,6 @@ function calculateGameStats(
         );
 
 
-  const streakData =
-    calculateStreaks(
-      playedDates
-    );
-
-
   return {
 
     totalGames:
@@ -535,54 +538,106 @@ function calculateGameStats(
       gamesLost,
 
     winRate:
-      winRate,
-
-    currentStreak:
-      streakData.currentStreak,
-
-    bestStreak:
-      streakData.bestStreak
+      winRate
 
   };
+
 }
 
 
 // =====================================================
-// DATE KEY
+// GET ACTUAL PLAY DATES
+//
+// IMPORTANT:
+//
+// Streak uses ONLY playedAt.
+//
+// Puzzle's original date is ignored.
 // =====================================================
 
-function getDateKey(date) {
+function getActualPlayDates(
+  allGames
+) {
 
-  const year =
-    date.getFullYear();
+  const playedDates =
+    new Set();
 
-  const month =
-    String(
-      date.getMonth() + 1
-    ).padStart(2, "0");
 
-  const day =
-    String(
-      date.getDate()
-    ).padStart(2, "0");
+  Object.values(
+    allGames
+  ).forEach(
+    (game) => {
 
-  return (
-    year +
-    "-" +
-    month +
-    "-" +
-    day
+      if (
+        !isCompletedGame(game)
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        !game.playedAt
+      ) {
+
+        return;
+
+      }
+
+
+      const date =
+        new Date(
+          game.playedAt
+        );
+
+
+      if (
+        Number.isNaN(
+          date.getTime()
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      const key =
+        getDateKey(
+          date
+        );
+
+
+      if (key) {
+
+        playedDates.add(
+          key
+        );
+
+      }
+
+    }
   );
+
+
+  return playedDates;
+
 }
 
 
 // =====================================================
-// STREAK CALCULATION
+// CALCULATE STREAKS
 //
-// Based ONLY on actual played dates.
-// Puzzle date is ignored.
+// Multiple games on same actual date = ONE day.
 //
-// Multiple games on same day = one streak day.
+// Today played:
+//   today counts.
+//
+// Today not played:
+//   yesterday can still remain current.
+//
+// Missing actual playing day breaks streak.
 // =====================================================
 
 function calculateStreaks(
@@ -595,9 +650,13 @@ function calculateStreaks(
   ) {
 
     return {
+
       currentStreak: 0,
+
       bestStreak: 0
+
     };
+
   }
 
 
@@ -607,11 +666,12 @@ function calculateStreaks(
     ).sort();
 
 
-  // ===============================================
+  // ===================================================
   // BEST STREAK
-  // ===============================================
+  // ===================================================
 
   let bestStreak = 1;
+
   let runningStreak = 1;
 
 
@@ -627,11 +687,13 @@ function calculateStreaks(
         "T00:00:00"
       );
 
+
     const current =
       new Date(
         dates[i] +
         "T00:00:00"
       );
+
 
     const difference =
       Math.round(
@@ -649,96 +711,137 @@ function calculateStreaks(
 
       runningStreak++;
 
+
       bestStreak =
         Math.max(
           bestStreak,
           runningStreak
         );
 
-    } else {
+    }
+
+    else {
 
       runningStreak = 1;
+
     }
 
   }
 
 
-  // ===============================================
+  // ===================================================
   // CURRENT STREAK
-  //
-  // If today is played:
-  // count backwards from today.
-  //
-  // If today isn't played:
-  // yesterday can still remain active.
-  // ===============================================
+  // ===================================================
 
   const today =
     new Date();
 
+
+  today.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+
   const todayKey =
-    getDateKey(today);
+    getDateKey(
+      today
+    );
+
 
   const yesterday =
-    new Date(today);
+    new Date(
+      today
+    );
+
 
   yesterday.setDate(
     yesterday.getDate() - 1
   );
 
+
   const yesterdayKey =
-    getDateKey(yesterday);
+    getDateKey(
+      yesterday
+    );
 
 
   let startDate = null;
 
 
   if (
-    playedDates.has(todayKey)
+    playedDates.has(
+      todayKey
+    )
   ) {
 
     startDate =
       today;
 
-  } else if (
-    playedDates.has(yesterdayKey)
+  }
+
+  else if (
+    playedDates.has(
+      yesterdayKey
+    )
   ) {
 
     startDate =
       yesterday;
 
-  } else {
+  }
+
+  else {
 
     return {
+
       currentStreak: 0,
-      bestStreak: bestStreak
+
+      bestStreak:
+        bestStreak
+
     };
+
   }
 
 
   let currentStreak = 0;
 
+
   const checkDate =
-    new Date(startDate);
+    new Date(
+      startDate
+    );
 
 
   while (true) {
 
     const key =
-      getDateKey(checkDate);
+      getDateKey(
+        checkDate
+      );
+
 
     if (
-      !playedDates.has(key)
+      !playedDates.has(
+        key
+      )
     ) {
 
       break;
+
     }
 
+
     currentStreak++;
+
 
     checkDate.setDate(
       checkDate.getDate() - 1
     );
+
   }
 
 
@@ -751,6 +854,7 @@ function calculateStreaks(
       bestStreak
 
   };
+
 }
 
 
@@ -758,50 +862,114 @@ function calculateStreaks(
 // LOAD STATS
 // =====================================================
 
-async function loadStats(data) {
+async function loadStats(
+  data
+) {
 
-  const totalScore =
-    Number(
-      data.totalScore || 0
+  const firestoreHistory =
+    data.history || {};
+
+
+  // ===================================================
+  // ALL GAMES
+  // ===================================================
+
+  const allGames =
+    mergeGames(
+      firestoreHistory
     );
 
+
+  // ===================================================
+  // TOTAL SCORE
+  // ===================================================
+
+  const totalScore =
+    calculateTotalScore(
+      allGames
+    );
+
+
+  // ===================================================
+  // GAME STATS
+  // ===================================================
 
   const gameStats =
     calculateGameStats(
-      data.history || {}
+      firestoreHistory
     );
 
 
-  // ===============================================
-  // SCREEN
-  // ===============================================
+  // ===================================================
+  // ACTUAL PLAY DATES
+  // ===================================================
 
-  score.textContent =
-    totalScore;
-
-  streak.textContent =
-    gameStats.currentStreak;
-
-  accuracy.textContent =
-    gameStats.winRate + "%";
-
-  played.textContent =
-    gameStats.totalGames;
+  const playedDates =
+    getActualPlayDates(
+      allGames
+    );
 
 
-  // ===============================================
-  // SAVE CORRECT STREAK BACK TO FIRESTORE
-  // ===============================================
+  // ===================================================
+  // STREAKS
+  // ===================================================
 
-  if (
-    currentUser &&
-    (
-      Number(data.currentStreak || 0) !==
-      gameStats.currentStreak ||
-      Number(data.bestStreak || 0) !==
-      gameStats.bestStreak
-    )
-  ) {
+  const streakData =
+    calculateStreaks(
+      playedDates
+    );
+
+
+  const currentStreak =
+    streakData.currentStreak;
+
+
+  const bestStreak =
+    streakData.bestStreak;
+
+
+  // ===================================================
+  // UPDATE SCREEN
+  // ===================================================
+
+  if (score) {
+
+    score.textContent =
+      totalScore;
+
+  }
+
+
+  if (streak) {
+
+    streak.textContent =
+      currentStreak;
+
+  }
+
+
+  if (accuracy) {
+
+    accuracy.textContent =
+      gameStats.winRate +
+      "%";
+
+  }
+
+
+  if (played) {
+
+    played.textContent =
+      gameStats.totalGames;
+
+  }
+
+
+  // ===================================================
+  // SAVE CALCULATED VALUES
+  // ===================================================
+
+  if (currentUser) {
 
     try {
 
@@ -815,11 +983,14 @@ async function loadStats(data) {
 
         {
 
+          totalScore:
+            totalScore,
+
           currentStreak:
-            gameStats.currentStreak,
+            currentStreak,
 
           bestStreak:
-            gameStats.bestStreak
+            bestStreak
 
         },
 
@@ -829,20 +1000,23 @@ async function loadStats(data) {
 
       );
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
       console.warn(
-        "Could not update streak:",
+        "Could not update profile stats:",
         error
       );
+
     }
 
   }
 
 
-  // ===============================================
+  // ===================================================
   // LOCAL BACKUP
-  // ===============================================
+  // ===================================================
 
   localStorage.setItem(
 
@@ -854,7 +1028,7 @@ async function loadStats(data) {
         totalScore,
 
       streak:
-        gameStats.currentStreak,
+        currentStreak,
 
       accuracy:
         gameStats.winRate,
@@ -873,48 +1047,63 @@ async function loadStats(data) {
   );
 
 
-  // ===============================================
+  // ===================================================
   // LEVEL
-  // ===============================================
+  // ===================================================
 
   if (
-    totalScore >= 1000
+    level
   ) {
 
-    level.textContent =
-      "👑 Level 5";
+    if (
+      totalScore >= 1000
+    ) {
 
-  } else if (
-    totalScore >= 500
-  ) {
+      level.textContent =
+        "👑 Level 5";
 
-    level.textContent =
-      "💎 Level 4";
+    }
 
-  } else if (
-    totalScore >= 250
-  ) {
+    else if (
+      totalScore >= 500
+    ) {
 
-    level.textContent =
-      "🥇 Level 3";
+      level.textContent =
+        "💎 Level 4";
 
-  } else if (
-    totalScore >= 100
-  ) {
+    }
 
-    level.textContent =
-      "🥈 Level 2";
+    else if (
+      totalScore >= 250
+    ) {
 
-  } else {
+      level.textContent =
+        "🥇 Level 3";
 
-    level.textContent =
-      "⭐ Level 1";
+    }
+
+    else if (
+      totalScore >= 100
+    ) {
+
+      level.textContent =
+        "🥈 Level 2";
+
+    }
+
+    else {
+
+      level.textContent =
+        "⭐ Level 1";
+
+    }
+
   }
 
 
-  // ===============================================
+  // ===================================================
   // ACHIEVEMENTS
-  // ===============================================
+  // ===================================================
 
   renderAchievements({
 
@@ -922,7 +1111,7 @@ async function loadStats(data) {
       totalScore,
 
     currentStreak:
-      gameStats.currentStreak,
+      currentStreak,
 
     puzzlesPlayed:
       gameStats.totalGames,
@@ -933,9 +1122,44 @@ async function loadStats(data) {
   });
 
 
+  // ===================================================
+  // DEBUG
+  // ===================================================
+
   console.log(
     "PROFILE STATS",
-    gameStats
+    {
+
+      totalScore:
+        totalScore,
+
+      currentStreak:
+        currentStreak,
+
+      bestStreak:
+        bestStreak,
+
+      totalGames:
+        gameStats.totalGames,
+
+      gamesWon:
+        gameStats.gamesWon,
+
+      gamesLost:
+        gameStats.gamesLost,
+
+      winRate:
+        gameStats.winRate,
+
+      playedDates:
+        Array.from(
+          playedDates
+        ),
+
+      allGames:
+        allGames
+
+    }
   );
 
 }
@@ -945,74 +1169,140 @@ async function loadStats(data) {
 // ACHIEVEMENTS
 // =====================================================
 
-function renderAchievements(stats) {
+function renderAchievements(
+  stats
+) {
 
   let html = "";
 
+
+  // ===================================================
+  // FIRST PUZZLE
+  // ===================================================
 
   if (
     stats.puzzlesPlayed >= 1
   ) {
 
     html += `
+
       <div class="achievement-item">
+
         <span>🥇</span>
+
         <div>
+
           <h3>Logo Rookie</h3>
-          <p>Completed your first puzzle.</p>
+
+          <p>
+            Completed your first puzzle.
+          </p>
+
         </div>
+
       </div>
+
     `;
+
   }
 
+
+  // ===================================================
+  // 7 DAY STREAK
+  // ===================================================
 
   if (
     stats.currentStreak >= 7
   ) {
 
     html += `
+
       <div class="achievement-item">
+
         <span>🔥</span>
+
         <div>
+
           <h3>7 Day Streak</h3>
-          <p>Solved puzzles for 7 consecutive days.</p>
+
+          <p>
+            Solved puzzles for 7 consecutive days.
+          </p>
+
         </div>
+
       </div>
+
     `;
+
   }
 
+
+  // ===================================================
+  // 100 POINTS
+  // ===================================================
 
   if (
     stats.totalScore >= 100
   ) {
 
     html += `
+
       <div class="achievement-item">
+
         <span>⭐</span>
+
         <div>
+
           <h3>100 Points Club</h3>
-          <p>Earned 100+ points.</p>
+
+          <p>
+            Earned 100+ points.
+          </p>
+
         </div>
+
       </div>
+
     `;
+
   }
 
+
+  // ===================================================
+  // 30 PUZZLES
+  // ===================================================
 
   if (
     stats.puzzlesPlayed >= 30
   ) {
 
     html += `
+
       <div class="achievement-item">
+
         <span>🎮</span>
+
         <div>
+
           <h3>Puzzle Master</h3>
-          <p>Played 30 puzzles.</p>
+
+          <p>
+            Played 30 puzzles.
+          </p>
+
         </div>
+
       </div>
+
     `;
+
   }
 
+
+  // ===================================================
+  // ACCURACY MASTER
+  // ===================================================
 
   if (
     stats.puzzlesPlayed >= 10 &&
@@ -1020,39 +1310,71 @@ function renderAchievements(stats) {
   ) {
 
     html += `
+
       <div class="achievement-item">
+
         <span>🎯</span>
+
         <div>
+
           <h3>Accuracy Master</h3>
-          <p>100% accuracy in 10 puzzles.</p>
+
+          <p>
+            100% accuracy in 10 puzzles.
+          </p>
+
         </div>
+
       </div>
+
     `;
+
   }
 
+
+  // ===================================================
+  // NO ACHIEVEMENTS
+  // ===================================================
 
   if (
     html === ""
   ) {
 
     html = `
+
       <div class="achievement-item">
+
         <span>🔒</span>
+
         <div>
+
           <h3>No Achievements Yet</h3>
-          <p>Keep playing to unlock achievements.</p>
+
+          <p>
+            Keep playing to unlock achievements.
+          </p>
+
         </div>
+
       </div>
+
     `;
+
   }
 
 
-  if (achievementList) {
+  if (
+    achievementList
+  ) {
 
     achievementList.innerHTML =
       html;
 
-  } else if (achievementSection) {
+  }
+
+  else if (
+    achievementSection
+  ) {
 
     achievementSection.innerHTML =
       "<h2>Achievements</h2>" +
@@ -1064,29 +1386,230 @@ function renderAchievements(stats) {
 
 
 // =====================================================
+// LOAD PROFILE
+// =====================================================
+
+async function loadProfile(
+  user
+) {
+
+  const userRef =
+    doc(
+      db,
+      "users",
+      user.uid
+    );
+
+
+  const snapshot =
+    await getDoc(
+      userRef
+    );
+
+
+  let data = {};
+
+
+  if (
+    snapshot.exists()
+  ) {
+
+    data =
+      snapshot.data();
+
+  }
+
+
+  // ===================================================
+  // USERNAME
+  // ===================================================
+
+  const savedUsername =
+    data.username ||
+    user.displayName ||
+    "User";
+
+
+  if (username) {
+
+    username.textContent =
+      savedUsername;
+
+  }
+
+
+  if (editUsername) {
+
+    editUsername.value =
+      savedUsername;
+
+  }
+
+
+  // ===================================================
+  // EMAIL
+  // ===================================================
+
+  if (email) {
+
+    email.textContent =
+      data.email ||
+      user.email ||
+      "";
+
+  }
+
+
+  // ===================================================
+  // PHOTO
+  // ===================================================
+
+  currentPhotoURL =
+    data.photoURL ||
+    user.photoURL ||
+    "default-avatar.png";
+
+
+  if (avatar) {
+
+    avatar.src =
+      currentPhotoURL;
+
+  }
+
+
+  if (editPhotoPreview) {
+
+    editPhotoPreview.src =
+      currentPhotoURL;
+
+  }
+
+
+  // ===================================================
+  // STATS
+  // ===================================================
+
+  await loadStats(
+    data
+  );
+
+}
+
+
+// =====================================================
+// AUTH
+// =====================================================
+
+onAuthStateChanged(
+  auth,
+  async (user) => {
+
+    if (!user) {
+
+      window.location.replace(
+        "login.html"
+      );
+
+      return;
+
+    }
+
+
+    currentUser =
+      user;
+
+
+    try {
+
+      await loadProfile(
+        user
+      );
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "PROFILE LOAD ERROR:",
+        error
+      );
+
+
+      if (username) {
+
+        username.textContent =
+          user.displayName ||
+          "User";
+
+      }
+
+
+      if (email) {
+
+        email.textContent =
+          user.email ||
+          "";
+
+      }
+
+
+      await loadStats({});
+
+    }
+
+  }
+);
+
+
+// =====================================================
 // EDIT PROFILE
 // =====================================================
 
-if (editProfileBtn) {
+if (
+  editProfileBtn &&
+  editProfileModal
+) {
 
   editProfileBtn.addEventListener(
     "click",
     () => {
 
-      editUsername.value =
-        username.textContent;
+      if (editUsername) {
 
-      editPhotoPreview.src =
-        currentPhotoURL;
+        editUsername.value =
+          username?.textContent ||
+          currentUser?.displayName ||
+          "User";
+
+      }
+
+
+      if (editPhotoPreview) {
+
+        editPhotoPreview.src =
+          currentPhotoURL;
+
+      }
+
 
       selectedPhotoFile =
         null;
 
-      profilePhotoInput.value =
-        "";
+
+      if (
+        profilePhotoInput
+      ) {
+
+        profilePhotoInput.value =
+          "";
+
+      }
+
 
       editProfileModal.style.display =
         "flex";
+
 
       editProfileModal.setAttribute(
         "aria-hidden",
@@ -1100,54 +1623,73 @@ if (editProfileBtn) {
 
 
 // =====================================================
-// CLOSE EDIT MODAL
+// CLOSE EDIT PROFILE
 // =====================================================
 
 function closeEditModal() {
 
-  if (!editProfileModal) {
+  if (
+    !editProfileModal
+  ) {
+
     return;
+
   }
+
 
   editProfileModal.style.display =
     "none";
+
 
   editProfileModal.setAttribute(
     "aria-hidden",
     "true"
   );
 
+
   selectedPhotoFile =
     null;
 
-  if (profilePhotoInput) {
+
+  if (
+    profilePhotoInput
+  ) {
 
     profilePhotoInput.value =
       "";
+
   }
 
 }
 
 
-if (cancelProfileBtn) {
+if (
+  cancelProfileBtn
+) {
 
   cancelProfileBtn.addEventListener(
     "click",
     closeEditModal
   );
+
 }
 
 
-if (closeEditProfile) {
+if (
+  closeEditProfile
+) {
 
   closeEditProfile.addEventListener(
     "click",
     closeEditModal
   );
+
 }
 
 
-if (editProfileModal) {
+if (
+  editProfileModal
+) {
 
   editProfileModal.addEventListener(
     "click",
@@ -1159,6 +1701,7 @@ if (editProfileModal) {
       ) {
 
         closeEditModal();
+
       }
 
     }
@@ -1171,7 +1714,9 @@ if (editProfileModal) {
 // SELECT PHOTO
 // =====================================================
 
-if (profilePhotoInput) {
+if (
+  profilePhotoInput
+) {
 
   profilePhotoInput.addEventListener(
     "change",
@@ -1180,40 +1725,83 @@ if (profilePhotoInput) {
       const file =
         profilePhotoInput.files?.[0];
 
+
       if (!file) {
+
         return;
+
       }
 
+
       if (
-        !file.type.startsWith("image/")
+        !file.type.startsWith(
+          "image/"
+        )
       ) {
 
         alert(
           "Please select an image."
         );
 
+
         profilePhotoInput.value =
           "";
 
+
         return;
+
       }
+
+
+      if (
+        file.size >
+        10 * 1024 * 1024
+      ) {
+
+        alert(
+          "Please select an image smaller than 10 MB."
+        );
+
+
+        profilePhotoInput.value =
+          "";
+
+
+        return;
+
+      }
+
 
       selectedPhotoFile =
         file;
 
 
+      // =================================================
+      // INSTANT PREVIEW
+      // =================================================
+
       const reader =
         new FileReader();
+
 
       reader.onload =
         (event) => {
 
-          editPhotoPreview.src =
-            event.target.result;
+          if (
+            editPhotoPreview
+          ) {
+
+            editPhotoPreview.src =
+              event.target.result;
+
+          }
 
         };
 
-      reader.readAsDataURL(file);
+
+      reader.readAsDataURL(
+        file
+      );
 
     }
   );
@@ -1225,7 +1813,9 @@ if (profilePhotoInput) {
 // COMPRESS IMAGE
 // =====================================================
 
-function compressImage(file) {
+function compressImage(
+  file
+) {
 
   return new Promise(
     (resolve, reject) => {
@@ -1233,14 +1823,20 @@ function compressImage(file) {
       const reader =
         new FileReader();
 
+
       reader.onload =
         (event) => {
 
           const image =
             new Image();
 
+
           image.onload =
             () => {
+
+              const MAX_SIZE =
+                450;
+
 
               let width =
                 image.width;
@@ -1249,40 +1845,48 @@ function compressImage(file) {
                 image.height;
 
 
-              const maxSize =
-                600;
-
+              // =================================================
+              // RESIZE
+              // =================================================
 
               if (
-                width > maxSize ||
-                height > maxSize
+                width > height
               ) {
 
                 if (
-                  width > height
+                  width > MAX_SIZE
                 ) {
 
                   height =
                     Math.round(
                       height *
-                      maxSize /
+                      MAX_SIZE /
                       width
                     );
 
                   width =
-                    maxSize;
+                    MAX_SIZE;
 
-                } else {
+                }
+
+              }
+
+              else {
+
+                if (
+                  height > MAX_SIZE
+                ) {
 
                   width =
                     Math.round(
                       width *
-                      maxSize /
+                      MAX_SIZE /
                       height
                     );
 
                   height =
-                    maxSize;
+                    MAX_SIZE;
+
                 }
 
               }
@@ -1292,6 +1896,7 @@ function compressImage(file) {
                 document.createElement(
                   "canvas"
                 );
+
 
               canvas.width =
                 width;
@@ -1305,6 +1910,7 @@ function compressImage(file) {
                   "2d"
                 );
 
+
               ctx.drawImage(
                 image,
                 0,
@@ -1317,6 +1923,7 @@ function compressImage(file) {
               let quality =
                 0.70;
 
+
               let result =
                 canvas.toDataURL(
                   "image/jpeg",
@@ -1325,23 +1932,28 @@ function compressImage(file) {
 
 
               while (
-                result.length > 600000 &&
-                quality > 0.30
+                result.length >
+                  600000 &&
+                quality >
+                  0.30
               ) {
 
                 quality -=
                   0.05;
+
 
                 result =
                   canvas.toDataURL(
                     "image/jpeg",
                     quality
                   );
+
               }
 
 
               if (
-                result.length > 750000
+                result.length >
+                750000
               ) {
 
                 reject(
@@ -1351,6 +1963,7 @@ function compressImage(file) {
                 );
 
                 return;
+
               }
 
 
@@ -1372,6 +1985,7 @@ function compressImage(file) {
 
             };
 
+
           image.src =
             event.target.result;
 
@@ -1389,7 +2003,10 @@ function compressImage(file) {
 
         };
 
-      reader.readAsDataURL(file);
+
+      reader.readAsDataURL(
+        file
+      );
 
     }
   );
@@ -1401,7 +2018,9 @@ function compressImage(file) {
 // SAVE PROFILE
 // =====================================================
 
-if (saveProfileBtn) {
+if (
+  saveProfileBtn
+) {
 
   saveProfileBtn.addEventListener(
     "click",
@@ -1414,11 +2033,12 @@ if (saveProfileBtn) {
         );
 
         return;
+
       }
 
 
       const newUsername =
-        editUsername.value.trim();
+        editUsername?.value.trim();
 
 
       if (!newUsername) {
@@ -1428,6 +2048,7 @@ if (saveProfileBtn) {
         );
 
         return;
+
       }
 
 
@@ -1435,6 +2056,7 @@ if (saveProfileBtn) {
 
         saveProfileBtn.disabled =
           true;
+
 
         saveProfileBtn.textContent =
           "Saving...";
@@ -1448,6 +2070,10 @@ if (saveProfileBtn) {
           );
 
 
+        // =================================================
+        // PHOTO
+        // =================================================
+
         let newPhotoURL =
           currentPhotoURL;
 
@@ -1459,12 +2085,18 @@ if (saveProfileBtn) {
           saveProfileBtn.textContent =
             "Preparing Photo...";
 
+
           newPhotoURL =
             await compressImage(
               selectedPhotoFile
             );
+
         }
 
+
+        // =================================================
+        // FIRESTORE
+        // =================================================
 
         saveProfileBtn.textContent =
           "Saving...";
@@ -1484,7 +2116,7 @@ if (saveProfileBtn) {
 
             email:
               currentUser.email ||
-              email.textContent ||
+              email?.textContent ||
               "",
 
             photoURL:
@@ -1499,33 +2131,63 @@ if (saveProfileBtn) {
         );
 
 
+        // =================================================
+        // FIREBASE AUTH PROFILE
+        // =================================================
+
         await updateProfile(
 
           currentUser,
 
           {
+
             displayName:
               newUsername
+
           }
 
         );
 
 
-        username.textContent =
-          newUsername;
+        // =================================================
+        // UPDATE SCREEN INSTANTLY
+        // =================================================
 
-        avatar.src =
-          newPhotoURL;
+        if (username) {
 
-        editPhotoPreview.src =
-          newPhotoURL;
+          username.textContent =
+            newUsername;
+
+        }
+
+
+        if (avatar) {
+
+          avatar.src =
+            newPhotoURL;
+
+        }
+
+
+        if (editPhotoPreview) {
+
+          editPhotoPreview.src =
+            newPhotoURL;
+
+        }
+
 
         currentPhotoURL =
           newPhotoURL;
 
+
         selectedPhotoFile =
           null;
 
+
+        // =================================================
+        // CLOSE
+        // =================================================
 
         closeEditModal();
 
@@ -1534,29 +2196,38 @@ if (saveProfileBtn) {
           "Profile updated successfully!"
         );
 
+      }
 
-      } catch (error) {
+      catch (error) {
 
         console.error(
           "PROFILE SAVE ERROR:",
           error
         );
 
+
         alert(
+
           "Profile save failed.\n\n" +
+
           (
             error.message ||
             "Please try again."
           )
+
         );
 
-      } finally {
+      }
+
+      finally {
 
         saveProfileBtn.disabled =
           false;
 
+
         saveProfileBtn.textContent =
           "Save Changes";
+
       }
 
     }
@@ -1569,7 +2240,9 @@ if (saveProfileBtn) {
 // LOGOUT
 // =====================================================
 
-if (logoutBtn) {
+if (
+  logoutBtn
+) {
 
   logoutBtn.addEventListener(
     "click",
@@ -1577,13 +2250,18 @@ if (logoutBtn) {
 
       try {
 
-        await signOut(auth);
+        await signOut(
+          auth
+        );
+
 
         window.location.replace(
           "login.html"
         );
 
-      } catch (error) {
+      }
+
+      catch (error) {
 
         console.error(
           "LOGOUT ERROR:",
@@ -1599,82 +2277,69 @@ if (logoutBtn) {
 
 
 // =====================================================
-// THEME
+// APPLY THEME
 // =====================================================
 
-const themesBtn =
-  document.getElementById(
-    "themesBtn"
-  );
+function applyTheme(
+  theme
+) {
 
-const themeModal =
-  document.getElementById(
-    "themeModal"
-  );
-
-const closeTheme =
-  document.getElementById(
-    "closeTheme"
-  );
-
-const themeOptions =
-  document.querySelectorAll(
-    ".theme-option"
+  document.body.classList.remove(
+    "theme-light",
+    "theme-dark"
   );
 
 
-if (themesBtn && themeModal) {
+  if (
+    theme === "light"
+  ) {
 
-  themesBtn.addEventListener(
-    "click",
-    (event) => {
+    document.body.classList.add(
+      "theme-light"
+    );
 
-      event.preventDefault();
+  }
 
-      themeModal.style.display =
-        "flex";
+  else if (
+    theme === "dark"
+  ) {
+
+    document.body.classList.add(
+      "theme-dark"
+    );
+
+  }
+
+  else {
+
+    if (
+      window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches
+    ) {
+
+      document.body.classList.add(
+        "theme-dark"
+      );
 
     }
-  );
+
+    else {
+
+      document.body.classList.add(
+        "theme-light"
+      );
+
+    }
+
+  }
 
 }
 
 
-if (closeTheme && themeModal) {
-
-  closeTheme.addEventListener(
-    "click",
-    () => {
-
-      themeModal.style.display =
-        "none";
-
-    }
-  );
-
-}
-
-
-if (themeModal) {
-
-  themeModal.addEventListener(
-    "click",
-    (event) => {
-
-      if (
-        event.target ===
-        themeModal
-      ) {
-
-        themeModal.style.display =
-          "none";
-      }
-
-    }
-  );
-
-}
-
+// =====================================================
+// UPDATE THEME SELECTION
+// =====================================================
 
 function updateThemeSelection() {
 
@@ -1691,15 +2356,18 @@ function updateThemeSelection() {
         "active"
       );
 
+
       const tick =
         option.querySelector(
           ".tick"
         );
 
+
       if (tick) {
 
         tick.textContent =
           "";
+
       }
 
 
@@ -1712,10 +2380,12 @@ function updateThemeSelection() {
           "active"
         );
 
+
         if (tick) {
 
           tick.textContent =
             "✓";
+
         }
 
       }
@@ -1726,48 +2396,76 @@ function updateThemeSelection() {
 }
 
 
-function applyTheme(theme) {
+// =====================================================
+// THEME MODAL
+// =====================================================
 
-  document.body.classList.remove(
-    "theme-light",
-    "theme-dark"
-  );
+if (
+  themesBtn &&
+  themeModal
+) {
+
+  themesBtn.addEventListener(
+    "click",
+    (event) => {
+
+      event.preventDefault();
 
 
-  if (
-    theme === "light"
-  ) {
-
-    document.body.classList.add(
-      "theme-light"
-    );
-
-  } else if (
-    theme === "dark"
-  ) {
-
-    document.body.classList.add(
-      "theme-dark"
-    );
-
-  } else {
-
-    if (
-      window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches
-    ) {
-
-      document.body.classList.add(
-        "theme-dark"
-      );
+      themeModal.style.display =
+        "flex";
 
     }
-
-  }
+  );
 
 }
 
+
+if (
+  closeTheme &&
+  themeModal
+) {
+
+  closeTheme.addEventListener(
+    "click",
+    () => {
+
+      themeModal.style.display =
+        "none";
+
+    }
+  );
+
+}
+
+
+if (
+  themeModal
+) {
+
+  themeModal.addEventListener(
+    "click",
+    (event) => {
+
+      if (
+        event.target ===
+        themeModal
+      ) {
+
+        themeModal.style.display =
+          "none";
+
+      }
+
+    }
+  );
+
+}
+
+
+// =====================================================
+// THEME OPTIONS
+// =====================================================
 
 themeOptions.forEach(
   (option) => {
@@ -1779,14 +2477,17 @@ themeOptions.forEach(
         const selectedTheme =
           option.dataset.theme;
 
+
         localStorage.setItem(
           "theme",
           selectedTheme
         );
 
+
         applyTheme(
           selectedTheme
         );
+
 
         updateThemeSelection();
 
@@ -1797,14 +2498,27 @@ themeOptions.forEach(
 );
 
 
-updateThemeSelection();
+// =====================================================
+// INITIAL THEME
+// =====================================================
 
-applyTheme(
+const savedTheme =
   localStorage.getItem(
     "theme"
-  ) || "default"
+  ) || "default";
+
+
+updateThemeSelection();
+
+
+applyTheme(
+  savedTheme
 );
 
+
+// =====================================================
+// SYSTEM THEME CHANGE
+// =====================================================
 
 window
   .matchMedia(
@@ -1819,6 +2533,7 @@ window
           "theme"
         ) || "default";
 
+
       if (
         theme === "default"
       ) {
@@ -1826,6 +2541,7 @@ window
         applyTheme(
           "default"
         );
+
       }
 
     }
@@ -1847,13 +2563,18 @@ if (
 
       event.preventDefault();
 
+
       contactModal.style.display =
         "flex";
 
-      if (contactStatus) {
+
+      if (
+        contactStatus
+      ) {
 
         contactStatus.textContent =
           "";
+
       }
 
     }
@@ -1880,7 +2601,9 @@ if (
 }
 
 
-if (contactModal) {
+if (
+  contactModal
+) {
 
   contactModal.addEventListener(
     "click",
@@ -1893,6 +2616,7 @@ if (contactModal) {
 
         contactModal.style.display =
           "none";
+
       }
 
     }
@@ -1900,6 +2624,10 @@ if (contactModal) {
 
 }
 
+
+// =====================================================
+// CONTACT FORM
+// =====================================================
 
 if (
   contactForm &&
@@ -1912,43 +2640,182 @@ if (
 
       event.preventDefault();
 
+
+      const formData =
+        new FormData(
+          contactForm
+        );
+
+
+      const messageType =
+        formData.get(
+          "type"
+        ) ||
+        "General";
+
+
+      const message =
+        formData.get(
+          "message"
+        ) ||
+        "";
+
+
       sendContactBtn.disabled =
         true;
+
 
       sendContactBtn.textContent =
         "Sending...";
 
+
       try {
 
-        if (contactStatus) {
+        const response =
+          await fetch(
 
-          contactStatus.textContent =
-            "Message sent successfully.";
+            "https://formsubmit.co/ajax/temanlyob@gmail.com",
+
+            {
+
+              method:
+                "POST",
+
+              headers: {
+
+                "Content-Type":
+                  "application/json",
+
+                "Accept":
+                  "application/json"
+
+              },
+
+              body:
+                JSON.stringify({
+
+                  name:
+                    username?.textContent ||
+                    currentUser?.displayName ||
+                    "User",
+
+                  email:
+                    currentUser?.email ||
+                    "",
+
+                  type:
+                    messageType,
+
+                  message:
+                    message,
+
+                  _subject:
+                    "Temanlyob - " +
+                    messageType,
+
+                  _replyto:
+                    currentUser?.email ||
+                    "",
+
+                  _template:
+                    "table"
+
+                })
+
+            }
+
+          );
+
+
+        const result =
+          await response.json();
+
+
+        if (
+          response.ok &&
+          result.success !== false
+        ) {
+
+          if (
+            contactStatus
+          ) {
+
+            contactStatus.textContent =
+              "✅ Message sent successfully!";
+
+
+            contactStatus.style.color =
+              "#22c55e";
+
+          }
+
+
+          contactForm.reset();
+
+
+          setTimeout(
+            () => {
+
+              contactModal.style.display =
+                "none";
+
+
+              if (
+                contactStatus
+              ) {
+
+                contactStatus.textContent =
+                  "";
+
+              }
+
+            },
+            1800
+          );
 
         }
 
-        contactForm.reset();
+        else {
 
-      } catch (error) {
+          throw new Error(
+            "Message could not be sent."
+          );
+
+        }
+
+      }
+
+      catch (error) {
 
         console.error(
           "CONTACT ERROR:",
           error
         );
 
-        if (contactStatus) {
+
+        if (
+          contactStatus
+        ) {
 
           contactStatus.textContent =
-            "Failed to send message.";
+            "❌ Message send nahi hua. Please try again.";
+
+
+          contactStatus.style.color =
+            "#ef4444";
+
         }
 
-      } finally {
+      }
+
+      finally {
 
         sendContactBtn.disabled =
           false;
 
+
         sendContactBtn.textContent =
-          "Send";
+          "📩 Send Message";
 
       }
 
