@@ -73,7 +73,7 @@ let currentYear =
 // =====================================
 
 const firstPuzzleDate =
-    new Date(2026, 8,  8);
+    new Date(2026, 8,  1);
 
 firstPuzzleDate.setHours(
     0,
