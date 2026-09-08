@@ -59,7 +59,7 @@ const achievementList =
 
 
 // =====================================================
-// EDIT PROFILE ELEMENTS
+// EDIT PROFILE
 // =====================================================
 
 const editProfileBtn =
@@ -158,40 +158,28 @@ function getDateKey(date) {
 
   }
 
-
-  const year =
-    d.getFullYear();
-
-  const month =
+  return (
+    d.getFullYear() +
+    "-" +
     String(
       d.getMonth() + 1
-    ).padStart(2, "0");
-
-  const day =
+    ).padStart(2, "0") +
+    "-" +
     String(
       d.getDate()
-    ).padStart(2, "0");
-
-
-  return (
-    year +
-    "-" +
-    month +
-    "-" +
-    day
+    ).padStart(2, "0")
   );
 
 }
 
 
 // =====================================================
-// GET LOCAL GAMES
+// LOCAL GAMES
 // =====================================================
 
 function getLocalGames() {
 
   const games = {};
-
 
   for (
     let i = 0;
@@ -202,7 +190,6 @@ function getLocalGames() {
     const key =
       localStorage.key(i);
 
-
     if (
       !key ||
       !key.startsWith("quiz_")
@@ -212,16 +199,12 @@ function getLocalGames() {
 
     }
 
-
     try {
 
-      const raw =
-        localStorage.getItem(key);
-
-
       const quiz =
-        JSON.parse(raw);
-
+        JSON.parse(
+          localStorage.getItem(key)
+        );
 
       if (
         !quiz ||
@@ -232,10 +215,8 @@ function getLocalGames() {
 
       }
 
-
       const puzzleKey =
         key.substring(5);
-
 
       games[puzzleKey] =
         quiz;
@@ -253,17 +234,16 @@ function getLocalGames() {
 
   }
 
-
   return games;
 
 }
 
 
 // =====================================================
-// MERGE ALL GAMES
+// MERGE GAMES
 //
-// Firestore history = MAIN SOURCE
-// localStorage = BACKUP
+// Firestore = main source
+// LocalStorage = backup
 //
 // Same puzzle counted only once.
 // =====================================================
@@ -274,24 +254,17 @@ function mergeGames(
 
   const games = {};
 
-
   const history =
     firestoreHistory &&
     typeof firestoreHistory === "object"
       ? firestoreHistory
       : {};
 
-
-  // ---------------------------------------------------
-  // FIRESTORE FIRST
-  // ---------------------------------------------------
-
   Object.keys(history).forEach(
     (key) => {
 
       const game =
         history[key];
-
 
       if (
         game &&
@@ -307,14 +280,8 @@ function mergeGames(
   );
 
 
-  // ---------------------------------------------------
-  // LOCAL STORAGE
-  // Only fills missing puzzles.
-  // ---------------------------------------------------
-
   const localGames =
     getLocalGames();
-
 
   Object.keys(localGames).forEach(
     (key) => {
@@ -338,15 +305,7 @@ function mergeGames(
 
 
 // =====================================================
-// CHECK COMPLETED GAME
-//
-// A completed game must have:
-//
-// played === true OR attempted === true
-//
-// AND
-//
-// correct === true OR correct === false
+// COMPLETED GAME
 // =====================================================
 
 function isCompletedGame(
@@ -362,16 +321,13 @@ function isCompletedGame(
 
   }
 
-
   const hasPlayedFlag =
     game.played === true ||
     game.attempted === true;
 
-
   const hasResult =
     game.correct === true ||
     game.correct === false;
-
 
   return (
     hasPlayedFlag &&
@@ -382,20 +338,9 @@ function isCompletedGame(
 
 
 // =====================================================
-// CALCULATE TOTAL SCORE
+// TOTAL SCORE
 //
-// Every completed puzzle's score is added.
-//
-// Puzzle date does NOT matter.
-// Playing date does NOT matter.
-//
-// Example:
-//
-// Puzzle A = 10
-// Puzzle B = 15
-// Puzzle C = 5
-//
-// Total Score = 30
+// Every completed puzzle score is added.
 // =====================================================
 
 function calculateTotalScore(
@@ -403,7 +348,6 @@ function calculateTotalScore(
 ) {
 
   let totalScore = 0;
-
 
   Object.values(
     allGames
@@ -418,12 +362,10 @@ function calculateTotalScore(
 
       }
 
-
       const gameScore =
         Number(
           game.score || 0
         );
-
 
       if (
         Number.isFinite(
@@ -439,21 +381,15 @@ function calculateTotalScore(
     }
   );
 
-
   return totalScore;
 
 }
 
 
 // =====================================================
-// CALCULATE GAME STATS
+// GAME STATS
 //
-// Total Games = Won + Lost
-// Won = correct true
-// Lost = correct false
-//
-// No puzzle-date restriction.
-// No playing-date restriction.
+// Total = Won + Lost
 // =====================================================
 
 function calculateGameStats(
@@ -465,13 +401,9 @@ function calculateGameStats(
       firestoreHistory
     );
 
-
   let totalGames = 0;
-
   let gamesWon = 0;
-
   let gamesLost = 0;
-
 
   Object.values(
     allGames
@@ -485,7 +417,6 @@ function calculateGameStats(
         return;
 
       }
-
 
       if (
         game.correct === true
@@ -507,9 +438,6 @@ function calculateGameStats(
   );
 
 
-  // Safety:
-  // Total must always equal Won + Lost.
-
   totalGames =
     gamesWon +
     gamesLost;
@@ -528,17 +456,10 @@ function calculateGameStats(
 
   return {
 
-    totalGames:
-      totalGames,
-
-    gamesWon:
-      gamesWon,
-
-    gamesLost:
-      gamesLost,
-
-    winRate:
-      winRate
+    totalGames,
+    gamesWon,
+    gamesLost,
+    winRate
 
   };
 
@@ -546,13 +467,10 @@ function calculateGameStats(
 
 
 // =====================================================
-// GET ACTUAL PLAY DATES
+// ACTUAL PLAY DATES
 //
-// IMPORTANT:
-//
-// Streak uses ONLY playedAt.
-//
-// Puzzle's original date is ignored.
+// Streak uses playedAt.
+// Puzzle date is ignored.
 // =====================================================
 
 function getActualPlayDates(
@@ -561,7 +479,6 @@ function getActualPlayDates(
 
   const playedDates =
     new Set();
-
 
   Object.values(
     allGames
@@ -576,7 +493,6 @@ function getActualPlayDates(
 
       }
 
-
       if (
         !game.playedAt
       ) {
@@ -585,12 +501,10 @@ function getActualPlayDates(
 
       }
 
-
       const date =
         new Date(
           game.playedAt
         );
-
 
       if (
         Number.isNaN(
@@ -602,12 +516,10 @@ function getActualPlayDates(
 
       }
 
-
       const key =
         getDateKey(
           date
         );
-
 
       if (key) {
 
@@ -620,24 +532,13 @@ function getActualPlayDates(
     }
   );
 
-
   return playedDates;
 
 }
 
 
 // =====================================================
-// CALCULATE STREAKS
-//
-// Multiple games on same actual date = ONE day.
-//
-// Today played:
-//   today counts.
-//
-// Today not played:
-//   yesterday can still remain current.
-//
-// Missing actual playing day breaks streak.
+// STREAKS
 // =====================================================
 
 function calculateStreaks(
@@ -650,11 +551,8 @@ function calculateStreaks(
   ) {
 
     return {
-
       currentStreak: 0,
-
       bestStreak: 0
-
     };
 
   }
@@ -671,7 +569,6 @@ function calculateStreaks(
   // ===================================================
 
   let bestStreak = 1;
-
   let runningStreak = 1;
 
 
@@ -687,13 +584,11 @@ function calculateStreaks(
         "T00:00:00"
       );
 
-
     const current =
       new Date(
         dates[i] +
         "T00:00:00"
       );
-
 
     const difference =
       Math.round(
@@ -710,7 +605,6 @@ function calculateStreaks(
     ) {
 
       runningStreak++;
-
 
       bestStreak =
         Math.max(
@@ -736,7 +630,6 @@ function calculateStreaks(
   const today =
     new Date();
 
-
   today.setHours(
     0,
     0,
@@ -755,7 +648,6 @@ function calculateStreaks(
     new Date(
       today
     );
-
 
   yesterday.setDate(
     yesterday.getDate() - 1
@@ -799,8 +691,7 @@ function calculateStreaks(
 
       currentStreak: 0,
 
-      bestStreak:
-        bestStreak
+      bestStreak
 
     };
 
@@ -825,9 +716,7 @@ function calculateStreaks(
 
 
     if (
-      !playedDates.has(
-        key
-      )
+      !playedDates.has(key)
     ) {
 
       break;
@@ -847,11 +736,9 @@ function calculateStreaks(
 
   return {
 
-    currentStreak:
-      currentStreak,
+    currentStreak,
 
-    bestStreak:
-      bestStreak
+    bestStreak
 
   };
 
@@ -866,7 +753,7 @@ async function loadStats(
   data
 ) {
 
-  const firestoreHistory =
+  const history =
     data.history || {};
 
 
@@ -876,7 +763,7 @@ async function loadStats(
 
   const allGames =
     mergeGames(
-      firestoreHistory
+      history
     );
 
 
@@ -896,12 +783,12 @@ async function loadStats(
 
   const gameStats =
     calculateGameStats(
-      firestoreHistory
+      history
     );
 
 
   // ===================================================
-  // ACTUAL PLAY DATES
+  // PLAY DATES
   // ===================================================
 
   const playedDates =
@@ -911,7 +798,7 @@ async function loadStats(
 
 
   // ===================================================
-  // STREAKS
+  // STREAK
   // ===================================================
 
   const streakData =
@@ -920,16 +807,8 @@ async function loadStats(
     );
 
 
-  const currentStreak =
-    streakData.currentStreak;
-
-
-  const bestStreak =
-    streakData.bestStreak;
-
-
   // ===================================================
-  // UPDATE SCREEN
+  // SCREEN
   // ===================================================
 
   if (score) {
@@ -943,7 +822,7 @@ async function loadStats(
   if (streak) {
 
     streak.textContent =
-      currentStreak;
+      streakData.currentStreak;
 
   }
 
@@ -961,6 +840,33 @@ async function loadStats(
 
     played.textContent =
       gameStats.totalGames;
+
+  }
+
+
+  // ===================================================
+  // UNLIMITED LEVEL
+  //
+  // 0-99    = Level 1
+  // 100-199 = Level 2
+  // 200-299 = Level 3
+  // 300-399 = Level 4
+  // ...
+  //
+  // Every 100 points = +1 level.
+  // ===================================================
+
+  if (level) {
+
+    const currentLevel =
+      Math.floor(
+        totalScore / 100
+      ) + 1;
+
+
+    level.textContent =
+      "⭐ Level " +
+      currentLevel;
 
   }
 
@@ -987,10 +893,10 @@ async function loadStats(
             totalScore,
 
           currentStreak:
-            currentStreak,
+            streakData.currentStreak,
 
           bestStreak:
-            bestStreak
+            streakData.bestStreak
 
         },
 
@@ -1028,7 +934,7 @@ async function loadStats(
         totalScore,
 
       streak:
-        currentStreak,
+        streakData.currentStreak,
 
       accuracy:
         gameStats.winRate,
@@ -1048,60 +954,6 @@ async function loadStats(
 
 
   // ===================================================
-  // LEVEL
-  // ===================================================
-
-  if (
-    level
-  ) {
-
-    if (
-      totalScore >= 1000
-    ) {
-
-      level.textContent =
-        "👑 Level 5";
-
-    }
-
-    else if (
-      totalScore >= 500
-    ) {
-
-      level.textContent =
-        "💎 Level 4";
-
-    }
-
-    else if (
-      totalScore >= 250
-    ) {
-
-      level.textContent =
-        "🥇 Level 3";
-
-    }
-
-    else if (
-      totalScore >= 100
-    ) {
-
-      level.textContent =
-        "🥈 Level 2";
-
-    }
-
-    else {
-
-      level.textContent =
-        "⭐ Level 1";
-
-    }
-
-  }
-
-
-  // ===================================================
   // ACHIEVEMENTS
   // ===================================================
 
@@ -1111,7 +963,7 @@ async function loadStats(
       totalScore,
 
     currentStreak:
-      currentStreak,
+      streakData.currentStreak,
 
     puzzlesPlayed:
       gameStats.totalGames,
@@ -1134,10 +986,10 @@ async function loadStats(
         totalScore,
 
       currentStreak:
-        currentStreak,
+        streakData.currentStreak,
 
       bestStreak:
-        bestStreak,
+        streakData.bestStreak,
 
       totalGames:
         gameStats.totalGames,
@@ -1176,10 +1028,6 @@ function renderAchievements(
   let html = "";
 
 
-  // ===================================================
-  // FIRST PUZZLE
-  // ===================================================
-
   if (
     stats.puzzlesPlayed >= 1
   ) {
@@ -1206,10 +1054,6 @@ function renderAchievements(
 
   }
 
-
-  // ===================================================
-  // 7 DAY STREAK
-  // ===================================================
 
   if (
     stats.currentStreak >= 7
@@ -1238,10 +1082,6 @@ function renderAchievements(
   }
 
 
-  // ===================================================
-  // 100 POINTS
-  // ===================================================
-
   if (
     stats.totalScore >= 100
   ) {
@@ -1268,10 +1108,6 @@ function renderAchievements(
 
   }
 
-
-  // ===================================================
-  // 30 PUZZLES
-  // ===================================================
 
   if (
     stats.puzzlesPlayed >= 30
@@ -1300,10 +1136,6 @@ function renderAchievements(
   }
 
 
-  // ===================================================
-  // ACCURACY MASTER
-  // ===================================================
-
   if (
     stats.puzzlesPlayed >= 10 &&
     stats.winRate === 100
@@ -1331,10 +1163,6 @@ function renderAchievements(
 
   }
 
-
-  // ===================================================
-  // NO ACHIEVEMENTS
-  // ===================================================
 
   if (
     html === ""
@@ -1368,16 +1196,6 @@ function renderAchievements(
   ) {
 
     achievementList.innerHTML =
-      html;
-
-  }
-
-  else if (
-    achievementSection
-  ) {
-
-    achievementSection.innerHTML =
-      "<h2>Achievements</h2>" +
       html;
 
   }
@@ -1535,7 +1353,6 @@ onAuthStateChanged(
         error
       );
 
-
       if (username) {
 
         username.textContent =
@@ -1543,7 +1360,6 @@ onAuthStateChanged(
           "User";
 
       }
-
 
       if (email) {
 
@@ -1553,9 +1369,6 @@ onAuthStateChanged(
 
       }
 
-
-      await loadStats({});
-
     }
 
   }
@@ -1563,7 +1376,7 @@ onAuthStateChanged(
 
 
 // =====================================================
-// EDIT PROFILE
+// EDIT PROFILE OPEN
 // =====================================================
 
 if (
@@ -1597,9 +1410,7 @@ if (
         null;
 
 
-      if (
-        profilePhotoInput
-      ) {
+      if (profilePhotoInput) {
 
         profilePhotoInput.value =
           "";
@@ -1609,12 +1420,6 @@ if (
 
       editProfileModal.style.display =
         "flex";
-
-
-      editProfileModal.setAttribute(
-        "aria-hidden",
-        "false"
-      );
 
     }
   );
@@ -1629,36 +1434,16 @@ if (
 function closeEditModal() {
 
   if (
-    !editProfileModal
+    editProfileModal
   ) {
 
-    return;
+    editProfileModal.style.display =
+      "none";
 
   }
-
-
-  editProfileModal.style.display =
-    "none";
-
-
-  editProfileModal.setAttribute(
-    "aria-hidden",
-    "true"
-  );
-
 
   selectedPhotoFile =
     null;
-
-
-  if (
-    profilePhotoInput
-  ) {
-
-    profilePhotoInput.value =
-      "";
-
-  }
 
 }
 
@@ -1711,7 +1496,7 @@ if (
 
 
 // =====================================================
-// SELECT PHOTO
+// PHOTO SELECT
 // =====================================================
 
 if (
@@ -1743,29 +1528,8 @@ if (
           "Please select an image."
         );
 
-
         profilePhotoInput.value =
           "";
-
-
-        return;
-
-      }
-
-
-      if (
-        file.size >
-        10 * 1024 * 1024
-      ) {
-
-        alert(
-          "Please select an image smaller than 10 MB."
-        );
-
-
-        profilePhotoInput.value =
-          "";
-
 
         return;
 
@@ -1775,10 +1539,6 @@ if (
       selectedPhotoFile =
         file;
 
-
-      // =================================================
-      // INSTANT PREVIEW
-      // =================================================
 
       const reader =
         new FileReader();
@@ -1810,7 +1570,7 @@ if (
 
 
 // =====================================================
-// COMPRESS IMAGE
+// COMPRESS PHOTO
 // =====================================================
 
 function compressImage(
@@ -1844,10 +1604,6 @@ function compressImage(
               let height =
                 image.height;
 
-
-              // =================================================
-              // RESIZE
-              // =================================================
 
               if (
                 width > height
@@ -1958,7 +1714,7 @@ function compressImage(
 
                 reject(
                   new Error(
-                    "Photo is too large even after compression. Please choose another photo."
+                    "Photo is too large."
                   )
                 );
 
@@ -1979,7 +1735,7 @@ function compressImage(
 
               reject(
                 new Error(
-                  "Could not process the image."
+                  "Could not process image."
                 )
               );
 
@@ -1997,7 +1753,7 @@ function compressImage(
 
           reject(
             new Error(
-              "Could not read selected photo."
+              "Could not read image."
             )
           );
 
@@ -2057,7 +1813,6 @@ if (
         saveProfileBtn.disabled =
           true;
 
-
         saveProfileBtn.textContent =
           "Saving...";
 
@@ -2070,10 +1825,6 @@ if (
           );
 
 
-        // =================================================
-        // PHOTO
-        // =================================================
-
         let newPhotoURL =
           currentPhotoURL;
 
@@ -2082,24 +1833,12 @@ if (
           selectedPhotoFile
         ) {
 
-          saveProfileBtn.textContent =
-            "Preparing Photo...";
-
-
           newPhotoURL =
             await compressImage(
               selectedPhotoFile
             );
 
         }
-
-
-        // =================================================
-        // FIRESTORE
-        // =================================================
-
-        saveProfileBtn.textContent =
-          "Saving...";
 
 
         await setDoc(
@@ -2116,7 +1855,6 @@ if (
 
             email:
               currentUser.email ||
-              email?.textContent ||
               "",
 
             photoURL:
@@ -2131,10 +1869,6 @@ if (
         );
 
 
-        // =================================================
-        // FIREBASE AUTH PROFILE
-        // =================================================
-
         await updateProfile(
 
           currentUser,
@@ -2148,10 +1882,6 @@ if (
 
         );
 
-
-        // =================================================
-        // UPDATE SCREEN INSTANTLY
-        // =================================================
 
         if (username) {
 
@@ -2185,10 +1915,6 @@ if (
           null;
 
 
-        // =================================================
-        // CLOSE
-        // =================================================
-
         closeEditModal();
 
 
@@ -2207,14 +1933,11 @@ if (
 
 
         alert(
-
           "Profile save failed.\n\n" +
-
           (
             error.message ||
             "Please try again."
           )
-
         );
 
       }
@@ -2223,7 +1946,6 @@ if (
 
         saveProfileBtn.disabled =
           false;
-
 
         saveProfileBtn.textContent =
           "Save Changes";
@@ -2254,7 +1976,6 @@ if (
           auth
         );
 
-
         window.location.replace(
           "login.html"
         );
@@ -2277,7 +1998,7 @@ if (
 
 
 // =====================================================
-// APPLY THEME
+// THEME
 // =====================================================
 
 function applyTheme(
@@ -2337,10 +2058,6 @@ function applyTheme(
 }
 
 
-// =====================================================
-// UPDATE THEME SELECTION
-// =====================================================
-
 function updateThemeSelection() {
 
   const currentTheme =
@@ -2396,10 +2113,6 @@ function updateThemeSelection() {
 }
 
 
-// =====================================================
-// THEME MODAL
-// =====================================================
-
 if (
   themesBtn &&
   themeModal
@@ -2410,7 +2123,6 @@ if (
     (event) => {
 
       event.preventDefault();
-
 
       themeModal.style.display =
         "flex";
@@ -2463,10 +2175,6 @@ if (
 }
 
 
-// =====================================================
-// THEME OPTIONS
-// =====================================================
-
 themeOptions.forEach(
   (option) => {
 
@@ -2498,58 +2206,18 @@ themeOptions.forEach(
 );
 
 
-// =====================================================
-// INITIAL THEME
-// =====================================================
-
-const savedTheme =
+applyTheme(
   localStorage.getItem(
     "theme"
-  ) || "default";
+  ) || "default"
+);
 
 
 updateThemeSelection();
 
 
-applyTheme(
-  savedTheme
-);
-
-
 // =====================================================
-// SYSTEM THEME CHANGE
-// =====================================================
-
-window
-  .matchMedia(
-    "(prefers-color-scheme: dark)"
-  )
-  .addEventListener(
-    "change",
-    () => {
-
-      const theme =
-        localStorage.getItem(
-          "theme"
-        ) || "default";
-
-
-      if (
-        theme === "default"
-      ) {
-
-        applyTheme(
-          "default"
-        );
-
-      }
-
-    }
-  );
-
-
-// =====================================================
-// CONTACT US
+// CONTACT
 // =====================================================
 
 if (
@@ -2563,10 +2231,8 @@ if (
 
       event.preventDefault();
 
-
       contactModal.style.display =
         "flex";
-
 
       if (
         contactStatus
@@ -2743,7 +2409,6 @@ if (
             contactStatus.textContent =
               "✅ Message sent successfully!";
 
-
             contactStatus.style.color =
               "#22c55e";
 
@@ -2800,7 +2465,6 @@ if (
           contactStatus.textContent =
             "❌ Message send nahi hua. Please try again.";
 
-
           contactStatus.style.color =
             "#ef4444";
 
@@ -2812,7 +2476,6 @@ if (
 
         sendContactBtn.disabled =
           false;
-
 
         sendContactBtn.textContent =
           "📩 Send Message";
